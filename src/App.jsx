@@ -64,11 +64,7 @@ const translations = {
     badgeHit: 'ХИТ',
     badgeNew: 'НОВИНКА',
     badgePrem: 'ПРЕМИУМ',
-    notFound: 'Ничего не найдено 😢',
-    sortPopular: '🔥 По популярности',
-    sortOrders: '📦 По заказам',
-    sortPriceAsc: '💲 Цена (возр.)',
-    sortPriceDesc: '💲 Цена (убыв.)'
+    notFound: 'Ничего не найдено 😢'
   },
   EN: {
     bakeryName: 'Sweet Bakery',
@@ -132,11 +128,7 @@ const translations = {
     badgeHit: 'HIT',
     badgeNew: 'NEW',
     badgePrem: 'PREMIUM',
-    notFound: 'Nothing found 😢',
-    sortPopular: '🔥 Popularity',
-    sortOrders: '📦 Orders',
-    sortPriceAsc: '💲 Price (low-high)',
-    sortPriceDesc: '💲 Price (high-low)'
+    notFound: 'Nothing found 😢'
   },
   KO: {
     bakeryName: 'Sweet Bakery',
@@ -200,11 +192,7 @@ const translations = {
     badgeHit: '인기',
     badgeNew: '신메뉴',
     badgePrem: '프리미엄',
-    notFound: '검색 결과가 없습니다 😢',
-    sortPopular: '🔥 인기순',
-    sortOrders: '📦 주문순',
-    sortPriceAsc: '💲 가격 낮은순',
-    sortPriceDesc: '💲 가격 높은순'
+    notFound: '검색 결과가 없습니다 😢'
   }
 };
 
@@ -215,7 +203,236 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'orders' | 'priceAsc' | 'priceDesc'
+  
+  const [cart, setCart] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [ordersHistory, setOrdersHistory] = useState([]);
+
+  // Скролл нижней панели
+  const [showBottomNav, setShowBottomNav] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowBottomNav(false);
+      } else {
+        setShowBottomNav(true```jsx
+import React, { useState, useEffect } from 'react';
+
+// Переводы интерфейса
+const translations = {
+  RU: {
+    bakeryName: 'Sweet Bakery',
+    bakerySub: 'домашняя выпечка',
+    address: '📍 Сеул, Каннам-гу 12-3',
+    phone: '📞 010-1234-5678',
+    searchPlaceholder: 'Поиск по изысканному меню...',
+    allCategories: 'Все',
+    catCroissants: 'Круассаны',
+    catCakes: 'Торты',
+    catPies: 'Пироги',
+    catCookies: 'Печенье',
+    catDrinks: 'Напитки',
+    specialEvent: 'СПЕЦ-АКЦИЯ',
+    promoText: 'Введите промокод "SWEET20" и получите скидку 20% на первый заказ!',
+    addToCart: 'В корзину +',
+    loginBtn: 'Login',
+    exitBtn: 'Exit (Выйти)',
+    editBannerTitle: '🖼️ Управление баннером',
+    uploadBannerLabel: 'Загрузить новый баннер (JPG/PNG):',
+    removeBannerBtn: 'Удалить баннер',
+    editItem: 'Редактировать',
+    deleteItem: 'Удалить',
+    saveChanges: 'Сохранить изменения',
+    addNewItemBtn: '+ Добавить товар',
+    dishNamePlaceholder: 'Название блюда',
+    pricePlaceholder: 'Цена (₩)',
+    oldPricePlaceholder: 'Старая цена (₩)',
+    descPlaceholder: 'Описание',
+    photoLabel: 'Фото (файл или ссылка):',
+    addButton: 'Добавить в меню',
+    cancel: 'Отмена',
+    checkoutTitle: '📋 Оформление заказа',
+    nameLabel: 'Ваше имя (только буквы) *',
+    namePlaceholder: 'Например: Alexander',
+    phoneLabel: 'Номер телефона (010-****-****) *',
+    deliveryTypeLabel: 'Способ получения *',
+    pickup: '🏃 Самовывоз',
+    delivery: '🛵 Доставка',
+    addressLabel: 'Адрес доставки *',
+    addressPlaceholder: 'Seoul, Gangnam-gu...',
+    commentLabel: 'Комментарий (необязательно)',
+    commentPlaceholder: 'Пожелания к заказу...',
+    confirmButton: 'Подтвердить заказ ➔',
+    selectedItems: 'Выбрано тов.',
+    total: 'Итого:',
+    checkoutBtn: 'Оформить ➔',
+    homeTab: 'Домой',
+    searchTab: 'Поиск',
+    likesTab: 'Нравится',
+    ordersTab: 'Мои заказы',
+    emptyLikes: 'В разделе «Нравится» пока ничего нет ❤️',
+    emptyOrders: 'История заказов пуста 📦',
+    orderHistoryTitle: '📦 История ваших заказов',
+    orderDate: 'Дата и время:',
+    statusCompleted: 'Принят в работу ✅',
+    adminLoginTitle: 'Вход для администратора',
+    adminPasswordPlaceholder: 'Пароль (1234)',
+    login: 'Войти',
+    badgeHit: 'ХИТ',
+    badgeNew: 'НОВИНКА',
+    badgePrem: 'ПРЕМИУМ',
+    notFound: 'Ничего не найдено 😢',
+    telegramSettingsTitle: '🔔 Telegram уведомления админа',
+    tgTokenLabel: 'Токен бота (Bot Token):',
+    tgChatIdLabel: 'Ваш Chat ID (@leedkor):',
+    saveTgSettings: 'Сохранить Telegram настройки'
+  },
+  EN: {
+    bakeryName: 'Sweet Bakery',
+    bakerySub: 'home baking',
+    address: '📍 Seoul, Gangnam-gu 12-3',
+    phone: '📞 010-1234-5678',
+    searchPlaceholder: 'Search menu...',
+    allCategories: 'All',
+    catCroissants: 'Croissants',
+    catCakes: 'Cakes',
+    catPies: 'Pies',
+    catCookies: 'Cookies',
+    catDrinks: 'Drinks',
+    specialEvent: 'SPECIAL EVENT',
+    promoText: 'Use promo code "SWEET20" for 20% off your first order!',
+    addToCart: 'Add to cart +',
+    loginBtn: 'Login',
+    exitBtn: 'Exit',
+    editBannerTitle: '🖼️ Banner Management',
+    uploadBannerLabel: 'Upload new banner (JPG/PNG):',
+    removeBannerBtn: 'Remove banner',
+    editItem: 'Edit',
+    deleteItem: 'Delete',
+    saveChanges: 'Save changes',
+    addNewItemBtn: '+ Add item',
+    dishNamePlaceholder: 'Dish name',
+    pricePlaceholder: 'Price (₩)',
+    oldPricePlaceholder: 'Old price (₩)',
+    descPlaceholder: 'Description',
+    photoLabel: 'Photo (file or URL):',
+    addButton: 'Add to menu',
+    cancel: 'Cancel',
+    checkoutTitle: '📋 Checkout',
+    nameLabel: 'Your name (letters only) *',
+    namePlaceholder: 'E.g., Alexander',
+    phoneLabel: 'Phone number (010-****-****) *',
+    deliveryTypeLabel: 'Delivery method *',
+    pickup: '🏃 Pickup',
+    delivery: '🛵 Delivery',
+    addressLabel: 'Delivery address *',
+    addressPlaceholder: 'Seoul, Gangnam-gu...',
+    commentLabel: 'Comment (optional)',
+    commentPlaceholder: 'Wishes for the order...',
+    confirmButton: 'Confirm order ➔',
+    selectedItems: 'Selected items',
+    total: 'Total:',
+    checkoutBtn: 'Checkout ➔',
+    homeTab: 'Home',
+    searchTab: 'Search',
+    likesTab: 'Favorites',
+    ordersTab: 'My Orders',
+    emptyLikes: 'No favorite items yet ❤️',
+    emptyOrders: 'Order history is empty 📦',
+    orderHistoryTitle: '📦 Your Order History',
+    orderDate: 'Date & Time:',
+    statusCompleted: 'Accepted ✅',
+    adminLoginTitle: 'Admin Login',
+    adminPasswordPlaceholder: 'Password (1234)',
+    login: 'Log in',
+    badgeHit: 'HIT',
+    badgeNew: 'NEW',
+    badgePrem: 'PREMIUM',
+    notFound: 'Nothing found 😢',
+    telegramSettingsTitle: '🔔 Telegram Admin Alerts',
+    tgTokenLabel: 'Bot Token:',
+    tgChatIdLabel: 'Your Chat ID (@leedkor):',
+    saveTgSettings: 'Save Telegram Settings'
+  },
+  KO: {
+    bakeryName: 'Sweet Bakery',
+    bakerySub: '홈 베이킹',
+    address: '📍 서울 강남구 12-3',
+    phone: '📞 010-1234-5678',
+    searchPlaceholder: '메뉴 검색...',
+    allCategories: '전체',
+    catCroissants: '크루아상',
+    catCakes: '케이크',
+    catPies: '파이',
+    catCookies: '쿠키',
+    catDrinks: '음료',
+    specialEvent: '스페셜 이벤트',
+    promoText: '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인!',
+    addToCart: '담기 +',
+    loginBtn: 'Login',
+    exitBtn: 'Exit (나가기)',
+    editBannerTitle: '🖼️ 배너 관리',
+    uploadBannerLabel: '새 배너 업로드 (JPG/PNG):',
+    removeBannerBtn: '배너 삭제',
+    editItem: '수정',
+    deleteItem: '삭제',
+    saveChanges: '변경사항 저장',
+    addNewItemBtn: '+ 상품 추가',
+    dishNamePlaceholder: '상품명',
+    pricePlaceholder: '가격 (₩)',
+    oldPricePlaceholder: '할인 전 가격 (₩)',
+    descPlaceholder: '설명',
+    photoLabel: '사진 (파일 또는 URL):',
+    addButton: '메뉴에 추가',
+    cancel: '취소',
+    checkoutTitle: '📋 주문하기',
+    nameLabel: '이름 (문자만) *',
+    namePlaceholder: '예: Alexander',
+    phoneLabel: '전화번호 (010-****-****) *',
+    deliveryTypeLabel: '수령 방법 *',
+    pickup: '🏃 픽업',
+    delivery: '🛵 배달',
+    addressLabel: '배달 주소 *',
+    addressPlaceholder: 'Seoul, Gangnam-gu...',
+    commentLabel: '요청사항 (선택)',
+    commentPlaceholder: '주문 요청사항...',
+    confirmButton: '주문 확정 ➔',
+    selectedItems: '선택됨',
+    total: '합계:',
+    checkoutBtn: '결제하기 ➔',
+    homeTab: '홈',
+    searchTab: '검색',
+    likesTab: '찜',
+    ordersTab: '내 주문',
+    emptyLikes: '찜한 상품이 없습니다 ❤️',
+    emptyOrders: '주문 내역이 없습니다 📦',
+    orderHistoryTitle: '📦 주문 내역',
+    orderDate: '날짜 및 시간:',
+    statusCompleted: '접수 완료 ✅',
+    adminLoginTitle: '관리자 로그인',
+    adminPasswordPlaceholder: '비밀번호 (1234)',
+    login: '로그인',
+    badgeHit: '인기',
+    badgeNew: '신메뉴',
+    badgePrem: '프리미엄',
+    notFound: '검색 결과가 없습니다 😢',
+    telegramSettingsTitle: '🔔 텔레그램 관리자 알림',
+    tgTokenLabel: '봇 토큰 (Bot Token):',
+    tgChatIdLabel: '챗 ID (@leedkor):',
+    saveTgSettings: '텔레그램 설정 저장'
+  }
+};
+
+export default function App() {
+  const [lang, setLang] = useState('RU');
+  const t = translations[lang];
+
+  const [activeTab, setActiveTab] = useState('home');
+  const [activeCategory, setActiveCategory] = useState('Все');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
@@ -244,16 +461,20 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
+  // Настройки Telegram для администратора (@leedkor)
+  const [tgBotToken, setTgBotToken] = useState('');
+  const [tgChatId, setTgChatId] = useState('');
+
   // Кастомизация логотипа и баннера администратором
   const [customLogo, setCustomLogo] = useState('🧁');
-  const [bannerImage, setBannerImage] = useState('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80');
+  const [bannerImage, setBannerImage] = useState('[https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80](https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80)');
 
   // Модалки
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Поля формы добавления
+  // Поля формы добавления товара
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -270,7 +491,7 @@ export default function App() {
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
 
-  // База товаров (с добавленными полями полярности и счетчика заказов для четкой сортировки)
+  // База товаров
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -286,7 +507,7 @@ export default function App() {
         EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
         KO: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' 
       },
-      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
+      image: '[https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80](https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80)', 
       badge: 'ХИТ' 
     },
     { 
@@ -303,7 +524,7 @@ export default function App() {
         EN: 'Soft handmade brioche dough with Belgian cocoa...', 
         KO: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' 
       },
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
+      image: '[https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80](https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80)', 
       badge: 'НОВИНКА' 
     },
     { 
@@ -320,7 +541,7 @@ export default function App() {
         EN: 'Sweet cream and vanilla sponge...', 
         KO: '달콤한 크림과 바닐라 시트...' 
       },
-      image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=600&q=80', 
+      image: '[https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=600&q=80](https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=600&q=80)', 
       badge: 'ПРЕМИУМ' 
     }
   ]);
@@ -362,7 +583,7 @@ export default function App() {
       ordersCount: 1,
       popularity: 50,
       descs: { RU: newDesc || 'Домашняя выпечка', EN: newDesc || 'Home baking', KO: newDesc || '홈 베이킹' },
-      image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+      image: newImage || '[https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80](https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80)',
       badge: newBadge
     };
     setProducts([newItem, ...products]);
@@ -411,6 +632,27 @@ export default function App() {
     }
   };
 
+  // Функция отправки уведомления в Telegram админу (@leedkor)
+  const sendTelegramNotification = async (orderData) => {
+    if (!tgBotToken || !tgChatId) return;
+    const itemsList = orderData.items.map(i => `• ${i.names.RU} — ${i.price.toLocaleString()} ₩`).join('\n');
+    const message = `🚨 <b>Новый заказ #${orderData.id}</b>\n\n👤 Имя: ${orderData.clientName}\n📞 Телефон: ${orderData.clientPhone}\n🚚 Способ: ${orderData.deliveryType === 'pickup' ? 'Самовывоз' : 'Доставка'}\n📍 Адрес: ${orderData.clientAddress || 'Самовывоз'}\n\n🛒 <b>Состав заказа:</b>\n${itemsList}\n\n💰 <b>Итого:</b> ${orderData.total.toLocaleString()} ₩`;
+
+    try {
+      await fetch(`[https://api.telegram.org/bot$](https://api.telegram.org/bot$){tgBotToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: tgChatId,
+          text: message,
+          parse_mode: 'HTML'
+        })
+      });
+    } catch (err) {
+      console.error('Ошибка отправки в Telegram:', err);
+    }
+  };
+
   const handleSendOrder = (e) => {
     e.preventDefault();
     if (!clientName.trim() || clientPhone.length < 13) {
@@ -433,24 +675,22 @@ export default function App() {
     };
 
     setOrdersHistory([newOrder, ...ordersHistory]);
+    
+    // Отправляем уведомление администратору в телеграм (@leedkor)
+    sendTelegramNotification(newOrder);
+
     setCart([]);
     setShowCheckoutModal(false);
     setActiveTab('orders');
     alert('Заказ успешно оформлен!');
   };
 
-  // Фильтрация и четкая сортировка
+  // Фильтрация товаров по категории и поиску
   const filteredProducts = products.filter(item => {
     const itemName = item.names[lang] || item.names['RU'];
     const matchesCat = activeCategory === 'Все' || activeCategory === 'All' || activeCategory === '전체' || item.category === activeCategory;
     const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
-  }).sort((a, b) => {
-    if (sortBy === 'popular') return b.popularity - a.popularity;
-    if (sortBy === 'orders') return b.ordersCount - a.ordersCount;
-    if (sortBy === 'priceAsc') return a.price - b.price;
-    if (sortBy === 'priceDesc') return b.price - a.price;
-    return 0;
   });
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
@@ -469,13 +709,23 @@ export default function App() {
       margin: 0, padding: '16px 16px 110px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
-      {/* Подключение шрифта для красивого рукописного названия */}
+      {/* Премиальные шрифты для шапки сайта */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
-        .handwritten-title {
-          font-family: 'Caveat', cursive;
-          font-size: 28px !important;
-          letter-spacing: 1px;
+        @import url('[https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap](https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap)');
+        .premium-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 24px !important;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          color: #ffffff;
+        }
+        .premium-subtitle {
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-size: 13px !important;
+          color: #fcd34d;
+          font-weight: 400;
+          letter-spacing: 0.3px;
         }
       `}</style>
 
@@ -620,10 +870,12 @@ export default function App() {
             <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#f59e0b' }}>{t.addNewItemBtn}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={e => setNewTitle(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} required />
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+              
+              <div style={{ display: 'flex', gap: '8px', width: '100%', boxSizing: 'border-box' }}>
+                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
               </div>
+
               <div style={{ display: 'flex', gap: '8px' }}>
                 <select value={newCat} onChange={e => setNewCat(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}>
                   <option value="Круассаны">{t.catCroissants}</option>
@@ -664,10 +916,23 @@ export default function App() {
                 setEditingProduct({ ...editingProduct, names: { ...editingProduct.names, [lang]: val, RU: val } });
               }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} required />
               
-              {/* Исправленная верстка полей цены без выезда рамок */}
+              {/* Исправленные инпуты цены (редактирование без багов с первыми символами и корректное сохранение старой цены) */}
               <div style={{ display: 'flex', gap: '8px', width: '100%', boxSizing: 'border-box' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={e => setEditingProduct({ ...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null })} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+                <input 
+                  type="number" 
+                  placeholder={t.pricePlaceholder} 
+                  value={editingProduct.price !== undefined ? editingProduct.price : ''} 
+                  onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value === '' ? '' : Number(e.target.value) })} 
+                  style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} 
+                  required 
+                />
+                <input 
+                  type="number" 
+                  placeholder={t.oldPricePlaceholder} 
+                  value={editingProduct.oldPrice !== null && editingProduct.oldPrice !== undefined ? editingProduct.oldPrice : ''} 
+                  onChange={e => setEditingProduct({ ...editingProduct, oldPrice: e.target.value === '' ? null : Number(e.target.value) })} 
+                  style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} 
+                />
               </div>
 
               <input type="text" placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={e => {
@@ -690,13 +955,10 @@ export default function App() {
         </div>
       )}
 
-      {/* ШАПКА САЙТА: 
-          1. Логотип наравне с названием. Название рукописным шрифтом.
-          2. Под название в одну строку — «домашняя выпечка» курсивом.
-          3. Телефон и адрес напротив названия и логотипа в шапке. */}
+      {/* ШАПКА САЙТА: Слева выравнивание строго по левому краю вровень, премиальные шрифты */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '14px', marginBottom: '12px' }}>
         
-        {/* Логотип + Название + Подпись + Телефон/Адрес */}
+        {/* Логотип + Название + Подпись строго вровень слева */}
         <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', flex: 1, minWidth: 0 }}>
           <div style={{
             width: '46px', height: '46px', flexShrink: 0, background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
@@ -708,18 +970,15 @@ export default function App() {
               customLogo
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            {/* Название рукописным легко читаемым шрифтом */}
-            <div className="handwritten-title" style={{ color: '#fff', lineHeight: '1.1' }}>{t.bakeryName}</div>
-            
-            {/* Под название в одну строку: «домашняя выпечка» курсивом */}
-            <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#fcd34d', fontWeight: '500', marginTop: '1px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, alignItems: 'flex-start' }}>
+            <div className="premium-title" style={{ lineHeight: '1.2' }}>{t.bakeryName}</div>
+            <div className="premium-subtitle" style={{ marginTop: '2px' }}>
               {t.bakerySub}
             </div>
           </div>
         </div>
 
-        {/* Телефон и адрес справа напротив названия и логотипа */}
+        {/* Телефон и адрес справа */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontSize: '10px', color: '#9ca3af', gap: '2px', textAlign: 'right', flexShrink: 0, marginLeft: '8px' }}>
           <span>{t.phone}</span>
           <span>{t.address}</span>
@@ -727,12 +986,9 @@ export default function App() {
 
       </div>
 
-      {/* НИЖЕ ШАПКИ: 
-          Слева языковая панель, напротив нее Login (или Exit при входе). 
-          При входе структура не меняется, шапка остается в таком же стиле. */}
+      {/* ЯЗЫКОВАЯ ПАНЕЛЬ И LOGIN/EXIT */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         
-        {/* Языковая панель слева под шапкой */}
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '3px', gap: '3px' }}>
           {[
             { code: 'RU', flag: '🇷🇺' },
@@ -755,7 +1011,6 @@ export default function App() {
           ))}
         </div>
 
-        {/* Напротив языковой панели: Login или Exit */}
         {!isAdminLoggedIn ? (
           <button onClick={() => setShowLoginModal(true)} style={{
             background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -778,7 +1033,7 @@ export default function App() {
 
       </div>
 
-      {/* АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ БАННЕРОМ (если вошел администратор) */}
+      {/* АДМИН-ПАНЕЛЬ (Управление баннером, Telegram-уведомления для @leedkor) */}
       {isAdminLoggedIn && (
         <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>{t.editBannerTitle}</h3>
@@ -793,10 +1048,35 @@ export default function App() {
               </button>
             )}
             
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: '5px' }}>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: '4px' }}>
               <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Сменить логотип (смайлик или URL):</label>
               <input type="text" value={customLogo} onChange={e => setCustomLogo(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} />
             </div>
+
+            {/* Блок настройки Телеграм для админа (@leedkor) */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: '4px' }}>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#fcd34d' }}>{t.telegramSettingsTitle}</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <input 
+                  type="text" 
+                  placeholder={t.tgTokenLabel} 
+                  value={tgBotToken} 
+                  onChange={e => setTgBotToken(e.target.value)} 
+                  style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} 
+                />
+                <input 
+                  type="text" 
+                  placeholder={t.tgChatIdLabel} 
+                  value={tgChatId} 
+                  onChange={e => setTgChatId(e.target.value)} 
+                  style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} 
+                />
+                <div style={{ fontSize: '10px', color: '#9ca3af', fontStyle: 'italic' }}>
+                  Заказы будут отправляться на ваш Telegram (@leedkor) при поступлении.
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
@@ -923,41 +1203,14 @@ export default function App() {
             })}
           </div>
 
-          {/* ФИЛЬТРЫ-ПЛАШКИ (Вместо сигнатурной коллекции) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 10px', gap: '8px' }}>
-            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', flex: 1 }}>
-              {[
-                { id: 'popular', label: t.sortPopular },
-                { id: 'orders', label: t.sortOrders },
-                { id: 'priceAsc', label: t.sortPriceAsc },
-                { id: 'priceDesc', label: t.sortPriceDesc }
-              ].map(s => {
-                const isSelected = sortBy === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => setSortBy(s.id)}
-                    style={{
-                      background: isSelected ? '#f59e0b' : 'rgba(255,255,255,0.05)',
-                      color: isSelected ? '#0b0e14' : '#9ca3af',
-                      border: `1px solid ${isSelected ? '#f59e0b' : 'rgba(255,255,255,0.08)'}`,
-                      borderRadius: '10px', padding: '6px 10px', fontSize: '11px', fontWeight: 'bold',
-                      cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0
-                    }}
-                  >
-                    {s.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Кнопка добавления товара для админа */}
-            {isAdminLoggedIn && (
-              <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>
+          {/* УДАЛЕНЫ НЕПОТРЕБНЫЕ ФИЛЬТРЫ И КНОПКИ ЗАКАЗОВ В АДМИНКЕ. ОСТАВЛЕНА ТОЛЬКО КНОПКА ДОБАВЛЕНИЯ ТОВАРА ДЛЯ АДМИНА */}
+          {isAdminLoggedIn && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+              <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
                 {t.addNewItemBtn}
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* СЕТКА ТОВАРОВ */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px', paddingBottom: '20px', marginTop: '10px' }}>
