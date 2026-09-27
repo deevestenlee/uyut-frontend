@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 // Полные переводы интерфейса и базы данных
 const translations = {
   RU: {
-    bakeryName: 'SWEET BAKERY',
-    bakerySub: 'ПРЕМИАЛЬНАЯ КОНДИТЕРСКАЯ',
+    bakeryName: 'Sweet Bakery',
+    bakerySub: 'домашняя выпечка',
     address: '📍 Сеул, Каннам-гу 12-3',
     phone: '📞 010-1234-5678',
     searchPlaceholder: 'Поиск по изысканному меню...',
@@ -14,11 +14,11 @@ const translations = {
     catPies: 'Пироги',
     catCookies: 'Печенье',
     catDrinks: 'Напитки',
-    signatureCollection: 'Сигнатурная коллекция',
     specialEvent: 'СПЕЦ-АКЦИЯ',
     promoText: 'Введите промокод "SWEET20" и получите скидку 20% на первый заказ!',
     addToCart: 'В корзину +',
     loginBtn: 'Login',
+    exitBtn: 'Exit (Выйти)',
     editBannerTitle: '🖼️ Управление баннером',
     uploadBannerLabel: 'Загрузить новый баннер (JPG/PNG):',
     removeBannerBtn: 'Удалить баннер',
@@ -26,7 +26,7 @@ const translations = {
     editItem: 'Редактировать',
     deleteItem: 'Удалить',
     saveChanges: 'Сохранить изменения',
-    addNewItemBtn: '+ Добавить новый товар',
+    addNewItemBtn: '+ Добавить товар',
     dishNamePlaceholder: 'Название блюда',
     pricePlaceholder: 'Цена (₩)',
     oldPricePlaceholder: 'Старая цена (₩)',
@@ -64,25 +64,29 @@ const translations = {
     badgeHit: 'ХИТ',
     badgeNew: 'НОВИНКА',
     badgePrem: 'ПРЕМИУМ',
-    notFound: 'Ничего не найдено 😢'
+    notFound: 'Ничего не найдено 😢',
+    sortPopular: '🔥 По популярности',
+    sortOrders: '📦 По заказам',
+    sortPriceAsc: '💲 Цена (возр.)',
+    sortPriceDesc: '💲 Цена (убыв.)'
   },
   EN: {
-    bakeryName: 'SWEET BAKERY',
-    bakerySub: 'PREMIUM BAKERY',
+    bakeryName: 'Sweet Bakery',
+    bakerySub: 'home baking',
     address: '📍 Seoul, Gangnam-gu 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: 'Search premium menu...',
+    searchPlaceholder: 'Search menu...',
     allCategories: 'All',
     catCroissants: 'Croissants',
     catCakes: 'Cakes',
     catPies: 'Pies',
     catCookies: 'Cookies',
     catDrinks: 'Drinks',
-    signatureCollection: 'Signature Collection',
     specialEvent: 'SPECIAL EVENT',
     promoText: 'Use promo code "SWEET20" for 20% off your first order!',
     addToCart: 'Add to cart +',
     loginBtn: 'Login',
+    exitBtn: 'Exit',
     editBannerTitle: '🖼️ Banner Management',
     uploadBannerLabel: 'Upload new banner (JPG/PNG):',
     removeBannerBtn: 'Remove banner',
@@ -90,7 +94,7 @@ const translations = {
     editItem: 'Edit',
     deleteItem: 'Delete',
     saveChanges: 'Save changes',
-    addNewItemBtn: '+ Add new item',
+    addNewItemBtn: '+ Add item',
     dishNamePlaceholder: 'Dish name',
     pricePlaceholder: 'Price (₩)',
     oldPricePlaceholder: 'Old price (₩)',
@@ -128,25 +132,29 @@ const translations = {
     badgeHit: 'HIT',
     badgeNew: 'NEW',
     badgePrem: 'PREMIUM',
-    notFound: 'Nothing found 😢'
+    notFound: 'Nothing found 😢',
+    sortPopular: '🔥 Popularity',
+    sortOrders: '📦 Orders',
+    sortPriceAsc: '💲 Price (low-high)',
+    sortPriceDesc: '💲 Price (high-low)'
   },
   KO: {
-    bakeryName: 'SWEET BAKERY',
-    bakerySub: '프리미엄 베이커리',
+    bakeryName: 'Sweet Bakery',
+    bakerySub: '홈 베이킹',
     address: '📍 서울 강남구 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: '프리미엄 메뉴 검색...',
+    searchPlaceholder: '메뉴 검색...',
     allCategories: '전체',
     catCroissants: '크루아상',
     catCakes: '케이크',
     catPies: '파이',
     catCookies: '쿠키',
     catDrinks: '음료',
-    signatureCollection: '시그니처 컬렉션',
     specialEvent: '스페셜 이벤트',
     promoText: '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인!',
     addToCart: '담기 +',
     loginBtn: 'Login',
+    exitBtn: 'Exit (나가기)',
     editBannerTitle: '🖼️ 배너 관리',
     uploadBannerLabel: '새 배너 업로드 (JPG/PNG):',
     removeBannerBtn: '배너 삭제',
@@ -154,7 +162,7 @@ const translations = {
     editItem: '수정',
     deleteItem: '삭제',
     saveChanges: '변경사항 저장',
-    addNewItemBtn: '+ 새 상품 추가',
+    addNewItemBtn: '+ 상품 추가',
     dishNamePlaceholder: '상품명',
     pricePlaceholder: '가격 (₩)',
     oldPricePlaceholder: '할인 전 가격 (₩)',
@@ -192,7 +200,11 @@ const translations = {
     badgeHit: '인기',
     badgeNew: '신메뉴',
     badgePrem: '프리미엄',
-    notFound: '검색 결과가 없습니다 😢'
+    notFound: '검색 결과가 없습니다 😢',
+    sortPopular: '🔥 인기순',
+    sortOrders: '📦 주문순',
+    sortPriceAsc: '💲 가격 낮은순',
+    sortPriceDesc: '💲 가격 높은순'
   }
 };
 
@@ -203,6 +215,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'orders' | 'priceAsc' | 'priceDesc'
   
   const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
@@ -232,17 +245,15 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState('');
 
   // Кастомизация логотипа и баннера администратором
-  const [customLogo, setCustomLogo] = useState('🧁'); // смайлик или картинка
+  const [customLogo, setCustomLogo] = useState('🧁');
   const [bannerImage, setBannerImage] = useState('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80');
 
-  // Модалка товара
+  // Модалки
   const [selectedProduct, setSelectedProduct] = useState(null);
-
-  // Редактирование существующего товара в админке
   const [editingProduct, setEditingProduct] = useState(null);
-
-  // Добавление нового товара в админке
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Поля формы добавления
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -259,7 +270,7 @@ export default function App() {
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
 
-  // База товаров
+  // База товаров (с добавленными полями полярности и счетчика заказов для четкой сортировки)
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -267,7 +278,9 @@ export default function App() {
       category: 'Круассаны', 
       price: 4500, 
       oldPrice: 5000,
-      rating: '4.9', 
+      rating: 4.9, 
+      ordersCount: 120,
+      popularity: 95,
       descs: { 
         RU: 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
         EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
@@ -282,7 +295,9 @@ export default function App() {
       category: 'Торты', 
       price: 5500, 
       oldPrice: 6500,
-      rating: '4.8', 
+      rating: 4.8, 
+      ordersCount: 85,
+      popularity: 88,
       descs: { 
         RU: 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
         EN: 'Soft handmade brioche dough with Belgian cocoa...', 
@@ -297,7 +312,9 @@ export default function App() {
       category: 'Торты', 
       price: 6000, 
       oldPrice: null,
-      rating: '5.0', 
+      rating: 5.0, 
+      ordersCount: 210,
+      popularity: 99,
       descs: { 
         RU: 'Нежнейший крем, ванильный бисквит и авторский декор...', 
         EN: 'Sweet cream and vanilla sponge...', 
@@ -328,6 +345,10 @@ export default function App() {
     }
   };
 
+  const handleExit = () => {
+    setIsAdminLoggedIn(false);
+  };
+
   const handleAddProduct = (e) => {
     e.preventDefault();
     if (!newTitle || !newPrice) return;
@@ -337,8 +358,10 @@ export default function App() {
       category: newCat,
       price: Number(newPrice),
       oldPrice: newOldPrice ? Number(newOldPrice) : null,
-      rating: '5.0',
-      descs: { RU: newDesc || 'Премиальная выпечка', EN: newDesc || 'Premium pastry', KO: newDesc || '프리미엄 베이커리' },
+      rating: 5.0,
+      ordersCount: 1,
+      popularity: 50,
+      descs: { RU: newDesc || 'Домашняя выпечка', EN: newDesc || 'Home baking', KO: newDesc || '홈 베이킹' },
       image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
       badge: newBadge
     };
@@ -413,19 +436,25 @@ export default function App() {
     setCart([]);
     setShowCheckoutModal(false);
     setActiveTab('orders');
-    alert('Заказ успешно оформлен и сохранен в истории!');
+    alert('Заказ успешно оформлен!');
   };
 
+  // Фильтрация и четкая сортировка
   const filteredProducts = products.filter(item => {
     const itemName = item.names[lang] || item.names['RU'];
     const matchesCat = activeCategory === 'Все' || activeCategory === 'All' || activeCategory === '전체' || item.category === activeCategory;
     const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
+  }).sort((a, b) => {
+    if (sortBy === 'popular') return b.popularity - a.popularity;
+    if (sortBy === 'orders') return b.ordersCount - a.ordersCount;
+    if (sortBy === 'priceAsc') return a.price - b.price;
+    if (sortBy === 'priceDesc') return b.price - a.price;
+    return 0;
   });
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-  // Кнопка домой возвращает на главную
   const goToHome = () => {
     setActiveTab('home');
     setActiveCategory('Все');
@@ -440,6 +469,16 @@ export default function App() {
       margin: 0, padding: '16px 16px 110px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
+      {/* Подключение шрифта для красивого рукописного названия */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+        .handwritten-title {
+          font-family: 'Caveat', cursive;
+          font-size: 28px !important;
+          letter-spacing: 1px;
+        }
+      `}</style>
+
       {/* МОДАЛКА ПРОСМОТРА ТОВАРА */}
       {selectedProduct && (
         <div onClick={() => setSelectedProduct(null)} style={{
@@ -524,12 +563,12 @@ export default function App() {
             <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.nameLabel}</label>
-                <input type="text" placeholder={t.namePlaceholder} value={clientName} onChange={handleNameChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+                <input type="text" placeholder={t.namePlaceholder} value={clientName} onChange={handleNameChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.phoneLabel}</label>
-                <input type="text" value={clientPhone} onChange={handlePhoneChange} maxLength={13} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', letterSpacing: '1px' }} required />
+                <input type="text" value={clientPhone} onChange={handlePhoneChange} maxLength={13} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', letterSpacing: '1px', boxSizing: 'border-box' }} required />
               </div>
 
               <div>
@@ -543,13 +582,13 @@ export default function App() {
               {deliveryType === 'delivery' && (
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.addressLabel}</label>
-                  <input type="text" placeholder={t.addressPlaceholder} value={clientAddress} onChange={e => setClientAddress(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+                  <input type="text" placeholder={t.addressPlaceholder} value={clientAddress} onChange={e => setClientAddress(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
                 </div>
               )}
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.commentLabel}</label>
-                <textarea placeholder={t.commentPlaceholder} value={clientComment} onChange={e => setClientComment(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', minHeight: '40px' }} />
+                <textarea placeholder={t.commentPlaceholder} value={clientComment} onChange={e => setClientComment(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none', minHeight: '40px', boxSizing: 'border-box' }} />
               </div>
 
               <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '12px', padding: '12px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '6px' }}>
@@ -563,7 +602,7 @@ export default function App() {
       {/* МОДАЛКА ВХОДА АДМИНА */}
       {showLoginModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh', background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(6px)', zIndex: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box' }}>
-          <form onSubmit={handleLogin} style={{ background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', textAlign: 'center' }}>
+          <form onSubmit={handleLogin} style={{ background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', textAlign: 'center', boxSizing: 'border-box' }}>
             <h3 style={{ margin: '0 0 10px 0', fontSize: '15px', color: '#fff' }}>{t.adminLoginTitle}</h3>
             <input type="password" placeholder={t.adminPasswordPlaceholder} value={passwordInput} onChange={e => setPasswordInput(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px 12px', color: '#fff', fontSize: '14px', boxSizing: 'border-box', marginBottom: '14px', outline: 'none' }} autoFocus />
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -580,26 +619,26 @@ export default function App() {
           <form onSubmit={handleAddProduct} style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', boxSizing: 'border-box' }}>
             <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#f59e0b' }}>{t.addNewItemBtn}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={e => setNewTitle(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+              <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={e => setNewTitle(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} required />
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <select value={newCat} onChange={e => setNewCat(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
+                <select value={newCat} onChange={e => setNewCat(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}>
                   <option value="Круассаны">{t.catCroissants}</option>
                   <option value="Торты">{t.catCakes}</option>
                   <option value="Пироги">{t.catPies}</option>
                   <option value="Печенье">{t.catCookies}</option>
                   <option value="Напитки">{t.catDrinks}</option>
                 </select>
-                <select value={newBadge} onChange={e => setNewBadge(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
+                <select value={newBadge} onChange={e => setNewBadge(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}>
                   <option value="ХИТ">{t.badgeHit}</option>
                   <option value="НОВИНКА">{t.badgeNew}</option>
                   <option value="ПРЕМИУМ">{t.badgePrem}</option>
                 </select>
               </div>
-              <input type="text" placeholder={t.descPlaceholder} value={newDesc} onChange={e => setNewDesc(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              <input type="text" placeholder={t.descPlaceholder} value={newDesc} onChange={e => setNewDesc(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.photoLabel}</label>
                 <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setNewImage)} style={{ fontSize: '11px', color: '#9ca3af', width: '100%', marginBottom: '6px' }} />
@@ -623,17 +662,18 @@ export default function App() {
               <input type="text" placeholder={t.dishNamePlaceholder} value={editingProduct.names[lang] || editingProduct.names['RU']} onChange={e => {
                 const val = e.target.value;
                 setEditingProduct({ ...editingProduct, names: { ...editingProduct.names, [lang]: val, RU: val } });
-              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} required />
               
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={e => setEditingProduct({ ...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null })} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              {/* Исправленная верстка полей цены без выезда рамок */}
+              <div style={{ display: 'flex', gap: '8px', width: '100%', boxSizing: 'border-box' }}>
+                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={e => setEditingProduct({ ...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null })} style={{ flex: 1, minWidth: 0, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
               </div>
 
               <input type="text" placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={e => {
                 const val = e.target.value;
                 setEditingProduct({ ...editingProduct, descs: { ...editingProduct.descs, [lang]: val, RU: val } });
-              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.photoLabel}</label>
@@ -650,17 +690,16 @@ export default function App() {
         </div>
       )}
 
-      {/* ШАПКА: 
-          1. Адрес и телефон СЛЕВА напротив логотипа и названия.
-          2. Логотип и название кликабельные — возвращают на главную.
-          3. Языковая панель СПРАВА НИЖЕ названия.
-          4. Кнопка "Login" с ключиком СПРАВА НАПРОТИВ языковой панели. */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '14px' }}>
+      {/* ШАПКА САЙТА: 
+          1. Логотип наравне с названием. Название рукописным шрифтом.
+          2. Под название в одну строку — «домашняя выпечка» курсивом.
+          3. Телефон и адрес напротив названия и логотипа в шапке. */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '14px', marginBottom: '12px' }}>
         
-        {/* Левая часть: Кликабельные Логотип + Название + Адрес/Телефон */}
-        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', cursor: 'pointer' }}>
+        {/* Логотип + Название + Подпись + Телефон/Адрес */}
+        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', flex: 1, minWidth: 0 }}>
           <div style={{
-            width: '46px', height: '46px', background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+            width: '46px', height: '46px', flexShrink: 0, background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
             borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 6px 16px rgba(245,158,11,0.35)', border: '1px solid rgba(255,255,255,0.2)'
           }}>
             {customLogo.startsWith('data:') || customLogo.startsWith('http') ? (
@@ -669,60 +708,77 @@ export default function App() {
               customLogo
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '0.8px', color: '#fff', lineHeight: '1.2' }}>{t.bakeryName}</div>
-            <div style={{ fontSize: '10px', fontWeight: '700', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '1.2px', lineHeight: '1.2', marginTop: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            {/* Название рукописным легко читаемым шрифтом */}
+            <div className="handwritten-title" style={{ color: '#fff', lineHeight: '1.1' }}>{t.bakeryName}</div>
+            
+            {/* Под название в одну строку: «домашняя выпечка» курсивом */}
+            <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#fcd34d', fontWeight: '500', marginTop: '1px' }}>
               {t.bakerySub}
-            </div>
-            {/* Адрес и телефон напротив логотипа */}
-            <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '4px', display: 'flex', gap: '8px' }}>
-              <span>{t.phone}</span>
-              <span>•</span>
-              <span>{t.address}</span>
             </div>
           </div>
         </div>
 
-        {/* Правая часть: Языковая панель и Login с ключиком */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-          
-          {/* Языковая панель справа */}
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '3px', gap: '3px' }}>
-            {[
-              { code: 'RU', flag: '🇷🇺' },
-              { code: 'EN', flag: '🇬🇧' },
-              { code: 'KO', flag: '🇰🇷' }
-            ].map((item) => (
-              <button
-                key={item.code}
-                onClick={() => setLang(item.code)}
-                style={{
-                  background: lang === item.code ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'transparent',
-                  color: lang === item.code ? '#0b0e14' : '#9ca3af',
-                  border: 'none', borderRadius: '9px', padding: '4px 7px',
-                  fontSize: '10px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px'
-                }}
-              >
-                <span>{item.flag}</span>
-                <span>{item.code}</span>
-              </button>
-            ))}
-          </div>
+        {/* Телефон и адрес справа напротив названия и логотипа */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontSize: '10px', color: '#9ca3af', gap: '2px', textAlign: 'right', flexShrink: 0, marginLeft: '8px' }}>
+          <span>{t.phone}</span>
+          <span>{t.address}</span>
+        </div>
 
-          {/* Кнопка Login с ключиком справа напротив языковой панели */}
+      </div>
+
+      {/* НИЖЕ ШАПКИ: 
+          Слева языковая панель, напротив нее Login (или Exit при входе). 
+          При входе структура не меняется, шапка остается в таком же стиле. */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        
+        {/* Языковая панель слева под шапкой */}
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '3px', gap: '3px' }}>
+          {[
+            { code: 'RU', flag: '🇷🇺' },
+            { code: 'EN', flag: '🇬🇧' },
+            { code: 'KO', flag: '🇰🇷' }
+          ].map((item) => (
+            <button
+              key={item.code}
+              onClick={() => setLang(item.code)}
+              style={{
+                background: lang === item.code ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'transparent',
+                color: lang === item.code ? '#0b0e14' : '#9ca3af',
+                border: 'none', borderRadius: '9px', padding: '4px 7px',
+                fontSize: '10px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px'
+              }}
+            >
+              <span>{item.flag}</span>
+              <span>{item.code}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Напротив языковой панели: Login или Exit */}
+        {!isAdminLoggedIn ? (
           <button onClick={() => setShowLoginModal(true)} style={{
             background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
-            color: '#f59e0b', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+            color: '#fcd34d', padding: '6px 14px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '5px'
           }}>
             <span>🔑</span>
             <span>{t.loginBtn}</span>
           </button>
-        </div>
+        ) : (
+          <button onClick={handleExit} style={{
+            background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)',
+            color: '#f87171', padding: '6px 14px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '5px'
+          }}>
+            <span>🚪</span>
+            <span>{t.exitBtn}</span>
+          </button>
+        )}
 
       </div>
 
-      {/* АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ БАННЕРОМ И НАСТРОЙКАМИ (если вошел администратор) */}
+      {/* АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ БАННЕРОМ (если вошел администратор) */}
       {isAdminLoggedIn && (
         <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>{t.editBannerTitle}</h3>
@@ -770,7 +826,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА: «МОИ ЗАКАЗЫ» (ИСТОРИЯ) */}
+      {/* ВКЛАДКА: «МОИ ЗАКАЗЫ» */}
       {activeTab === 'orders' && (
         <div style={{ paddingBottom: '20px' }}>
           <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '14px', color: '#fcd34d' }}>{t.orderHistoryTitle}</h2>
@@ -804,10 +860,10 @@ export default function App() {
         </div>
       )}
 
-      {/* ОСНОВНОЙ КОНТЕНТ ВКЛАДКИ ДОМОЙ / ПОИСК */}
+      {/* ОСНОВНОЙ КОНТЕНТ ДОМОЙ / ПОИСК */}
       {(activeTab === 'home' || activeTab === 'search') && (
         <>
-          {/* БАННЕР (если он не удален администратором) */}
+          {/* БАННЕР */}
           {bannerImage && (
             <div style={{
               background: 'linear-gradient(135deg, #1e1b10 0%, #141822 100%)',
@@ -867,20 +923,44 @@ export default function App() {
             })}
           </div>
 
-          {/* ЗАГОЛОВОК МЕНЮ И КНОПКА ДОБАВЛЕНИЯ ТОВАРА ДЛЯ АДМИНА */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 14px' }}>
-            <div style={{ fontSize: '16px', fontWeight: '800' }}>
-              {t.signatureCollection} ({filteredProducts.length}) ✨
+          {/* ФИЛЬТРЫ-ПЛАШКИ (Вместо сигнатурной коллекции) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 10px', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', flex: 1 }}>
+              {[
+                { id: 'popular', label: t.sortPopular },
+                { id: 'orders', label: t.sortOrders },
+                { id: 'priceAsc', label: t.sortPriceAsc },
+                { id: 'priceDesc', label: t.sortPriceDesc }
+              ].map(s => {
+                const isSelected = sortBy === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setSortBy(s.id)}
+                    style={{
+                      background: isSelected ? '#f59e0b' : 'rgba(255,255,255,0.05)',
+                      color: isSelected ? '#0b0e14' : '#9ca3af',
+                      border: `1px solid ${isSelected ? '#f59e0b' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: '10px', padding: '6px 10px', fontSize: '11px', fontWeight: 'bold',
+                      cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Кнопка добавления товара для админа */}
             {isAdminLoggedIn && (
-              <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+              <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>
                 {t.addNewItemBtn}
               </button>
             )}
           </div>
 
-          {/* СЕТКА ТОВАРОВ С ПОЛНЫМ ПЕРЕВОДОМ НАЗВАНИЙ И ОПИСАНИЙ */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px', paddingBottom: '20px' }}>
+          {/* СЕТКА ТОВАРОВ */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px', paddingBottom: '20px', marginTop: '10px' }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((item) => {
                 const isLiked = likes.includes(item.id);
@@ -890,14 +970,12 @@ export default function App() {
                 return (
                   <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
                     
-                    {/* Бейдж */}
                     {item.badge && (
                       <div style={{ position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0', zIndex: 2 }}>
                         {item.badge === 'ХИТ' ? t.badgeHit : item.badge === 'НОВИНКА' ? t.badgeNew : t.badgePrem}
                       </div>
                     )}
 
-                    {/* Кнопка лайка */}
                     <button onClick={() => toggleLike(item.id)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', zIndex: 2, fontSize: '14px' }}>
                       {isLiked ? '❤️' : '🤍'}
                     </button>
@@ -908,7 +986,7 @@ export default function App() {
 
                     <div style={{ padding: '12px' }}>
                       <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{itemName}</div>
-                      <div style={{ fontSize: '11px', color: '#f59e0b', fontWeight: '700', marginBottom: '4px' }}>★ {item.rating}</div>
+                      <div style={{ fontSize: '11px', color: '#f59e0b', fontWeight: '700', marginBottom: '4px' }}>★ {item.rating} (📦 {item.ordersCount})</div>
                       <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '10px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{itemDesc}</div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '8px' }}>
