@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TRANSLATIONS = {
   ru: {
@@ -176,7 +176,7 @@ export default function App() {
   const t = TRANSLATIONS[lang];
 
   const [activeTab, setActiveTab] = useState('home');
-  const [activeCategory, setActiveCategory] = useState('Все');
+  const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -199,7 +199,26 @@ export default function App() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [myOrdersList, setMyOrdersList] = useState([]);
 
-  // База товаров с переводами названий и описаний на 3 языка (RU, EN, KO)
+  // Логика автоматического скрытия нижней панели при скролле
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsNavVisible(false); // Скролл вниз — скрываем
+      } else {
+        setIsNavVisible(true);  // Скролл вверх — показываем
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // База товаров (категории хранятся ключами для точного сопоставления)
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -208,7 +227,7 @@ export default function App() {
         en: { name: 'Almond Croissant', desc: 'Exquisite puff pastry with French butter, delicate frangipane cream, and select premium almonds' },
         ko: { name: '아몬드 크루아상', desc: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림, 엄선된 아몬드가 들어간 프리미엄 크루아상' }
       },
-      category: 'Круассаны', 
+      categoryKey: 'Croissants', 
       price: 4500, 
       oldPrice: 5000,
       rating: '4.9', 
@@ -222,7 +241,7 @@ export default function App() {
         en: { name: 'Chocolate Brioche', desc: 'Fluffy handmade enriched dough, authentic Belgian cocoa, and chunks of premium dark chocolate' },
         ko: { name: '초콜릿 브리오슈', desc: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아와 다크 초콜릿 칩이 가득한 달콤한 빵' }
       },
-      category: 'Торты', 
+      categoryKey: 'Cakes', 
       price: 5500, 
       oldPrice: 6500,
       rating: '4.8', 
@@ -236,7 +255,7 @@ export default function App() {
         en: { name: 'Vanilla Berry Tart', desc: 'Crispy shortcrust pastry, custard with bourbon vanilla, and fresh seasonal wild berries' },
         ko: { name: '바닐라 베리 타르트', desc: '바삭한 타르트 시트 위에 부드러운 바닐라 커스터드 크림과 신선한 제철 산딸기를 올린 디저트' }
       },
-      category: 'Пироги', 
+      categoryKey: 'Pies', 
       price: 7200, 
       oldPrice: 8000,
       rating: '5.0', 
@@ -250,7 +269,7 @@ export default function App() {
   const [newTitleKo, setNewTitleKo] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
-  const [newCat, setNewCat] = useState('Круассаны');
+  const [newCatKey, setNewCatKey] = useState('Croissants');
   const [newDescRu, setNewDescRu] = useState('');
   const [newImage, setNewImage] = useState('');
   const [newBadge, setNewBadge] = useState('ХИТ');
@@ -285,7 +304,7 @@ export default function App() {
         en: { name: newTitleEn || newTitleRu, desc: newDescRu || 'Fresh handmade artisanal pastry' },
         ko: { name: newTitleKo || newTitleRu, desc: newDescRu || '신선한 수제 프리미엄 베이커리' }
       },
-      category: newCat,
+      categoryKey: newCatKey,
       price: Number(newPrice),
       oldPrice: newOldPrice ? Number(newOldPrice) : null,
       rating: '5.0',
@@ -327,7 +346,7 @@ export default function App() {
   };
 
   const filteredProducts = products.filter(item => {
-    const matchesCat = activeCategory === 'Все' || item.category === activeCategory;
+    const matchesCat = activeCategory === 'All' || item.categoryKey === activeCategory;
     const currentName = (item.translations[lang]?.name || item.translations.ru.name).toLowerCase();
     const matchesSearch = currentName.includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
@@ -368,10 +387,10 @@ export default function App() {
     <div style={{
       background: '#0b0e14', minHeight: '100dvh', width: '100%',
       fontFamily: 'Inter, sans-serif', boxSizing: 'border-box',
-      margin: 0, padding: '16px 16px 130px 16px', color: '#fff', overflowX: 'hidden'
+      margin: 0, padding: '16px 16px 140px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
-      {/* 1. ПРЕМИАЛЬНОЕ МОДАЛЬНОЕ ОКНО УВЕЛИЧЕННОГО ТОВАРА */}
+      {/* МОДАЛЬНОЕ ОКНО ТОВАРА */}
       {selectedProductModal && (
         <div 
           onClick={() => setSelectedProductModal(null)}
@@ -455,7 +474,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. Модальное окно просмотра корзины */}
+      {/* МОДАЛЬНОЕ ОКНО КОРЗИНЫ */}
       {showCartModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -504,7 +523,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. Успешное оформление заказа */}
+      {/* УСПЕШНЫЙ ЗАКАЗ */}
       {orderSuccess && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -537,7 +556,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 4. Модальное окно оформления заказа */}
+      {/* ОФОРМЛЕНИЕ ЗАКАЗА */}
       {showCheckoutModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -637,7 +656,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Верхняя панель: Переключатель языков и Вход админа */}
+      {/* ВЕРХНЯЯ ПАНЕЛЬ: ЯЗЫК И АДМИН */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px 8px', fontSize: '11px', color: '#9ca3af' }}>
         <div style={{ display: 'flex', gap: '6px' }}>
           {['ru', 'en', 'ko'].map((itemLang) => (
@@ -676,7 +695,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Модальное окно входа */}
+      {/* МОДАЛЬНОЕ ОКНО ВХОДА */}
       {showLoginModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -699,10 +718,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Админ-панель с возможностью ввода на разных языках */}
+      {/* АДМИН-ПАНЕЛЬ */}
       {isAdminLoggedIn && (
         <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '14px', marginBottom: '14px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар (с мультиязычным описанием)</h3>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <input 
               type="text" placeholder="Название (RU)" value={newTitleRu} onChange={e => setNewTitleRu(e.target.value)}
@@ -728,14 +747,14 @@ export default function App() {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <select 
-                value={newCat} onChange={e => setNewCat(e.target.value)}
+                value={newCatKey} onChange={e => setNewCatKey(e.target.value)}
                 style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
               >
-                <option value="Круассаны">Круассаны</option>
-                <option value="Торты">Торты</option>
-                <option value="Пироги">Пироги</option>
-                <option value="Печенье">Печенье</option>
-                <option value="Напитки">Напитки</option>
+                <option value="Croissants">Круассаны</option>
+                <option value="Cakes">Торты</option>
+                <option value="Pies">Пироги</option>
+                <option value="Cookies">Печенье</option>
+                <option value="Drinks">Напитки</option>
               </select>
               <select 
                 value={newBadge} onChange={e => setNewBadge(e.target.value)}
@@ -761,7 +780,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Шапка бренда */}
+      {/* ШАПКА БРЕНДА */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ 
@@ -819,7 +838,7 @@ export default function App() {
           type="button"
           onClick={() => {
             setActiveTab('home');
-            setActiveCategory('Все');
+            setActiveCategory('All');
           }}
           style={{
             zIndex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '10px',
@@ -844,14 +863,15 @@ export default function App() {
             </div>
           </div>
 
+          {/* КАТЕГОРИИ С ДИНАМИЧЕСКИМ ПЕРЕВОДОМ */}
           <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '14px', scrollbarWidth: 'none' }}>
             {[
-              { key: 'Все', label: t.categories.All, icon: '🌟' },
-              { key: 'Круассаны', label: t.categories.Croissants, icon: '🥐' },
-              { key: 'Торты', label: t.categories.Cakes, icon: '🍰' },
-              { key: 'Пироги', label: t.categories.Pies, icon: '🥧' },
-              { key: 'Печенье', label: t.categories.Cookies, icon: '🍪' },
-              { key: 'Напитки', label: t.categories.Drinks, icon: '☕' }
+              { key: 'All', label: t.categories.All, icon: '🌟' },
+              { key: 'Croissants', label: t.categories.Croissants, icon: '🥐' },
+              { key: 'Cakes', label: t.categories.Cakes, icon: '🍰' },
+              { key: 'Pies', label: t.categories.Pies, icon: '🥧' },
+              { key: 'Cookies', label: t.categories.Cookies, icon: '🍪' },
+              { key: 'Drinks', label: t.categories.Drinks, icon: '☕' }
             ].map((catObj) => {
               const isActive = activeCategory === catObj.key;
               return (
@@ -872,7 +892,7 @@ export default function App() {
             <div style={{ fontSize: '16px', fontWeight: '800' }}>{t.menuTitle} ({filteredProducts.length}) ✨</div>
           </div>
 
-          {/* Список товаров с переводом названий и описаний */}
+          {/* СПИСОК ТОВАРОВ */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', paddingBottom: '20px' }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((item) => {
@@ -942,7 +962,7 @@ export default function App() {
         </>
       )}
 
-      {/* ВКЛАДКА ПОИСК */}
+      {/* ПОИСК */}
       {activeTab === 'search' && (
         <div style={{ padding: '10px 0' }}>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>🔍 {t.navSearch}</h2>
@@ -969,7 +989,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА ИЗБРАННОЕ */}
+      {/* ИЗБРАННОЕ */}
       {activeTab === 'favorites' && (
         <div style={{ padding: '10px 0' }}>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.favoritesTitle}</h2>
@@ -993,7 +1013,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА МОИ ЗАКАЗЫ */}
+      {/* ЗАКАЗЫ */}
       {activeTab === 'orders' && (
         <div style={{ padding: '10px 0' }}>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.ordersTitle}</h2>
@@ -1028,14 +1048,14 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПЛАШКА КОРЗИНЫ */}
+      {/* НИЖНЯЯ ПЛАШКА КОРЗИНЫ (С АВТОМАТИЧЕСКИМ СКРЫТИЕМ ПРИ СКРОЛЛЕ) */}
       {cart.length > 0 && activeTab !== 'orders' && (
         <div style={{
-          position: 'fixed', bottom: '74px', left: '16px', right: '16px',
+          position: 'fixed', bottom: isNavVisible ? '74px' : '-80px', left: '16px', right: '16px',
           background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(10px)',
           border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: '16px', padding: '12px 16px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box', zIndex: 1000,
-          boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.6)', transition: 'bottom 0.3s ease-in-out'
         }}>
           <div onClick={() => setShowCartModal(true)} style={{ cursor: 'pointer' }}>
             <div style={{ fontSize: '11px', color: '#9ca3af' }}>{t.cartSelected}: {cart.length} {t.itemsWord}</div>
@@ -1058,12 +1078,12 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ */}
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (С АВТОМАТИЧЕСКИМ СКРЫТИЕМ ПРИ СКРОЛЛЕ) */}
       <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, height: '64px',
+        position: 'fixed', bottom: isNavVisible ? '0' : '-80px', left: 0, right: 0, height: '64px',
         background: '#141822', borderTop: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-        zIndex: 1500, boxSizing: 'border-box', padding: '0 8px'
+        zIndex: 1500, boxSizing: 'border-box', padding: '0 8px', transition: 'bottom 0.3s ease-in-out'
       }}>
         {[
           { key: 'home', label: t.navHome, icon: '🏠' },
