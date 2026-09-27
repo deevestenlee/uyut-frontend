@@ -54,7 +54,7 @@ const translations = {
     orderDate: 'Дата и время:',
     statusCompleted: 'Принят в работу ✅',
     adminLoginTitle: 'Вход для администратора',
-    adminPasswordPlaceholder: 'Пароль (1234)',
+    adminPasswordPlaceholder: 'Введите пароль',
     login: 'Войти',
     badgeHit: 'ХИТ',
     badgeNew: 'НОВИНКА',
@@ -121,7 +121,7 @@ const translations = {
     orderDate: 'Date & Time:',
     statusCompleted: 'Accepted ✅',
     adminLoginTitle: 'Admin Login',
-    adminPasswordPlaceholder: 'Password (1234)',
+    adminPasswordPlaceholder: 'Enter password',
     login: 'Log in',
     badgeHit: 'HIT',
     badgeNew: 'NEW',
@@ -188,7 +188,7 @@ const translations = {
     orderDate: '날짜:',
     statusCompleted: '접수 완료 ✅',
     adminLoginTitle: '관리자 로그인',
-    adminPasswordPlaceholder: '비밀번호 (1234)',
+    adminPasswordPlaceholder: '비밀번호 입력',
     login: '로그인',
     badgeHit: '인기',
     badgeNew: '신메뉴',
@@ -273,7 +273,6 @@ export default function App() {
   const [categories, setCategories] = useState(['Круассаны', 'Торты', 'Пироги', 'Печенье', 'Напитки']);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Поля ввода цен как строки для полного удаления без нулей
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -501,17 +500,17 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap');
         .premium-title {
           font-family: 'Playfair Display', serif;
-          font-size: 20px !important;
+          font-size: 18px !important;
           font-weight: 700;
           letter-spacing: 0.5px;
           color: #ffffff;
           white-space: nowrap;
-          line-height: 1.2;
+          line-height: 1.1;
         }
         .premium-subtitle {
           font-family: 'Playfair Display', serif;
           font-style: italic;
-          font-size: 11px !important;
+          font-size: 10px !important;
           color: #fcd34d;
           font-weight: 400;
           letter-spacing: 0.3px;
@@ -676,7 +675,7 @@ export default function App() {
         </div>
       )}
 
-      {/* МОДАЛКА ВХОДА АДМИНИСТРАТОРА */}
+      {/* МОДАЛКА ВХОДА АДМИНИСТРАТОРА (Без подсказки по паролю) */}
       {showLoginModal && (
         <div onClick={() => setShowLoginModal(false)} style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -754,13 +753,14 @@ export default function App() {
         </div>
       )}
 
-      {/* ШАПКА САЙТА */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', position: 'relative' }}>
-        {/* Логотип и название строго в одну строку */}
-        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', minHeight: '42px' }}>
+      {/* ШАПКА САЙТА (Строгое выравнивание всех элементов по высоте и ширине) */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
+        
+        {/* Логотип и название */}
+        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', height: '36px' }}>
           <div style={{
-            width: '40px', height: '40px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+            width: '36px', height: '36px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
             boxShadow: '0 4px 12px rgba(245,158,11,0.3)', flexShrink: 0
           }}>
             {customLogo}
@@ -771,75 +771,73 @@ export default function App() {
           </div>
         </div>
 
-        {/* Правый блок: Верхняя строка (Login + Гамбургер), Нижняя строка (Лупа + Языки) */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+        {/* Правый блок элементов управления в одну строку с одинаковой высотой (36px) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px' }}>
           
-          {/* Верхняя строка: Login / Exit и Меню-гамбургер в одной строке */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '30px' }}>
-            {!isAdminLoggedIn ? (
-              <button onClick={() => setShowLoginModal(true)} style={{
-                background: 'transparent', color: '#9ca3af', border: '1px solid #334155',
-                borderRadius: '8px', padding: '0 10px', height: '30px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                {t.loginBtn}
-              </button>
-            ) : (
-              <button onClick={handleExit} style={{
-                background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)',
-                borderRadius: '8px', padding: '0 10px', height: '30px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                {t.exitBtn}
-              </button>
-            )}
+          {/* Кнопка поиска (Лупа) */}
+          <button onClick={() => {
+            const nextState = !isSearchActive;
+            setIsSearchActive(nextState);
+            if (!nextState) resetViewportZoom();
+          }} style={{
+            background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
+            borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px', boxSizing: 'border-box'
+          }} className="search-container">
+            🔍
+          </button>
 
-            <div className="burger-menu-container" style={{ position: 'relative', display: 'inline-block' }}>
-              <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
-                background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
-                width: '30px', height: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer'
-              }}>
-                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-              </button>
-
-              {/* Выпадающее меню гамбургера с выравниванием по левому краю и компактной шириной */}
-              {showBurgerMenu && (
-                <div style={{
-                  position: 'absolute', top: '34px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
-                  borderRadius: '12px', width: 'auto', minWidth: '130px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '6px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box'
-                }}>
-                  <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>🏠 {t.menuMain}</button>
-                  <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>✨ {t.menuPromos}</button>
-                  <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>📍 {t.menuContacts}</button>
-                  <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>ℹ️ {t.menuAbout}</button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Нижняя строка: Лупа и Языковая панель, выровненные по высоте (30px) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '30px' }} className="search-container">
-            <button onClick={() => {
-              const nextState = !isSearchActive;
-              setIsSearchActive(nextState);
-              if (!nextState) resetViewportZoom();
-            }} style={{
-              background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
-              borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px'
+          {/* Кнопка Login / Exit */}
+          {!isAdminLoggedIn ? (
+            <button onClick={() => setShowLoginModal(true)} style={{
+              background: '#141822', color: '#9ca3af', border: '1px solid #334155',
+              borderRadius: '8px', padding: '0 10px', height: '36px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', whiteSpace: 'nowrap'
             }}>
-              🔍
+              {t.loginBtn}
+            </button>
+          ) : (
+            <button onClick={handleExit} style={{
+              background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '8px', padding: '0 10px', height: '36px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', whiteSpace: 'nowrap'
+            }}>
+              {t.exitBtn}
+            </button>
+          )}
+
+          {/* Гамбургер меню */}
+          <div className="burger-menu-container" style={{ position: 'relative', display: 'inline-block', height: '36px' }}>
+            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
+              background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
+              width: '36px', height: '36px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer', boxSizing: 'border-box'
+            }}>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
             </button>
 
-            <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
-              background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
-              borderRadius: '8px', height: '30px', padding: '0 6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
-            }}>
-              <option value="RU">🇷🇺 RU</option>
-              <option value="EN">🇺🇸 EN</option>
-              <option value="KO">🇰🇷 KO</option>
-            </select>
+            {/* Выпадающее меню */}
+            {showBurgerMenu && (
+              <div style={{
+                position: 'absolute', top: '42px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
+                borderRadius: '12px', width: 'auto', minWidth: '130px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '6px',
+                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box'
+              }}>
+                <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>🏠 {t.menuMain}</button>
+                <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>✨ {t.menuPromos}</button>
+                <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>📍 {t.menuContacts}</button>
+                <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>ℹ️ {t.menuAbout}</button>
+              </div>
+            )}
           </div>
+
+          {/* Языковая панель (Выровнена по правому краю, ширина сокращена по размеру контента) */}
+          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
+            background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
+            borderRadius: '8px', height: '36px', width: 'auto', padding: '0 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', boxSizing: 'border-box', textAlignLast: 'right'
+          }}>
+            <option value="RU">🇷🇺 RU</option>
+            <option value="EN">🇺🇸 EN</option>
+            <option value="KO">🇰🇷 KO</option>
+          </select>
 
         </div>
       </header>
