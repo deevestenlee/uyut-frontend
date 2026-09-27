@@ -6,6 +6,7 @@ const translations = {
     bakerySub: 'домашняя выпечка',
     address: '📍 Сеул, Каннам-гу 12-3',
     phone: '📞 010-1234-5678',
+    searchPlaceholder: 'Поиск...',
     allCategories: 'Все',
     addToCart: 'В корзину +',
     loginBtn: 'Login',
@@ -72,6 +73,7 @@ const translations = {
     bakerySub: 'home baking',
     address: '📍 Seoul, Gangnam-gu 12-3',
     phone: '📞 010-1234-5678',
+    searchPlaceholder: 'Search...',
     allCategories: 'All',
     addToCart: 'Add to cart +',
     loginBtn: 'Login',
@@ -138,6 +140,7 @@ const translations = {
     bakerySub: '홈 베이킹',
     address: '📍 서울 강남구 12-3',
     phone: '📞 010-1234-5678',
+    searchPlaceholder: '검색...',
     allCategories: '전체',
     addToCart: '담기 +',
     loginBtn: 'Login',
@@ -215,6 +218,7 @@ export default function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  // Глобальный клик: закрытие выпадающего меню и бургера
   useEffect(() => {
     const handleGlobalClick = (e) => {
       if (showBurgerMenu && !e.target.closest('.burger-menu-container')) {
@@ -275,6 +279,81 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
   const [ordersHistory, setOrdersHistory] = useState([]);
+
+  const handleImageUpload = (e, setter) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setter(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passwordInput === '1234') {
+      setIsAdminLoggedIn(true);
+      setShowLoginModal(false);
+      setPasswordInput('');
+    } else {
+      alert('Неверный пароль!');
+    }
+  };
+
+  const handleExit = () => {
+    setIsAdminLoggedIn(false);
+  };
+
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+    if (!newTitle || newPrice === '') return;
+    const newItem = {
+      id: Date.now(),
+      names: { RU: newTitle, EN: newTitle, KO: newTitle },
+      category: newCat,
+      price: Number(newPrice) || 0,
+      oldPrice: newOldPrice !== '' ? Number(newOldPrice) : null,
+      rating: 5.0,
+      descs: { RU: newDesc || 'Домашняя выпечка', EN: newDesc || 'Home baking', KO: newDesc || '홈 베이킹' },
+      image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+      badge: newBadge
+    };
+    setProducts([newItem, ...products]);
+    setNewTitle('');
+    setNewPrice('');
+    setNewOldPrice('');
+    setNewDesc('');
+    setNewImage('');
+    setShowAddModal(false);
+  };
+
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+    if (!categories.includes(newCategoryName)) {
+      setCategories([...categories, newCategoryName]);
+    }
+    setNewCategoryName('');
+    setShowAddCatModal(false);
+  };
+
+  const handleSaveEditedProduct = (e) => {
+    e.preventDefault();
+    const updated = {
+      ...editingProduct,
+      price: editingProduct.price !== '' ? Number(editingProduct.price) : 0,
+      oldPrice: editingProduct.oldPrice !== '' && editingProduct.oldPrice !== null ? Number(editingProduct.oldPrice) : null
+    };
+    setProducts(products.map(p => p.id === updated.id ? updated : p));
+    setEditingProduct(null);
+  };
+
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('Удалить этот товар из меню?')) {
+      setProducts(products.filter(p => p.id !== id));
+    }
+  };
+
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -307,41 +386,6 @@ export default function App() {
       badge: 'НОВИНКА' 
     }
   ]);
-
-  const handleImageUpload = (e, setter) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setter(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (passwordInput === '1234') {
-      setIsAdminLoggedIn(true);
-      setShowLoginModal(false);
-      setPasswordInput('');
-    } else {
-      alert('Неверный пароль!');
-    }
-  };
-
-  const handleExit = () => {
-    setIsAdminLoggedIn(false);
-  };
-
-  const handleSaveEditedProduct = (e) => {
-    e.preventDefault();
-    const updated = {
-      ...editingProduct,
-      price: editingProduct.price !== '' ? Number(editingProduct.price) : 0,
-      oldPrice: editingProduct.oldPrice !== '' && editingProduct.oldPrice !== null ? Number(editingProduct.oldPrice) : null
-    };
-    setProducts(products.map(p => p.id === updated.id ? updated : p));
-    setEditingProduct(null);
-  };
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -450,58 +494,58 @@ export default function App() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '16px', gap: '8px'
       }}>
-        {/* Логотип и Название */}
+        {/* Логотип и Название слева */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => { setActiveTab('home'); setActiveCategory('Все'); }}>
-          <div style={{ fontSize: '28px', background: 'rgba(245,158,11,0.1)', padding: '6px', borderRadius: '12px' }}>{customLogo}</div>
+          <div style={{ fontSize: '26px', background: 'rgba(245,158,11,0.1)', padding: '5px', borderRadius: '10px' }}>{customLogo}</div>
           <div>
             <div className="premium-title">{t.bakeryName}</div>
             <div className="premium-subtitle">{t.bakerySub}</div>
           </div>
         </div>
 
-        {/* Адрес и телефон справа от названия */}
+        {/* Адрес и телефон (сверху вниз) сразу за логотипом */}
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '10px', color: '#9ca3af', lineHeight: '1.3' }}>
           <span>{t.address}</span>
           <span>{t.phone}</span>
         </div>
 
-        {/* Логин, Меню и Языковая панель в ряд вертикально, справа */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Элементы управления справа в один ряд */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {/* Кнопка логина / выхода */}
           {!isAdminLoggedIn ? (
-            <button onClick={() => setShowLoginModal(true)} style={{ background: 'transparent', border: '1px solid #334155', color: '#fff', padding: '6px 10px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer' }}>
+            <button onClick={() => setShowLoginModal(true)} style={{ background: 'transparent', border: '1px solid #334155', color: '#fff', padding: '5px 8px', borderRadius: '8px', fontSize: '10px', cursor: 'pointer' }}>
               {t.loginBtn}
             </button>
           ) : (
-            <button onClick={handleExit} style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#f87171', padding: '6px 10px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer' }}>
+            <button onClick={handleExit} style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid #ef4444', color: '#f87171', padding: '5px 8px', borderRadius: '8px', fontSize: '10px', cursor: 'pointer' }}>
               {t.exitBtn}
             </button>
           )}
 
           {/* Бургер меню */}
           <div className="burger-menu-container" style={{ position: 'relative' }}>
-            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{ background: '#141822', border: '1px solid #334155', color: '#fff', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px' }}>
+            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{ background: '#141822', border: '1px solid #334155', color: '#fff', width: '30px', height: '30px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px' }}>
               ☰
             </button>
             {showBurgerMenu && (
-              <div style={{ position: 'absolute', right: 0, top: '40px', background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', padding: '8px', width: '140px', zIndex: 100, boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
-                <div onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '12px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuMain}</div>
-                <div onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '12px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuPromos}</div>
-                <div onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '12px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuContacts}</div>
-                <div onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '12px', cursor: 'pointer', color: '#fff' }}>{t.menuAbout}</div>
+              <div style={{ position: 'absolute', right: 0, top: '38px', background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px', padding: '8px', width: '130px', zIndex: 100, boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
+                <div onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuMain}</div>
+                <div onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuPromos}</div>
+                <div onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{t.menuContacts}</div>
+                <div onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ padding: '8px', fontSize: '11px', cursor: 'pointer', color: '#fff' }}>{t.menuAbout}</div>
               </div>
             )}
           </div>
 
-          {/* Языковая панель (строго выровнена слева при раскрытии, без лишних боковых рамок) */}
+          {/* Языковая панель (left: 0, строго выровнена, без боковых рамок) */}
           <div className="lang-dropdown-container" style={{ position: 'relative' }}>
-            <button onClick={() => setShowLangDropdown(!showLangDropdown)} style={{ background: '#141822', border: '1px solid #334155', color: '#fcd34d', padding: '6px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => setShowLangDropdown(!showLangDropdown)} style={{ background: '#141822', border: '1px solid #334155', color: '#fcd34d', padding: '5px 7px', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
               {lang} ▾
             </button>
             {showLangDropdown && (
-              <div style={{ position: 'absolute', left: 0, top: '40px', background: '#141822', border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden', zIndex: 100, minWidth: '50px', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
+              <div style={{ position: 'absolute', left: 0, top: '38px', background: '#141822', border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden', zIndex: 100, minWidth: '45px', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
                 {['RU', 'EN', 'KO'].map((l) => (
-                  <div key={l} onClick={() => { setLang(l); setShowLangDropdown(false); }} style={{ padding: '8px 12px', fontSize: '11px', textAlign: 'left', cursor: 'pointer', background: lang === l ? 'rgba(245,158,11,0.2)' : 'transparent', color: lang === l ? '#fcd34d' : '#fff' }}>
+                  <div key={l} onClick={() => { setLang(l); setShowLangDropdown(false); }} style={{ padding: '7px 10px', fontSize: '10px', textAlign: 'left', cursor: 'pointer', background: lang === l ? 'rgba(245,158,11,0.2)' : 'transparent', color: lang === l ? '#fcd34d' : '#fff' }}>
                     {l}
                   </div>
                 ))}
@@ -559,6 +603,44 @@ export default function App() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'promos' && (
+        <div style={{ background: '#141822', padding: '16px', borderRadius: '14px' }}>
+          <h3>{t.promoSectionTitle}</h3>
+          <p style={{ color: '#9ca3af', fontSize: '13px' }}>Скидка 10% на все круассаны при заказе через приложение в утренние часы!</p>
+        </div>
+      )}
+
+      {activeTab === 'contacts' && (
+        <div style={{ background: '#141822', padding: '16px', borderRadius: '14px' }}>
+          <h3>{t.menuContacts}</h3>
+          <p style={{ color: '#9ca3af', fontSize: '13px', lineHeight: '1.5' }}>{t.contactsText}</p>
+        </div>
+      )}
+
+      {activeTab === 'about' && (
+        <div style={{ background: '#141822', padding: '16px', borderRadius: '14px' }}>
+          <h3>{t.menuAbout}</h3>
+          <p style={{ color: '#9ca3af', fontSize: '13px', lineHeight: '1.5' }}>{t.aboutText}</p>
+        </div>
+      )}
+
+      {activeTab === 'orders' && (
+        <div>
+          <h3 style={{ fontSize: '15px', color: '#fcd34d', marginBottom: '12px' }}>{t.orderHistoryTitle}</h3>
+          {ordersHistory.length === 0 ? (
+            <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', marginTop: '40px' }}>{t.emptyOrders}</p>
+          ) : (
+            ordersHistory.map(ord => (
+              <div key={ord.id} style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px', marginBottom: '10px' }}>
+                <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>{t.orderDate} {ord.date}</div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#fcd34d', marginBottom: '6px' }}>Сумма: {ord.total.toLocaleString()} ₩</div>
+                <div style={{ fontSize: '11px', color: '#10b981' }}>{t.statusCompleted}</div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
