@@ -5,10 +5,19 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState([]);
   
+  // Управление админкой
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // Управление модальным окном заказа
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [clientPhone, setClientPhone] = useState('010');
+  const [deliveryType, setDeliveryType] = useState('pickup');
+  const [clientAddress, setClientAddress] = useState('');
+  const [clientComment, setClientComment] = useState('');
 
   const [products, setProducts] = useState([
     { 
@@ -93,29 +102,61 @@ export default function App() {
   });
 
   const addToCart = (item) => setCart([...cart, item]);
+  
+  const removeFromCart = (indexToRemove) => {
+    setCart(cart.filter((_, index) => index !== indexToRemove));
+  };
+
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const handleSendOrder = (e) => {
+    e.preventDefault();
+    if (!clientName || clientPhone.length < 5) {
+      alert('Пожалуйста, заполните обязательные поля (Имя и Телефон).');
+      return;
+    }
+
+    let orderText = `🥐 *Новый заказ в Уютной Пекарне!*\n\n`;
+    orderText += `👤 *Имя:* ${clientName}\n`;
+    orderText += `📞 *Телефон:* ${clientPhone}\n`;
+    orderText += `📦 *Способ:* ${deliveryType === 'pickup' ? 'Самовывоз 🏃' : 'Доставка 🛵'}\n`;
+    if (deliveryType === 'delivery') {
+      orderText += `📍 *Адрес:* ${clientAddress}\n`;
+    }
+    if (clientComment) {
+      orderText += `💬 *Комментарий:* ${clientComment}\n`;
+    }
+    orderText += `\n🛒 *Состав заказа:*\n`;
+    cart.forEach((item, idx) => {
+      orderText += `${idx + 1}. ${item.name} — ${item.price.toLocaleString()} ₩\n`;
+    });
+    orderText += `\n💰 *Итого к оплате:* *${totalPrice.toLocaleString()} ₩*`;
+
+    const bakeryWhatsAppNumber = '821012345678'; 
+    const encodedUrl = `https://wa.me/${bakeryWhatsAppNumber}?text=${encodeURIComponent(orderText)}`;
+
+    window.open(encodedUrl, '_blank');
+    
+    setCart([]);
+    setShowCheckoutModal(false);
+    alert('Заказ сформирован! Перенаправляем в WhatsApp...');
+  };
 
   return (
     <div style={{
-      background: '#0b0e14',
-      minHeight: '100dvh',
-      width: '100%',
-      fontFamily: 'Inter, sans-serif',
-      boxSizing: 'border-box',
-      margin: 0,
-      padding: '16px 16px 100px 16px',
-      color: '#fff',
-      overflowX: 'hidden'
+      background: '#0b0e14', minHeight: '100dvh', width: '100%',
+      fontFamily: 'Inter, sans-serif', boxSizing: 'border-box',
+      margin: 0, padding: '16px 16px 130px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
-      {/* Модальное окно увеличения картинки */}
+      {/* 1. Модальное окно просмотра картинки */}
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)}
           style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
             background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(8px)',
-            zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box', cursor: 'pointer'
+            zIndex: 2000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box', cursor: 'pointer'
           }}
         >
           <img src={selectedImage} alt="Zoomed" style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '16px', border: '1px solid rgba(245, 158, 11, 0.3)' }} />
@@ -123,43 +164,140 @@ export default function App() {
         </div>
       )}
 
-      {/* Верхняя строка: Адрес + Вход админа */}
+      {/* 2. Модальное окно оформления заказа */}
+      {showCheckoutModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+          background: 'rgba(6, 8, 12, 0.95)', backdropFilter: 'blur(8px)',
+          zIndex: 1500, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+          padding: '20px 16px', boxSizing: 'border-box', overflowY: 'auto'
+        }}>
+          <div style={{
+            background: '#141822', border: '1px solid rgba(245, 158, 11, 0.4)',
+            borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '420px', boxSizing: 'border-box', marginTop: '20px', marginBottom: '40px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#fcd34d' }}>📋 Оформление заказа</h3>
+                <span style={{ fontSize: '10px', color: '#9ca3af' }}>Заполните данные для отправки в WhatsApp</span>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setShowCheckoutModal(false)} 
+                style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '18px', cursor: 'pointer', padding: '5px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto' }}>
+              <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>Ваш выбор:</div>
+              {cart.map((item, index) => (
+                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                  <span>{item.name}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</span>
+                    <button type="button" onClick={() => removeFromCart(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
+                  </div>
+                </div>
+              ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.1)', fontWeight: 'bold', fontSize: '13px' }}>
+                <span>Итого:</span>
+                <span style={{ color: '#fcd34d' }}>{totalPrice.toLocaleString()} ₩</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ваше имя *</label>
+                <input 
+                  type="text" placeholder="Например: Александр" value={clientName} onChange={e => setClientName(e.target.value)}
+                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Номер телефона *</label>
+                <input 
+                  type="text" value={clientPhone} onChange={e => setClientPhone(e.target.value)}
+                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Способ получения *</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    type="button" onClick={() => setDeliveryType('pickup')}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: deliveryType === 'pickup' ? '1px solid #f59e0b' : '1px solid #334155', background: deliveryType === 'pickup' ? 'rgba(245, 158, 11, 0.15)' : '#0b0e14', color: '#fff', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    🏃 Самовывоз
+                  </button>
+                  <button 
+                    type="button" onClick={() => setDeliveryType('delivery')}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: deliveryType === 'delivery' ? '1px solid #f59e0b' : '1px solid #334155', background: deliveryType === 'delivery' ? 'rgba(245, 158, 11, 0.15)' : '#0b0e14', color: '#fff', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    🛵 Доставка
+                  </button>
+                </div>
+              </div>
+
+              {deliveryType === 'delivery' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Адрес доставки *</label>
+                  <input 
+                    type="text" placeholder="Город, улица, дом, квартира" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
+                    style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                  />
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Комментарий (необязательно)</label>
+                <textarea 
+                  placeholder="Пожелания к заказу..." value={clientComment} onChange={e => setClientComment(e.target.value)}
+                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none', minHeight: '50px' }} 
+                />
+              </div>
+
+              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '12px', padding: '12px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '6px' }}>
+                Подтвердить и отправить в WhatsApp ➔
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Шапка: Адрес и Вход */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px 8px', fontSize: '11px', color: '#9ca3af' }}>
         <span>📍 Сеул, Каннам-гу 12-3</span>
         {!isAdminLoggedIn ? (
           <button 
+            type="button"
             onClick={() => setShowLoginModal(true)}
-            style={{
-              background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
-              color: '#f59e0b', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', cursor: 'pointer'
-            }}
+            style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
           >
             ⚙️ Вход для админа
           </button>
         ) : (
           <button 
+            type="button"
             onClick={() => setIsAdminLoggedIn(false)}
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#ef4444', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', cursor: 'pointer'
-            }}
+            style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
           >
             Выйти
           </button>
         )}
       </div>
 
-      {/* Модалка входа */}
+      {/* Модальное окно входа */}
       {showLoginModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
           background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(6px)',
-          zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
+          zIndex: 1500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
         }}>
-          <form onSubmit={handleLogin} style={{
-            background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', textAlign: 'center'
-          }}>
+          <form onSubmit={handleLogin} style={{ background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', textAlign: 'center' }}>
             <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', color: '#fff' }}>Вход для администратора</h3>
             <p style={{ margin: '0 0 14px 0', fontSize: '11px', color: '#9ca3af' }}>Пароль по умолчанию: 1234</p>
             <input 
@@ -175,13 +313,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Форма админа */}
+      {/* Админ-панель добавления товаров */}
       {isAdminLoggedIn && (
-        <div style={{
-          background: '#141822', border: '1px solid #f59e0b',
-          borderRadius: '16px', padding: '14px', marginBottom: '14px'
-        }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар со скидкой</h3>
+        <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '14px', marginBottom: '14px' }}>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар на витрину</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <input 
               type="text" placeholder="Название блюда" value={newTitle} onChange={e => setNewTitle(e.target.value)}
@@ -226,46 +361,32 @@ export default function App() {
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '11px', color: '#9ca3af', width: '100%' }} />
             </div>
             <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', marginTop: '4px' }}>
-              Добавить на витрину
+              Добавить товар
             </button>
           </form>
         </div>
       )}
 
-      {/* Шапка */}
+      {/* Шапка бренда */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '40px', height: '40px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
-          }}>🥐</div>
+          <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🥐</div>
           <div>
             <div style={{ fontSize: '15px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Уютная Пекарня</div>
-            <div style={{ fontSize: '10px', fontWeight: '500', color: '#f59e0b' }}>📞 +82 10-1234-5678</div>
+            <div style={{ fontSize: '10px', fontWeight: '500', color: '#f59e0b' }}>📞 010-1234-5678</div>
           </div>
         </div>
-        <div style={{
-          width: '40px', height: '40px', background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '14px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', position: 'relative'
-        }}>
+        <div style={{ width: '40px', height: '40px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', position: 'relative' }}>
           🛒
           {cart.length > 0 && (
-            <span style={{
-              position: 'absolute', top: '-4px', right: '-4px', background: '#f59e0b', color: '#0b0e14',
-              fontSize: '10px', fontWeight: '800', width: '18px', height: '18px', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0b0e14'
-            }}>{cart.length}</span>
+            <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#f59e0b', color: '#0b0e14', fontSize: '10px', fontWeight: '800', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0b0e14' }}>{cart.length}</span>
           )}
         </div>
       </div>
 
       {/* Поиск */}
       <div style={{ margin: '4px 0 14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <div style={{
-          flex: 1, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)',
-          borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px'
-        }}>
+        <div style={{ flex: 1, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span>🔍</span>
           <input 
             type="text" placeholder="Поиск по меню..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -283,11 +404,7 @@ export default function App() {
               key={cat} onClick={() => setActiveCategory(cat)}
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer', flexShrink: 0 }}
             >
-              <div style={{
-                width: '48px', height: '48px', background: isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.04)',
-                border: `1px solid ${isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.06)'}`, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', transition: '0.2s'
-              }}>
+              <div style={{ width: '48px', height: '48px', background: isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.04)', border: `1px solid ${isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.06)'}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', transition: '0.2s' }}>
                 {cat === 'Все' ? '🌟' : cat === 'Круассаны' ? '🥐' : cat === 'Торты' ? '🍰' : cat === 'Пироги' ? '🥧' : cat === 'Печенье' ? '🍪' : '☕'}
               </div>
               <span style={{ fontSize: '11px', color: isActive ? '#fcd34d' : '#9ca3af', fontWeight: isActive ? '700' : '500' }}>{cat}</span>
@@ -296,23 +413,18 @@ export default function App() {
         })}
       </div>
 
-      {/* Заголовок меню */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0 12px' }}>
         <div style={{ fontSize: '16px', fontWeight: '800' }}>Меню ({filteredProducts.length}) 🔥</div>
       </div>
 
-      {/* Сетка товаров (адаптивная на всю ширину) */}
+      {/* Список товаров */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', paddingBottom: '20px' }}>
         {filteredProducts.length > 0 ? (
           filteredProducts.map((item) => (
             <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
               
               {item.badge && (
-                <div style={{
-                  position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)',
-                  color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, textTransform: 'uppercase', letterSpacing: '0.5px'
-                }}>
+                <div style={{ position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, textTransform: 'uppercase' }}>
                   {item.badge}
                 </div>
               )}
@@ -320,7 +432,6 @@ export default function App() {
               <div 
                 onClick={() => setSelectedImage(item.image)}
                 style={{ height: '130px', width: '100%', overflow: 'hidden', background: '#141822', position: 'relative', cursor: 'pointer' }}
-                title="Нажмите для увеличения"
               >
                 <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', right: '6px', bottom: '6px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '2px 6px', fontSize: '11px' }}>🔍</div>
@@ -339,6 +450,7 @@ export default function App() {
                     )}
                   </div>
                   <button 
+                    type="button"
                     onClick={() => addToCart(item)}
                     style={{ width: '28px', height: '28px', background: '#f59e0b', color: '#0b0e14', borderRadius: '8px', border: 'none', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}
                   >
@@ -355,20 +467,37 @@ export default function App() {
         )}
       </div>
 
-      {/* Фиксированная плашка корзины снизу на всю ширину */}
+      {/* 3. ФИКСИРОВАННАЯ НИЖНЯЯ ПЛАШКА КОРЗИНЫ (СТРОГО В САМОМ КОНЦЕ, ВНЕ ЛЮБЫХ ФОРМ) */}
       {cart.length > 0 && (
         <div style={{
           position: 'fixed', bottom: '16px', left: '16px', right: '16px',
-          background: 'rgba(20, 24, 34, 0.95)', backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '16px', padding: '12px 16px',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box', zIndex: 50,
-          boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+          background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: '16px', padding: '12px 16px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box', zIndex: 1000,
+          boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
         }}>
           <div>
             <div style={{ fontSize: '11px', color: '#9ca3af' }}>Выбрано: {cart.length} тов.</div>
             <div style={{ fontSize: '14px', fontWeight: '800', color: '#fcd34d' }}>{totalPrice.toLocaleString()} ₩</div>
           </div>
-          <button onClick={() => alert('Заказ успешно оформлен!')} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px 18px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowCheckoutModal(true);
+            }}
+            style={{ 
+              background: '#f59e0b', 
+              color: '#0b0e14', 
+              border: 'none', 
+              padding: '10px 20px', 
+              borderRadius: '10px', 
+              fontWeight: '900', 
+              fontSize: '13px', 
+              cursor: 'pointer' 
+            }}
+          >
             Оформить ➔
           </button>
         </div>
