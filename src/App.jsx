@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Словари локализации для полного перевода меню и интерфейса
+// Полные переводы интерфейса и базы данных
 const translations = {
   RU: {
     bakeryName: 'SWEET BAKERY',
@@ -18,14 +18,22 @@ const translations = {
     specialEvent: 'СПЕЦ-АКЦИЯ',
     promoText: 'Введите промокод "SWEET20" и получите скидку 20% на первый заказ!',
     addToCart: 'В корзину +',
-    adminPanel: 'Админ',
-    addProductTitle: '✨ Добавить премиум товар',
+    loginBtn: 'Login',
+    editBannerTitle: '🖼️ Управление баннером',
+    uploadBannerLabel: 'Загрузить новый баннер (JPG/PNG):',
+    removeBannerBtn: 'Удалить баннер',
+    adminEditMenuTitle: '🛠️ Управление меню и товарами',
+    editItem: 'Редактировать',
+    deleteItem: 'Удалить',
+    saveChanges: 'Сохранить изменения',
+    addNewItemBtn: '+ Добавить новый товар',
     dishNamePlaceholder: 'Название блюда',
     pricePlaceholder: 'Цена (₩)',
     oldPricePlaceholder: 'Старая цена (₩)',
     descPlaceholder: 'Описание',
-    photoLabel: 'Фото:',
-    addButton: 'Добавить в базу',
+    photoLabel: 'Фото (файл или ссылка):',
+    addButton: 'Добавить в меню',
+    cancel: 'Отмена',
     checkoutTitle: '📋 Оформление заказа',
     nameLabel: 'Ваше имя (только буквы) *',
     namePlaceholder: 'Например: Alexander',
@@ -52,7 +60,6 @@ const translations = {
     statusCompleted: 'Принят в работу ✅',
     adminLoginTitle: 'Вход для администратора',
     adminPasswordPlaceholder: 'Пароль (1234)',
-    cancel: 'Отмена',
     login: 'Войти',
     badgeHit: 'ХИТ',
     badgeNew: 'НОВИНКА',
@@ -75,14 +82,22 @@ const translations = {
     specialEvent: 'SPECIAL EVENT',
     promoText: 'Use promo code "SWEET20" for 20% off your first order!',
     addToCart: 'Add to cart +',
-    adminPanel: 'Admin',
-    addProductTitle: '✨ Add Premium Item',
+    loginBtn: 'Login',
+    editBannerTitle: '🖼️ Banner Management',
+    uploadBannerLabel: 'Upload new banner (JPG/PNG):',
+    removeBannerBtn: 'Remove banner',
+    adminEditMenuTitle: '🛠️ Menu & Item Management',
+    editItem: 'Edit',
+    deleteItem: 'Delete',
+    saveChanges: 'Save changes',
+    addNewItemBtn: '+ Add new item',
     dishNamePlaceholder: 'Dish name',
     pricePlaceholder: 'Price (₩)',
     oldPricePlaceholder: 'Old price (₩)',
     descPlaceholder: 'Description',
-    photoLabel: 'Photo:',
-    addButton: 'Add to database',
+    photoLabel: 'Photo (file or URL):',
+    addButton: 'Add to menu',
+    cancel: 'Cancel',
     checkoutTitle: '📋 Checkout',
     nameLabel: 'Your name (letters only) *',
     namePlaceholder: 'E.g., Alexander',
@@ -109,7 +124,6 @@ const translations = {
     statusCompleted: 'Accepted ✅',
     adminLoginTitle: 'Admin Login',
     adminPasswordPlaceholder: 'Password (1234)',
-    cancel: 'Cancel',
     login: 'Log in',
     badgeHit: 'HIT',
     badgeNew: 'NEW',
@@ -132,14 +146,22 @@ const translations = {
     specialEvent: '스페셜 이벤트',
     promoText: '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인!',
     addToCart: '담기 +',
-    adminPanel: '관리자',
-    addProductTitle: '✨ 프리미엄 상품 추가',
+    loginBtn: 'Login',
+    editBannerTitle: '🖼️ 배너 관리',
+    uploadBannerLabel: '새 배너 업로드 (JPG/PNG):',
+    removeBannerBtn: '배너 삭제',
+    adminEditMenuTitle: '🛠️ 메뉴 및 상품 관리',
+    editItem: '수정',
+    deleteItem: '삭제',
+    saveChanges: '변경사항 저장',
+    addNewItemBtn: '+ 새 상품 추가',
     dishNamePlaceholder: '상품명',
     pricePlaceholder: '가격 (₩)',
     oldPricePlaceholder: '할인 전 가격 (₩)',
     descPlaceholder: '설명',
-    photoLabel: '사진:',
-    addButton: '데이터베이스에 추가',
+    photoLabel: '사진 (파일 또는 URL):',
+    addButton: '메뉴에 추가',
+    cancel: '취소',
     checkoutTitle: '📋 주문하기',
     nameLabel: '이름 (문자만) *',
     namePlaceholder: '예: Alexander',
@@ -166,7 +188,6 @@ const translations = {
     statusCompleted: '접수 완료 ✅',
     adminLoginTitle: '관리자 로그인',
     adminPasswordPlaceholder: '비밀번호 (1234)',
-    cancel: '취소',
     login: '로그인',
     badgeHit: '인기',
     badgeNew: '신메뉴',
@@ -184,8 +205,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   
   const [cart, setCart] = useState([]);
-  const [likes, setLikes] = useState([]); // ID понравившихся товаров
-  const [ordersHistory, setOrdersHistory] = useState([]); // История заказов
+  const [likes, setLikes] = useState([]);
+  const [ordersHistory, setOrdersHistory] = useState([]);
 
   // Скролл нижней панели
   const [showBottomNav, setShowBottomNav] = useState(true);
@@ -210,8 +231,25 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
+  // Кастомизация логотипа и баннера администратором
+  const [customLogo, setCustomLogo] = useState('🧁'); // смайлик или картинка
+  const [bannerImage, setBannerImage] = useState('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80');
+
   // Модалка товара
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Редактирование существующего товара в админке
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  // Добавление нового товара в админке
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newOldPrice, setNewOldPrice] = useState('');
+  const [newCat, setNewCat] = useState('Круассаны');
+  const [newDesc, setNewDesc] = useState('');
+  const [newImage, setNewImage] = useState('');
+  const [newBadge, setNewBadge] = useState('ХИТ');
 
   // Оформление заказа
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -221,7 +259,7 @@ export default function App() {
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
 
-  // База товаров с поддержкой мультиязычности (названия и описания для RU, EN, KO)
+  // База товаров
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -270,20 +308,11 @@ export default function App() {
     }
   ]);
 
-  // Поля админки для добавления товара
-  const [newTitle, setNewTitle] = useState('');
-  const [newPrice, setNewPrice] = useState('');
-  const [newOldPrice, setNewOldPrice] = useState('');
-  const [newCat, setNewCat] = useState('Круассаны');
-  const [newDesc, setNewDesc] = useState('');
-  const [newImage, setNewImage] = useState('');
-  const [newBadge, setNewBadge] = useState('ХИТ');
-
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e, setter) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setNewImage(reader.result);
+      reader.onloadend = () => setter(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -319,10 +348,21 @@ export default function App() {
     setNewOldPrice('');
     setNewDesc('');
     setNewImage('');
-    alert('Товар успешно добавлен!');
+    setShowAddModal(false);
   };
 
-  // Валидация телефона (010-****-****)
+  const handleUpdateProduct = (e) => {
+    e.preventDefault();
+    setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
+    setEditingProduct(null);
+  };
+
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('Удалить этот товар из меню?')) {
+      setProducts(products.filter(p => p.id !== id));
+    }
+  };
+
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
     if (!val.startsWith('010')) {
@@ -340,7 +380,6 @@ export default function App() {
     setClientName(val);
   };
 
-  // Лайки
   const toggleLike = (productId) => {
     if (likes.includes(productId)) {
       setLikes(likes.filter(id => id !== productId));
@@ -349,7 +388,6 @@ export default function App() {
     }
   };
 
-  // Оформление заказа (без WhatsApp, сохранение в истории)
   const handleSendOrder = (e) => {
     e.preventDefault();
     if (!clientName.trim() || clientPhone.length < 13) {
@@ -386,6 +424,14 @@ export default function App() {
   });
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+  // Кнопка домой возвращает на главную
+  const goToHome = () => {
+    setActiveTab('home');
+    setActiveCategory('Все');
+    setSearchQuery('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div style={{
@@ -528,91 +574,174 @@ export default function App() {
         </div>
       )}
 
-      {/* ШАПКА: 3 & 4. ЛОГОТИП КЕКС/ТОРТ И ВЫРАВНИВАНИЕ ПО ЛЕВОМУ КРАЮ */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left' }}>
+      {/* МОДАЛКА ДОБАВЛЕНИЯ ТОВАРА ДЛЯ АДМИНА */}
+      {showAddModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh', background: 'rgba(5, 7, 10, 0.92)', backdropFilter: 'blur(10px)', zIndex: 145, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box', overflowY: 'auto' }}>
+          <form onSubmit={handleAddProduct} style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', boxSizing: 'border-box' }}>
+            <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#f59e0b' }}>{t.addNewItemBtn}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={e => setNewTitle(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select value={newCat} onChange={e => setNewCat(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
+                  <option value="Круассаны">{t.catCroissants}</option>
+                  <option value="Торты">{t.catCakes}</option>
+                  <option value="Пироги">{t.catPies}</option>
+                  <option value="Печенье">{t.catCookies}</option>
+                  <option value="Напитки">{t.catDrinks}</option>
+                </select>
+                <select value={newBadge} onChange={e => setNewBadge(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
+                  <option value="ХИТ">{t.badgeHit}</option>
+                  <option value="НОВИНКА">{t.badgeNew}</option>
+                  <option value="ПРЕМИУМ">{t.badgePrem}</option>
+                </select>
+              </div>
+              <input type="text" placeholder={t.descPlaceholder} value={newDesc} onChange={e => setNewDesc(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.photoLabel}</label>
+                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setNewImage)} style={{ fontSize: '11px', color: '#9ca3af', width: '100%', marginBottom: '6px' }} />
+                <input type="text" placeholder="или вставьте URL картинки" value={newImage} onChange={e => setNewImage(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setShowAddModal(false)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', cursor: 'pointer' }}>{t.cancel}</button>
+                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>{t.addButton}</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* МОДАЛКА РЕДАКТИРОВАНИЯ ТОВАРА ДЛЯ АДМИНА */}
+      {editingProduct && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh', background: 'rgba(5, 7, 10, 0.92)', backdropFilter: 'blur(10px)', zIndex: 145, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box', overflowY: 'auto' }}>
+          <form onSubmit={handleUpdateProduct} style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', boxSizing: 'border-box' }}>
+            <h3 style={{ margin: '0 0 14px 0', fontSize: '15px', color: '#f59e0b' }}>{t.editItem}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="text" placeholder={t.dishNamePlaceholder} value={editingProduct.names[lang] || editingProduct.names['RU']} onChange={e => {
+                const val = e.target.value;
+                setEditingProduct({ ...editingProduct, names: { ...editingProduct.names, [lang]: val, RU: val } });
+              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={e => setEditingProduct({ ...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null })} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+              </div>
+
+              <input type="text" placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={e => {
+                const val = e.target.value;
+                setEditingProduct({ ...editingProduct, descs: { ...editingProduct.descs, [lang]: val, RU: val } });
+              }} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '9px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.photoLabel}</label>
+                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (imgUrl) => setEditingProduct({ ...editingProduct, image: imgUrl }))} style={{ fontSize: '11px', color: '#9ca3af', width: '100%', marginBottom: '6px' }} />
+                <input type="text" placeholder="или URL картинки" value={editingProduct.image} onChange={e => setEditingProduct({ ...editingProduct, image: e.target.value })} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setEditingProduct(null)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', cursor: 'pointer' }}>{t.cancel}</button>
+                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>{t.saveChanges}</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ШАПКА: 
+          1. Адрес и телефон СЛЕВА напротив логотипа и названия.
+          2. Логотип и название кликабельные — возвращают на главную.
+          3. Языковая панель СПРАВА НИЖЕ названия.
+          4. Кнопка "Login" с ключиком СПРАВА НАПРОТИВ языковой панели. */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '14px' }}>
+        
+        {/* Левая часть: Кликабельные Логотип + Название + Адрес/Телефон */}
+        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', cursor: 'pointer' }}>
           <div style={{
             width: '46px', height: '46px', background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
             borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 6px 16px rgba(245,158,11,0.35)', border: '1px solid rgba(255,255,255,0.2)'
-          }}>🧁</div>
+          }}>
+            {customLogo.startsWith('data:') || customLogo.startsWith('http') ? (
+              <img src={customLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+            ) : (
+              customLogo
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '0.8px', color: '#fff', lineHeight: '1.2' }}>{t.bakeryName}</div>
             <div style={{ fontSize: '10px', fontWeight: '700', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '1.2px', lineHeight: '1.2', marginTop: '2px' }}>
               {t.bakerySub}
             </div>
+            {/* Адрес и телефон напротив логотипа */}
+            <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '4px', display: 'flex', gap: '8px' }}>
+              <span>{t.phone}</span>
+              <span>•</span>
+              <span>{t.address}</span>
+            </div>
           </div>
         </div>
 
-        <button onClick={() => setShowLoginModal(true)} style={{
-          background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
-          color: '#f59e0b', padding: '7px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', cursor: 'pointer'
-        }}>
-          ⚙️ {t.adminPanel}
-        </button>
-      </div>
+        {/* Правая часть: Языковая панель и Login с ключиком */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          
+          {/* Языковая панель справа */}
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '3px', gap: '3px' }}>
+            {[
+              { code: 'RU', flag: '🇷🇺' },
+              { code: 'EN', flag: '🇬🇧' },
+              { code: 'KO', flag: '🇰🇷' }
+            ].map((item) => (
+              <button
+                key={item.code}
+                onClick={() => setLang(item.code)}
+                style={{
+                  background: lang === item.code ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'transparent',
+                  color: lang === item.code ? '#0b0e14' : '#9ca3af',
+                  border: 'none', borderRadius: '9px', padding: '4px 7px',
+                  fontSize: '10px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px'
+                }}
+              >
+                <span>{item.flag}</span>
+                <span>{item.code}</span>
+              </button>
+            ))}
+          </div>
 
-      {/* АДРЕС, ТЕЛЕФОН И 5. ЯЗЫКОВАЯ ПАНЕЛЬ ПОСЛЕ АДРЕСА */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '10px 12px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <div style={{ fontSize: '11px', color: '#fcd34d', fontWeight: '700' }}>{t.phone}</div>
-          <div style={{ fontSize: '10px', color: '#9ca3af' }}>{t.address}</div>
+          {/* Кнопка Login с ключиком справа напротив языковой панели */}
+          <button onClick={() => setShowLoginModal(true)} style={{
+            background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
+            color: '#f59e0b', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '5px'
+          }}>
+            <span>🔑</span>
+            <span>{t.loginBtn}</span>
+          </button>
         </div>
 
-        {/* Языковая панель с флагами */}
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '3px', gap: '3px' }}>
-          {[
-            { code: 'RU', flag: '🇷🇺' },
-            { code: 'EN', flag: '🇬🇧' },
-            { code: 'KO', flag: '🇰🇷' }
-          ].map((item) => (
-            <button
-              key={item.code}
-              onClick={() => setLang(item.code)}
-              style={{
-                background: lang === item.code ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'transparent',
-                color: lang === item.code ? '#0b0e14' : '#9ca3af',
-                border: 'none', borderRadius: '9px', padding: '5px 8px',
-                fontSize: '10px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
-              }}
-            >
-              <span>{item.flag}</span>
-              <span>{item.code}</span>
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* ПАНЕЛЬ АДМИНА ДОБАВЛЕНИЯ ТОВАРА */}
+      {/* АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ БАННЕРОМ И НАСТРОЙКАМИ (если вошел администратор) */}
       {isAdminLoggedIn && (
-        <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '14px', marginBottom: '16px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>{t.addProductTitle}</h3>
-          <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={e => setNewTitle(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required />
-              <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select value={newCat} onChange={e => setNewCat(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
-                <option value="Круассаны">{t.catCroissants}</option>
-                <option value="Торты">{t.catCakes}</option>
-                <option value="Пироги">{t.catPies}</option>
-                <option value="Печенье">{t.catCookies}</option>
-                <option value="Напитки">{t.catDrinks}</option>
-              </select>
-              <select value={newBadge} onChange={e => setNewBadge(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}>
-                <option value="ХИТ">{t.badgeHit}</option>
-                <option value="НОВИНКА">{t.badgeNew}</option>
-                <option value="ПРЕМИУМ">{t.badgePrem}</option>
-              </select>
-            </div>
-            <input type="text" placeholder={t.descPlaceholder} value={newDesc} onChange={e => setNewDesc(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} />
+        <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>{t.editBannerTitle}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.photoLabel}</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '11px', color: '#9ca3af', width: '100%' }} />
+              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.uploadBannerLabel}</label>
+              <input type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageUpload(e, setBannerImage)} style={{ fontSize: '11px', color: '#9ca3af', width: '100%' }} />
             </div>
-            <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', marginTop: '4px' }}>{t.addButton}</button>
-          </form>
+            {bannerImage && (
+              <button type="button" onClick={() => setBannerImage('')} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                {t.removeBannerBtn}
+              </button>
+            )}
+            
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: '5px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Сменить логотип (смайлик или URL):</label>
+              <input type="text" value={customLogo} onChange={e => setCustomLogo(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '12px', width: '100%', outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          </div>
         </div>
       )}
 
@@ -678,33 +807,35 @@ export default function App() {
       {/* ОСНОВНОЙ КОНТЕНТ ВКЛАДКИ ДОМОЙ / ПОИСК */}
       {(activeTab === 'home' || activeTab === 'search') && (
         <>
-          {/* АКЦИЯ */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1e1b10 0%, #141822 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '18px', padding: '16px', marginBottom: '18px',
-            display: 'flex', alignItems: 'center', gap: '14px', position: 'relative', overflow: 'hidden',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-          }}>
+          {/* БАННЕР (если он не удален администратором) */}
+          {bannerImage && (
             <div style={{
-              position: 'absolute', top: 0, right: 0, width: '120px', height: '100%',
-              backgroundImage: 'url("https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80")',
-              backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.25,
-              maskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))',
-              WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))'
-            }}></div>
+              background: 'linear-gradient(135deg, #1e1b10 0%, #141822 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '18px', padding: '16px', marginBottom: '18px',
+              display: 'flex', alignItems: 'center', gap: '14px', position: 'relative', overflow: 'hidden',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+            }}>
+              <div style={{
+                position: 'absolute', top: 0, right: 0, width: '140px', height: '100%',
+                backgroundImage: `url("${bannerImage}")`,
+                backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.35,
+                maskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))',
+                WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))'
+              }}></div>
 
-            <div style={{ flex: 1, zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
-                  {t.specialEvent}
-                </span>
-                <span style={{ fontSize: '10px', color: '#fcd34d', fontWeight: 'bold' }}>✨ -20% OFF</span>
-              </div>
-              <div style={{ fontSize: '12px', color: '#e5e7eb', lineHeight: '1.4', fontWeight: '500' }}>
-                {t.promoText}
+              <div style={{ flex: 1, zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                    {t.specialEvent}
+                  </span>
+                  <span style={{ fontSize: '10px', color: '#fcd34d', fontWeight: 'bold' }}>✨ -20% OFF</span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#e5e7eb', lineHeight: '1.4', fontWeight: '500' }}>
+                  {t.promoText}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* ПОИСК */}
           <div style={{ margin: '0 0 16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -736,14 +867,19 @@ export default function App() {
             })}
           </div>
 
-          {/* ЗАГОЛОВОК МЕНЮ */}
+          {/* ЗАГОЛОВОК МЕНЮ И КНОПКА ДОБАВЛЕНИЯ ТОВАРА ДЛЯ АДМИНА */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 14px' }}>
             <div style={{ fontSize: '16px', fontWeight: '800' }}>
               {t.signatureCollection} ({filteredProducts.length}) ✨
             </div>
+            {isAdminLoggedIn && (
+              <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+                {t.addNewItemBtn}
+              </button>
+            )}
           </div>
 
-          {/* СЕТКА ТОВАРОВ */}
+          {/* СЕТКА ТОВАРОВ С ПОЛНЫМ ПЕРЕВОДОМ НАЗВАНИЙ И ОПИСАНИЙ */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px', paddingBottom: '20px' }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((item) => {
@@ -754,7 +890,7 @@ export default function App() {
                 return (
                   <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
                     
-                    {/* Бейдж с языковым переводом плашек */}
+                    {/* Бейдж */}
                     {item.badge && (
                       <div style={{ position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0', zIndex: 2 }}>
                         {item.badge === 'ХИТ' ? t.badgeHit : item.badge === 'НОВИНКА' ? t.badgeNew : t.badgePrem}
@@ -783,6 +919,18 @@ export default function App() {
                           +
                         </button>
                       </div>
+
+                      {/* Панель администратора на карточке товара (Редактировать / Удалить) */}
+                      {isAdminLoggedIn && (
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '10px', borderTop: '1px dashed rgba(245,158,11,0.3)', paddingTop: '8px' }}>
+                          <button onClick={() => setEditingProduct(item)} style={{ flex: 1, background: 'rgba(245,158,11,0.2)', color: '#fcd34d', border: 'none', borderRadius: '6px', padding: '5px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+                            ✏️ {t.editItem}
+                          </button>
+                          <button onClick={() => handleDeleteProduct(item.id)} style={{ flex: 1, background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: 'none', borderRadius: '6px', padding: '5px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+                            🗑️ {t.deleteItem}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -831,10 +979,10 @@ export default function App() {
           const isActive = activeTab === tab.id;
           return (
             <div key={tab.id} onClick={() => {
-              setActiveTab(tab.id);
               if (tab.id === 'home') {
-                setActiveCategory('Все');
-                setSearchQuery('');
+                goToHome();
+              } else {
+                setActiveTab(tab.id);
               }
             }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', cursor: 'pointer', flex: 1 }}>
               <span style={{ fontSize: '18px', opacity: isActive ? 1 : 0.5 }}>{tab.icon}</span>
