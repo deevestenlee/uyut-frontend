@@ -36,9 +36,6 @@ const TRANSLATIONS = {
     successTitle: 'Заказ успешно оформлен!',
     successDesc: 'Благодарим вас, {name}! Ваш заказ принят в работу. Мы свяжемся с вами в ближайшее время по номеру {phone}.',
     backToMenu: 'Вернуться к меню',
-    bannerTitle: 'Специальное предложение',
-    bannerSubtitle: 'Скидка 20% на первый заказ всей авторской выпечки по промокоду "SWEET20"',
-    bannerBtn: 'Получить скидку',
     navHome: 'Домой',
     navSearch: 'Поиск',
     navFavorites: 'Нравится',
@@ -48,6 +45,12 @@ const TRANSLATIONS = {
     ordersTitle: '📦 История заказов',
     ordersEmpty: 'У вас пока нет активных заказов',
     addToCart: 'В корзину',
+    sortLabel: 'Сортировка:',
+    sortDefault: 'По умолчанию',
+    sortPopular: 'По популярности (рейтинг)',
+    sortOrders: 'По количеству заказов',
+    sortPriceLow: 'Сначала дешевле',
+    sortPriceHigh: 'Сначала дороже',
     categories: {
       All: 'Все',
       Croissants: 'Круассаны',
@@ -92,9 +95,6 @@ const TRANSLATIONS = {
     successTitle: 'Order Successfully Placed!',
     successDesc: 'Thank you, {name}! Your order has been accepted. We will contact you shortly at {phone}.',
     backToMenu: 'Back to Menu',
-    bannerTitle: 'Special Offer',
-    bannerSubtitle: 'Enjoy 20% off your first order of signature pastries with promo code "SWEET20"',
-    bannerBtn: 'Claim Discount',
     navHome: 'Home',
     navSearch: 'Search',
     navFavorites: 'Favorites',
@@ -104,6 +104,12 @@ const TRANSLATIONS = {
     ordersTitle: '📦 Order History',
     ordersEmpty: 'You have no active orders yet',
     addToCart: 'Add to Cart',
+    sortLabel: 'Sort by:',
+    sortDefault: 'Default',
+    sortPopular: 'Popularity (Rating)',
+    sortOrders: 'Order Count',
+    sortPriceLow: 'Price: Low to High',
+    sortPriceHigh: 'Price: High to Low',
     categories: {
       All: 'All',
       Croissants: 'Croissants',
@@ -148,9 +154,6 @@ const TRANSLATIONS = {
     successTitle: '주문이 완료되었습니다!',
     successDesc: '감사합니다, {name}님! 주문이 성공적으로 접수되었습니다. {phone} 번호로 곧 연락드리겠습니다.',
     backToMenu: '메뉴로 돌아가기',
-    bannerTitle: '스페셜 이벤트',
-    bannerSubtitle: '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인 혜택을 드립니다',
-    bannerBtn: '할인 받기',
     navHome: '홈',
     navSearch: '검색',
     navFavorites: '즐겨찾기',
@@ -160,6 +163,12 @@ const TRANSLATIONS = {
     ordersTitle: '📦 주문 내역',
     ordersEmpty: '진행 중인 주문이 없습니다',
     addToCart: '담기',
+    sortLabel: '정렬 기준:',
+    sortDefault: '기본순',
+    sortPopular: '인기순 (평점)',
+    sortOrders: '주문량순',
+    sortPriceLow: '낮은 가격순',
+    sortPriceHigh: '높은 가격순',
     categories: {
       All: '전체',
       Croissants: '크루아상',
@@ -171,6 +180,23 @@ const TRANSLATIONS = {
   }
 };
 
+// Универсальный словарь для автоматического перевода плашек (бейждей) на разные языки
+const BADGE_DICTIONARY = {
+  'ХИТ': { ru: 'ХИТ', en: 'HIT', ko: '인기' },
+  'НОВИНКА': { ru: 'НОВИНКА', en: 'NEW', ko: '신메뉴' },
+  'ПРЕМИУМ': { ru: 'ПРЕМИУМ', en: 'PREMIUM', ko: '프리미엄' },
+  'СКИДКА': { ru: 'СКИДКА', en: 'SALE', ko: '할인' }
+};
+
+const translateBadge = (badgeText, currentLang) => {
+  if (!badgeText) return '';
+  const upper = badgeText.trim().toUpperCase();
+  if (BADGE_DICTIONARY[upper]) {
+    return BADGE_DICTIONARY[upper][currentLang] || badgeText;
+  }
+  return badgeText; // Если плашка новая и не найдена в словаре, возвращаем как есть
+};
+
 export default function App() {
   const [lang, setLang] = useState('ru');
   const t = TRANSLATIONS[lang];
@@ -178,6 +204,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('default');
   const [cart, setCart] = useState([]);
   const [favorites, setFavorites] = useState([]);
   
@@ -186,7 +213,6 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState('');
   
   const [selectedProductModal, setSelectedProductModal] = useState(null);
-
   const [showCartModal, setShowCartModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clientName, setClientName] = useState('');
@@ -199,7 +225,6 @@ export default function App() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [myOrdersList, setMyOrdersList] = useState([]);
 
-  // Логика автоматического скрытия нижней панели при скролле
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -207,18 +232,16 @@ export default function App() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setIsNavVisible(false); // Скролл вниз — скрываем
+        setIsNavVisible(false);
       } else {
-        setIsNavVisible(true);  // Скролл вверх — показываем
+        setIsNavVisible(true);
       }
       setLastScrollY(currentScrollY);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // База товаров (категории хранятся ключами для точного сопоставления)
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -230,7 +253,8 @@ export default function App() {
       categoryKey: 'Croissants', 
       price: 4500, 
       oldPrice: 5000,
-      rating: '4.9', 
+      rating: 4.9,
+      ordersCount: 142,
       image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
       badge: 'ХИТ' 
     },
@@ -244,7 +268,8 @@ export default function App() {
       categoryKey: 'Cakes', 
       price: 5500, 
       oldPrice: 6500,
-      rating: '4.8', 
+      rating: 4.8,
+      ordersCount: 89,
       image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
       badge: 'НОВИНКА' 
     },
@@ -258,7 +283,8 @@ export default function App() {
       categoryKey: 'Pies', 
       price: 7200, 
       oldPrice: 8000,
-      rating: '5.0', 
+      rating: 5.0,
+      ordersCount: 210,
       image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80', 
       badge: 'ПРЕМИУМ' 
     }
@@ -307,7 +333,8 @@ export default function App() {
       categoryKey: newCatKey,
       price: Number(newPrice),
       oldPrice: newOldPrice ? Number(newOldPrice) : null,
-      rating: '5.0',
+      rating: 5.0,
+      ordersCount: 1,
       image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
       badge: newBadge
     };
@@ -345,11 +372,18 @@ export default function App() {
     }
   };
 
+  // Фильтрация и сортировка товаров
   const filteredProducts = products.filter(item => {
     const matchesCat = activeCategory === 'All' || item.categoryKey === activeCategory;
     const currentName = (item.translations[lang]?.name || item.translations.ru.name).toLowerCase();
     const matchesSearch = currentName.includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
+  }).sort((a, b) => {
+    if (sortBy === 'popular') return b.rating - a.rating;
+    if (sortBy === 'orders') return b.ordersCount - a.ordersCount;
+    if (sortBy === 'priceLow') return a.price - b.price;
+    if (sortBy === 'priceHigh') return b.price - a.price;
+    return 0; // 'default'
   });
 
   const addToCart = (item, e) => {
@@ -424,7 +458,7 @@ export default function App() {
               <img src={selectedProductModal.image} alt={selectedProductModal.translations[lang]?.name || selectedProductModal.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               {selectedProductModal.badge && (
                 <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase' }}>
-                  {selectedProductModal.badge}
+                  {translateBadge(selectedProductModal.badge, lang)}
                 </div>
               )}
             </div>
@@ -656,6 +690,29 @@ export default function App() {
         </div>
       )}
 
+      {/* МОДАЛЬНОЕ ОКНО АДМИНА */}
+      {showLoginModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+          background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(8px)',
+          zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#fcd34d' }}>Вход для администратора</h3>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input 
+                type="password" placeholder="Введите пароль (1234)" value={passwordInput} onChange={e => setPasswordInput(e.target.value)}
+                style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', outline: 'none' }} autoFocus
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="button" onClick={() => setShowLoginModal(false)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px', cursor: 'pointer' }}>Отмена</button>
+                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '10px', padding: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Войти</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* ВЕРХНЯЯ ПАНЕЛЬ: ЯЗЫК И АДМИН */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px 8px', fontSize: '11px', color: '#9ca3af' }}>
         <div style={{ display: 'flex', gap: '6px' }}>
@@ -695,317 +752,199 @@ export default function App() {
         )}
       </div>
 
-      {/* МОДАЛЬНОЕ ОКНО ВХОДА */}
-      {showLoginModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(6px)',
-          zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
-        }}>
-          <form onSubmit={handleLogin} style={{ background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', textAlign: 'center' }}>
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', color: '#fff' }}>Вход для администратора</h3>
-            <p style={{ margin: '0 0 14px 0', fontSize: '11px', color: '#9ca3af' }}>Пароль по умолчанию: 1234</p>
-            <input 
-              type="password" placeholder="Пароль" value={passwordInput} onChange={e => setPasswordInput(e.target.value)}
-              style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px 12px', color: '#fff', fontSize: '14px', boxSizing: 'border-box', marginBottom: '14px', outline: 'none' }}
-              autoFocus
-            />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button" onClick={() => setShowLoginModal(false)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px', fontSize: '13px', cursor: 'pointer' }}>Отмена</button>
-              <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '10px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>Войти</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* АДМИН-ПАНЕЛЬ */}
-      {isAdminLoggedIn && (
-        <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '14px', marginBottom: '14px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар</h3>
-          <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input 
-              type="text" placeholder="Название (RU)" value={newTitleRu} onChange={e => setNewTitleRu(e.target.value)}
-              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required
-            />
-            <input 
-              type="text" placeholder="Название (EN - English)" value={newTitleEn} onChange={e => setNewTitleEn(e.target.value)}
-              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-            />
-            <input 
-              type="text" placeholder="Название (KO - 한국어)" value={newTitleKo} onChange={e => setNewTitleKo(e.target.value)}
-              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-            />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input 
-                type="number" placeholder="Цена (₩)" value={newPrice} onChange={e => setNewPrice(e.target.value)}
-                style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required
-              />
-              <input 
-                type="number" placeholder="Старая цена (₩)" value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)}
-                style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select 
-                value={newCatKey} onChange={e => setNewCatKey(e.target.value)}
-                style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-              >
-                <option value="Croissants">Круассаны</option>
-                <option value="Cakes">Торты</option>
-                <option value="Pies">Пироги</option>
-                <option value="Cookies">Печенье</option>
-                <option value="Drinks">Напитки</option>
-              </select>
-              <select 
-                value={newBadge} onChange={e => setNewBadge(e.target.value)}
-                style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-              >
-                <option value="ХИТ">Ленточка: ХИТ</option>
-                <option value="НОВИНКА">Ленточка: НОВИНКА</option>
-                <option value="ПРЕМИУМ">Ленточка: ПРЕМИУМ</option>
-              </select>
-            </div>
-            <input 
-              type="text" placeholder="Описание товара (на русском)" value={newDescRu} onChange={e => setNewDescRu(e.target.value)}
-              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
-            />
-            <div>
-              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Фото с устройства:</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '11px', color: '#9ca3af', width: '100%' }} />
-            </div>
-            <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', marginTop: '4px' }}>
-              Добавить товар
-            </button>
-          </form>
-        </div>
-      )}
-
       {/* ШАПКА БРЕНДА */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ 
-            width: '46px', height: '46px', 
-            background: 'linear-gradient(135deg, #fcd34d 0%, #d97706 100%)', 
-            borderRadius: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-            boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)', border: '1px solid rgba(255,255,255,0.3)'
-          }}>
-            <span style={{ fontSize: '14px', lineHeight: '1' }}>👑</span>
-            <span style={{ fontSize: '10px', fontWeight: '900', color: '#0b0e14', letterSpacing: '-0.5px' }}>SB</span>
-          </div>
-          <div>
-            <div style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', background: 'linear-gradient(90deg, #fff, #fcd34d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              {t.brandName}
-            </div>
-            <div style={{ fontSize: '10px', fontWeight: '600', color: '#f59e0b', letterSpacing: '0.5px' }}>{t.brandSubtitle}</div>
-          </div>
+      <div style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#fcd34d' }}>{t.brandName}</h1>
+          <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#9ca3af' }}>{t.brandSubtitle}</p>
         </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '800', color: '#fcd34d', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', padding: '4px 10px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span>📞</span> 010-1234-5678
-          </div>
-          <div style={{ fontSize: '10px', fontWeight: '500', color: '#9ca3af', textAlign: 'right' }}>
-            📍 {t.address}
-          </div>
-        </div>
+        {cart.length > 0 && (
+          <button 
+            type="button"
+            onClick={() => setShowCartModal(true)}
+            style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '12px', padding: '8px 14px', fontSize: '12px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            🛒 {totalPrice.toLocaleString()} ₩
+          </button>
+        )}
       </div>
 
-      {/* АКЦИОННЫЙ БАННЕР */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%)',
-        border: '1px solid rgba(245, 158, 11, 0.35)',
-        borderRadius: '18px',
-        padding: '16px',
-        marginBottom: '16px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ position: 'absolute', right: '-10px', bottom: '-20px', fontSize: '70px', opacity: 0.15, pointerEvents: 'none' }}>🥐</div>
-        <div style={{ zIndex: 1, maxWidth: '75%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-            <span style={{ background: '#f59e0b', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '2px 6px', borderRadius: '6px', textTransform: 'uppercase' }}>АКЦИЯ</span>
-            <span style={{ fontSize: '13px', fontWeight: '800', color: '#fcd34d' }}>{t.bannerTitle}</span>
-          </div>
-          <p style={{ margin: 0, fontSize: '11px', color: '#9ca3af', lineHeight: '1.4' }}>
-            {t.bannerSubtitle}
-          </p>
-        </div>
-        <button 
-          type="button"
-          onClick={() => {
-            setActiveTab('home');
-            setActiveCategory('All');
-          }}
-          style={{
-            zIndex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '10px',
-            padding: '8px 12px', fontWeight: '800', fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap',
-            boxShadow: '0 4px 12px rgba(245,158,11,0.3)'
-          }}
-        >
-          {t.bannerBtn}
-        </button>
-      </div>
-
-      {/* ОСНОВНОЙ КОНТЕНТ */}
+      {/* ВКЛАДКА HOME */}
       {activeTab === 'home' && (
         <>
-          <div style={{ margin: '4px 0 14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <div style={{ flex: 1, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span>🔍</span>
-              <input 
-                type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f3f4f6', fontSize: '14px', width: '100%' }} 
-              />
-            </div>
+          {/* СТРОКА ПОИСКА */}
+          <div style={{ marginBottom: '16px' }}>
+            <input 
+              type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              style={{ width: '100%', background: '#141822', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }}
+            />
           </div>
 
-          {/* КАТЕГОРИИ С ДИНАМИЧЕСКИМ ПЕРЕВОДОМ */}
-          <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '14px', scrollbarWidth: 'none' }}>
-            {[
-              { key: 'All', label: t.categories.All, icon: '🌟' },
-              { key: 'Croissants', label: t.categories.Croissants, icon: '🥐' },
-              { key: 'Cakes', label: t.categories.Cakes, icon: '🍰' },
-              { key: 'Pies', label: t.categories.Pies, icon: '🥧' },
-              { key: 'Cookies', label: t.categories.Cookies, icon: '🍪' },
-              { key: 'Drinks', label: t.categories.Drinks, icon: '☕' }
-            ].map((catObj) => {
-              const isActive = activeCategory === catObj.key;
+          {/* ПАНЕЛЬ СОРТИРОВКИ */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <span style={{ fontSize: '11px', color: '#9ca3af', whiteSpace: 'nowrap' }}>{t.sortLabel}</span>
+            <select 
+              value={sortBy} 
+              onChange={e => setSortBy(e.target.value)}
+              style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 10px', color: '#fcd34d', fontSize: '11px', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="default">{t.sortDefault}</option>
+              <option value="popular">{t.sortPopular}</option>
+              <option value="orders">{t.sortOrders}</option>
+              <option value="priceLow">{t.sortPriceLow}</option>
+              <option value="priceHigh">{t.sortPriceHigh}</option>
+            </select>
+          </div>
+
+          {/* КАТЕГОРИИ */}
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px' }}>
+            {Object.keys(t.categories).map((catKey) => (
+              <button 
+                key={catKey}
+                type="button"
+                onClick={() => setActiveCategory(catKey)}
+                style={{
+                  background: activeCategory === catKey ? '#f59e0b' : '#141822',
+                  color: activeCategory === catKey ? '#0b0e14' : '#9ca3af',
+                  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
+                  padding: '8px 14px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap'
+                }}
+              >
+                {t.categories[catKey]}
+              </button>
+            ))}
+          </div>
+
+          {/* АДМИН ПАНЕЛЬ ДОБАВЛЕНИЯ ТОВАРА */}
+          {isAdminLoggedIn && (
+            <div style={{ background: '#141822', border: '1px dashed #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '20px' }}>
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#fcd34d' }}>⚙️ Панель админа: Добавить товар</h3>
+              <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input type="text" placeholder="Название (RU)" value={newTitleRu} onChange={e => setNewTitleRu(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} required />
+                <input type="text" placeholder="Название (EN)" value={newTitleEn} onChange={e => setNewTitleEn(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+                <input type="text" placeholder="Название (KO)" value={newTitleKo} onChange={e => setNewTitleKo(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+                
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input type="number" placeholder="Цена (₩)" value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} required />
+                  <input type="number" placeholder="Старая цена (опц.)" value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+                </div>
+
+                <select value={newCatKey} onChange={e => setNewCatKey(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }}>
+                  {Object.keys(t.categories).filter(k => k !== 'All').map(k => (
+                    <option key={k} value={k}>{t.categories[k]}</option>
+                  ))}
+                </select>
+
+                <input type="text" placeholder="Плашка (например: ХИТ, НОВИНКА, ПРЕМИУМ)" value={newBadge} onChange={e => setNewBadge(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+                <textarea placeholder="Описание (RU)" value={newDescRu} onChange={e => setNewDescRu(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px', outline: 'none', minHeight: '40px' }} />
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '11px', color: '#9ca3af' }} />
+                </div>
+
+                <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>Опубликовать товар</button>
+              </form>
+            </div>
+          )}
+
+          {/* СПИСОК ТОВАРОВ */}
+          <h2 style={{ fontSize: '15px', color: '#fcd34d', marginBottom: '12px' }}>{t.menuTitle}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+            {filteredProducts.map((item) => {
+              const isFav = favorites.some(fav => fav.id === item.id);
+              const itemName = item.translations[lang]?.name || item.translations.ru.name;
+              const itemDesc = item.translations[lang]?.desc || item.translations.ru.desc;
+              const translatedBadge = translateBadge(item.badge, lang);
+
               return (
                 <div 
-                  key={catObj.key} onClick={() => setActiveCategory(catObj.key)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer', flexShrink: 0 }}
+                  key={item.id}
+                  onClick={() => setSelectedProductModal(item)}
+                  style={{
+                    background: '#141822', border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer', position: 'relative'
+                  }}
                 >
-                  <div style={{ width: '48px', height: '48px', background: isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.04)', border: `1px solid ${isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.06)'}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', transition: '0.2s' }}>
-                    {catObj.icon}
+                  <div style={{ width: '100%', height: '130px', background: '#0b0e14', position: 'relative' }}>
+                    <img src={item.image} alt={itemName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {translatedBadge && (
+                      <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                        {translatedBadge}
+                      </div>
+                    )}
+                    <button 
+                      type="button" 
+                      onClick={(e) => toggleFavorite(item, e)}
+                      style={{
+                        position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)',
+                        border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: isFav ? '#ef4444' : '#fff', fontSize: '12px', cursor: 'pointer'
+                      }}
+                    >
+                      {isFav ? '❤️' : '🤍'}
+                    </button>
                   </div>
-                  <span style={{ fontSize: '11px', color: isActive ? '#fcd34d' : '#9ca3af', fontWeight: isActive ? '700' : '500' }}>{catObj.label}</span>
+
+                  <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#fff', marginBottom: '4px' }}>{itemName}</div>
+                      <div style={{ fontSize: '10px', color: '#9ca3af', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{itemDesc}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '900', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</div>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={(e) => addToCart(item, e)}
+                        style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0 12px' }}>
-            <div style={{ fontSize: '16px', fontWeight: '800' }}>{t.menuTitle} ({filteredProducts.length}) ✨</div>
-          </div>
-
-          {/* СПИСОК ТОВАРОВ */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', paddingBottom: '20px' }}>
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((item) => {
-                const isFavorite = favorites.some(fav => fav.id === item.id);
-                const currentName = item.translations[lang]?.name || item.translations.ru.name;
-                const currentDesc = item.translations[lang]?.desc || item.translations.ru.desc;
-
-                return (
-                  <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
-                    
-                    {item.badge && (
-                      <div style={{ position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, textTransform: 'uppercase' }}>
-                        {item.badge}
-                      </div>
-                    )}
-
-                    <button 
-                      type="button"
-                      onClick={(e) => toggleFavorite(item, e)}
-                      style={{
-                        position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)',
-                        border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, fontSize: '13px'
-                      }}
-                    >
-                      {isFavorite ? '❤️' : '🤍'}
-                    </button>
-
-                    <div 
-                      onClick={() => setSelectedProductModal(item)}
-                      style={{ height: '130px', width: '100%', overflow: 'hidden', background: '#141822', position: 'relative', cursor: 'pointer' }}
-                    >
-                      <img src={item.image} alt={currentName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <div style={{ position: 'absolute', right: '6px', bottom: '6px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '2px 6px', fontSize: '11px' }}>🔍</div>
-                    </div>
-
-                    <div style={{ padding: '10px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentName}</div>
-                      <div style={{ fontSize: '10px', color: '#f59e0b', fontWeight: '700', marginBottom: '3px' }}>★ {item.rating}</div>
-                      <div style={{ fontSize: '9px', color: '#6b7280', marginBottom: '8px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{currentDesc}</div>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '8px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '12px', fontWeight: '800', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</span>
-                          {item.oldPrice && (
-                            <span style={{ fontSize: '9px', color: '#6b7280', textDecoration: 'line-through' }}>{item.oldPrice.toLocaleString()} ₩</span>
-                          )}
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={(e) => addToCart(item, e)}
-                          style={{ width: '28px', height: '28px', background: '#f59e0b', color: '#0b0e14', borderRadius: '8px', border: 'none', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div style={{ gridColumn: 'span 2', textAlign: 'center', color: '#6b7280', padding: '30px', fontSize: '13px' }}>
-                Ничего не найдено 😢
-              </div>
-            )}
-          </div>
         </>
       )}
 
-      {/* ПОИСК */}
+      {/* ВКЛАДКА SEARCH */}
       {activeTab === 'search' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>🔍 {t.navSearch}</h2>
-          <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-            <span>🔍</span>
-            <input 
-              type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f3f4f6', fontSize: '14px', width: '100%' }} 
-              autoFocus
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-            {products.filter(item => (item.translations[lang]?.name || item.translations.ru.name).toLowerCase().includes(searchQuery.toLowerCase())).map(item => (
-              <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }}>
-                <div style={{ height: '120px' }}><img src={item.image} alt={item.translations[lang]?.name || item.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                <div style={{ padding: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
-                  <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold', marginTop: '4px' }}>{item.price.toLocaleString()} ₩</div>
-                </div>
+        <div>
+          <h2 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '12px' }}>{t.navSearch}</h2>
+          <input 
+            type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            style={{ width: '100%', background: '#141822', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none', marginBottom: '16px' }}
+            autoFocus
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+            {filteredProducts.map(item => (
+              <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: '#141822', borderRadius: '12px', padding: '10px', cursor: 'pointer' }}>
+                <img src={item.image} alt="" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                <div style={{ fontSize: '12px', fontWeight: 'bold', marginTop: '6px' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
+                <div style={{ fontSize: '11px', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* ИЗБРАННОЕ */}
+      {/* ВКЛАДКА FAVORITES */}
       {activeTab === 'favorites' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.favoritesTitle}</h2>
+        <div>
+          <h2 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '12px' }}>{t.favoritesTitle}</h2>
           {favorites.length === 0 ? (
-            <div style={{ textAlign: 'center', color: '#6b7280', padding: '40px', fontSize: '14px' }}>
-              {t.favoritesEmpty} 🤍
-            </div>
+            <div style={{ textAlign: 'center', color: '#9ca3af', padding: '40px 0', fontSize: '13px' }}>{t.favoritesEmpty}</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
               {favorites.map(item => (
-                <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }}>
-                  <div style={{ height: '120px' }}><img src={item.image} alt={item.translations[lang]?.name || item.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                  <div style={{ padding: '10px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
-                    <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold', marginTop: '4px' }}>{item.price.toLocaleString()} ₩</div>
-                  </div>
+                <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: '#141822', borderRadius: '12px', padding: '10px', cursor: 'pointer' }}>
+                  <img src={item.image} alt="" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', marginTop: '6px' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
+                  <div style={{ fontSize: '11px', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</div>
                 </div>
               ))}
             </div>
@@ -1013,31 +952,29 @@ export default function App() {
         </div>
       )}
 
-      {/* ЗАКАЗЫ */}
+      {/* ВКЛАДКА ORDERS */}
       {activeTab === 'orders' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.ordersTitle}</h2>
+        <div>
+          <h2 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '12px' }}>{t.ordersTitle}</h2>
           {myOrdersList.length === 0 ? (
-            <div style={{ textAlign: 'center', color: '#6b7280', padding: '40px', fontSize: '14px' }}>
-              {t.ordersEmpty} 📦
-            </div>
+            <div style={{ textAlign: 'center', color: '#9ca3af', padding: '40px 0', fontSize: '13px' }}>{t.ordersEmpty}</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {myOrdersList.map(order => (
-                <div key={order.id} style={{ background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '16px', padding: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '12px', color: '#9ca3af' }}>
+                <div key={order.id} style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#9ca3af', marginBottom: '8px' }}>
                     <span>Заказ #{order.id.toString().slice(-6)}</span>
                     <span>{order.date}</span>
                   </div>
-                  <div style={{ marginBottom: '10px', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
                     {order.items.map((it, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', marginBottom: '4px' }}>
-                        <span>• {it.translations[lang]?.name || it.translations.ru.name}</span>
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                        <span>{it.translations[lang]?.name || it.translations.ru.name}</span>
                         <span style={{ color: '#fcd34d' }}>{it.price.toLocaleString()} ₩</span>
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', fontSize: '13px', fontWeight: 'bold' }}>
                     <span>{t.total}</span>
                     <span style={{ color: '#fcd34d' }}>{order.total.toLocaleString()} ₩</span>
                   </div>
@@ -1048,77 +985,34 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПЛАШКА КОРЗИНЫ (С АВТОМАТИЧЕСКИМ СКРЫТИЕМ ПРИ СКРОЛЛЕ) */}
-      {cart.length > 0 && activeTab !== 'orders' && (
-        <div style={{
-          position: 'fixed', bottom: isNavVisible ? '74px' : '-80px', left: '16px', right: '16px',
-          background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: '16px', padding: '12px 16px',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box', zIndex: 1000,
-          boxShadow: '0 10px 25px rgba(0,0,0,0.6)', transition: 'bottom 0.3s ease-in-out'
-        }}>
-          <div onClick={() => setShowCartModal(true)} style={{ cursor: 'pointer' }}>
-            <div style={{ fontSize: '11px', color: '#9ca3af' }}>{t.cartSelected}: {cart.length} {t.itemsWord}</div>
-            <div style={{ fontSize: '14px', fontWeight: '800', color: '#fcd34d' }}>{totalPrice.toLocaleString()} ₩</div>
-          </div>
-          <button 
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowCheckoutModal(true);
-            }}
-            style={{ 
-              background: '#f59e0b', color: '#0b0e14', border: 'none', 
-              padding: '10px 20px', borderRadius: '10px', fontWeight: '900', fontSize: '13px', cursor: 'pointer' 
-            }}
-          >
-            {t.checkout} ➔
-          </button>
-        </div>
-      )}
-
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (С АВТОМАТИЧЕСКИМ СКРЫТИЕМ ПРИ СКРОЛЛЕ) */}
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ */}
       <div style={{
-        position: 'fixed', bottom: isNavVisible ? '0' : '-80px', left: 0, right: 0, height: '64px',
-        background: '#141822', borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-        zIndex: 1500, boxSizing: 'border-box', padding: '0 8px', transition: 'bottom 0.3s ease-in-out'
+        position: 'fixed', bottom: 0, left: 0, width: '100%',
+        background: 'rgba(20, 24, 34, 0.9)', backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(255,255,255,0.08)', padding: '10px 16px',
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center', zIndex: 1000,
+        transform: isNavVisible ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease'
       }}>
         {[
-          { key: 'home', label: t.navHome, icon: '🏠' },
-          { key: 'search', label: t.navSearch, icon: '🔍' },
-          { key: 'favorites', label: t.navFavorites, icon: '❤️', count: favorites.length },
-          { key: 'orders', label: t.navOrders, icon: '📦', count: myOrdersList.length }
-        ].map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                background: 'transparent', border: 'none', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flex: 1, position: 'relative',
-                color: isActive ? '#f59e0b' : '#9ca3af', padding: '6px 0'
-              }}
-            >
-              <span style={{ fontSize: '18px', marginBottom: '2px' }}>{tab.icon}</span>
-              <span style={{ fontSize: '10px', fontWeight: isActive ? '800' : '500' }}>{tab.label}</span>
-              {tab.count > 0 && (
-                <span style={{
-                  position: 'absolute', top: '4px', right: '22%', background: '#f59e0b', color: '#0b0e14',
-                  fontSize: '9px', fontWeight: '900', width: '15px', height: '15px', borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
+          { key: 'home', icon: '🏠', label: t.navHome },
+          { key: 'search', icon: '🔍', label: t.navSearch },
+          { key: 'favorites', icon: '❤️', label: t.navFavorites },
+          { key: 'orders', icon: '📦', label: t.navOrders }
+        ].map((tab) => (
+          <button 
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              background: 'transparent', border: 'none', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: '3px', cursor: 'pointer', color: activeTab === tab.key ? '#f59e0b' : '#9ca3af'
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>{tab.icon}</span>
+            <span style={{ fontSize: '10px', fontWeight: activeTab === tab.key ? 'bold' : 'normal' }}>{tab.label}</span>
+          </button>
+        ))}
       </div>
-
     </div>
   );
 }
