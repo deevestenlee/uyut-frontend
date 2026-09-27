@@ -218,16 +218,31 @@ export default function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Клик вне поиска для его закрытия
+  // Сброс масштаба страницы (viewport zoom)
+  const resetViewportZoom = () => {
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0');
+      setTimeout(() => {
+        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+      }, 50);
+    }
+  };
+
+  // Глобальный клик: закрытие поиска сбросом масштаба и закрытие меню
   useEffect(() => {
     const handleGlobalClick = (e) => {
       if (isSearchActive && !e.target.closest('.search-container')) {
         setIsSearchActive(false);
+        resetViewportZoom();
+      }
+      if (showBurgerMenu && !e.target.closest('.burger-menu-container')) {
+        setShowBurgerMenu(false);
       }
     };
     window.addEventListener('click', handleGlobalClick);
     return () => window.removeEventListener('click', handleGlobalClick);
-  }, [isSearchActive]);
+  }, [isSearchActive, showBurgerMenu]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -258,7 +273,7 @@ export default function App() {
   const [categories, setCategories] = useState(['Круассаны', 'Торты', 'Пироги', 'Печенье', 'Напитки']);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Поля добавления товара (пустые строки по умолчанию, чтобы избежать лишних нулей)
+  // Поля ввода цен как строки для полного удаления без нулей
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -304,12 +319,12 @@ export default function App() {
 
   const handleAddProduct = (e) => {
     e.preventDefault();
-    if (!newTitle || !newPrice) return;
+    if (!newTitle || newPrice === '') return;
     const newItem = {
       id: Date.now(),
       names: { RU: newTitle, EN: newTitle, KO: newTitle },
       category: newCat,
-      price: Number(newPrice),
+      price: Number(newPrice) || 0,
       oldPrice: newOldPrice !== '' ? Number(newOldPrice) : null,
       rating: 5.0,
       descs: { RU: newDesc || 'Домашняя выпечка', EN: newDesc || 'Home baking', KO: newDesc || '홈 베이킹' },
@@ -337,7 +352,12 @@ export default function App() {
 
   const handleSaveEditedProduct = (e) => {
     e.preventDefault();
-    setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
+    const updated = {
+      ...editingProduct,
+      price: editingProduct.price !== '' ? Number(editingProduct.price) : 0,
+      oldPrice: editingProduct.oldPrice !== '' && editingProduct.oldPrice !== null ? Number(editingProduct.oldPrice) : null
+    };
+    setProducts(products.map(p => p.id === updated.id ? updated : p));
     setEditingProduct(null);
   };
 
@@ -481,7 +501,7 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap');
         .premium-title {
           font-family: 'Playfair Display', serif;
-          font-size: 22px !important;
+          font-size: 20px !important;
           font-weight: 700;
           letter-spacing: 0.5px;
           color: #ffffff;
@@ -491,7 +511,7 @@ export default function App() {
         .premium-subtitle {
           font-family: 'Playfair Display', serif;
           font-style: italic;
-          font-size: 12px !important;
+          font-size: 11px !important;
           color: #fcd34d;
           font-weight: 400;
           letter-spacing: 0.3px;
@@ -545,7 +565,7 @@ export default function App() {
         </div>
       )}
 
-      {/* МОДАЛКА ПОЛНОГО РЕДАКТИРОВАНИЯ ТОВАРА ДЛЯ АДМИНА */}
+      {/* МОДАЛКА РЕДАКТИРОВАНИЯ ТОВАРА ДЛЯ АДМИНА */}
       {editingProduct && (
         <div onClick={() => setEditingProduct(null)} style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -563,8 +583,8 @@ export default function App() {
               }} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
               
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice !== null ? editingProduct.oldPrice : ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value !== '' ? Number(e.target.value) : null})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
+                <input type="text" inputMode="numeric" placeholder={t.pricePlaceholder} value={editingProduct.price !== null ? editingProduct.price : ''} onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+                <input type="text" inputMode="numeric" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice !== null ? editingProduct.oldPrice : ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
               </div>
 
               <textarea placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={(e) => {
@@ -708,8 +728,8 @@ export default function App() {
             <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="number" placeholder={t.pricePlaceholder} value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={(e) => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
+                <input type="text" inputMode="numeric" placeholder={t.pricePlaceholder} value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+                <input type="text" inputMode="numeric" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={(e) => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
               </div>
               <select value={newCat} onChange={(e) => setNewCat(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }}>
                 {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
@@ -739,8 +759,8 @@ export default function App() {
         {/* Логотип и название строго в одну строку */}
         <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', minHeight: '42px' }}>
           <div style={{
-            width: '42px', height: '42px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
+            width: '40px', height: '40px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
             boxShadow: '0 4px 12px rgba(245,158,11,0.3)', flexShrink: 0
           }}>
             {customLogo}
@@ -751,10 +771,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* Правый блок управления с выравниванием по высоте и ширине под Login */}
+        {/* Правый блок: Верхняя строка (Login + Гамбургер), Нижняя строка (Лупа + Языки) */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-          {/* Верхняя строка: Login / Exit */}
-          <div style={{ display: 'flex', alignItems: 'center', height: '30px' }}>
+          
+          {/* Верхняя строка: Login / Exit и Меню-гамбургер в одной строке */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '30px' }}>
             {!isAdminLoggedIn ? (
               <button onClick={() => setShowLoginModal(true)} style={{
                 background: 'transparent', color: '#9ca3af', border: '1px solid #334155',
@@ -770,11 +791,40 @@ export default function App() {
                 {t.exitBtn}
               </button>
             )}
+
+            <div className="burger-menu-container" style={{ position: 'relative', display: 'inline-block' }}>
+              <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
+                background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
+                width: '30px', height: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer'
+              }}>
+                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+                <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+              </button>
+
+              {/* Выпадающее меню гамбургера с выравниванием по левому краю и компактной шириной */}
+              {showBurgerMenu && (
+                <div style={{
+                  position: 'absolute', top: '34px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
+                  borderRadius: '12px', width: 'auto', minWidth: '130px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '6px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box'
+                }}>
+                  <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>🏠 {t.menuMain}</button>
+                  <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>✨ {t.menuPromos}</button>
+                  <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>📍 {t.menuContacts}</button>
+                  <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>ℹ️ {t.menuAbout}</button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Нижняя строка: Лупа, Языки и Меню-гамбургер, выровненные по высоте (30px) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }} className="search-container">
-            <button onClick={() => setIsSearchActive(!isSearchActive)} style={{
+          {/* Нижняя строка: Лупа и Языковая панель, выровненные по высоте (30px) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '30px' }} className="search-container">
+            <button onClick={() => {
+              const nextState = !isSearchActive;
+              setIsSearchActive(nextState);
+              if (!nextState) resetViewportZoom();
+            }} style={{
               background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
               borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px'
             }}>
@@ -783,35 +833,14 @@ export default function App() {
 
             <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
               background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
-              borderRadius: '8px', height: '30px', padding: '0 4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
+              borderRadius: '8px', height: '30px', padding: '0 6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
             }}>
               <option value="RU">🇷🇺 RU</option>
               <option value="EN">🇺🇸 EN</option>
               <option value="KO">🇰🇷 KO</option>
             </select>
-
-            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
-              background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
-              width: '30px', height: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer'
-            }}>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-            </button>
-
-            {/* Выпадающее меню гамбургера */}
-            {showBurgerMenu && (
-              <div style={{
-                position: 'absolute', top: '36px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
-                borderRadius: '16px', width: '180px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '8px'
-              }}>
-                <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>🏠 {t.menuMain}</button>
-                <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>✨ {t.menuPromos}</button>
-                <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>📍 {t.menuContacts}</button>
-                <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>ℹ️ {t.menuAbout}</button>
-              </div>
-            )}
           </div>
+
         </div>
       </header>
 
