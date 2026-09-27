@@ -14,10 +14,13 @@ export default function App() {
   // Управление модальным окном заказа
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clientName, setClientName] = useState('');
-  const [clientPhone, setClientPhone] = useState('010');
+  const [clientPhone, setClientPhone] = useState('');
+  const [phoneError, setPhoneError] = useState(false);
+  const [nameError, setNameError] = useState(false);
   const [deliveryType, setDeliveryType] = useState('pickup');
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   const [products, setProducts] = useState([
     { 
@@ -95,6 +98,31 @@ export default function App() {
     alert('Товар успешно добавлен на витрину!');
   };
 
+  // Проверка телефона (только цифры)
+  const handlePhoneChange = (e) => {
+    const val = e.target.value;
+    const onlyNums = val.replace(/\D/g, ''); // Удаляем все, кроме цифр
+    if (val !== onlyNums) {
+      setPhoneError(true);
+    } else {
+      setPhoneError(false);
+    }
+    setClientPhone(onlyNums);
+  };
+
+  // Проверка имени (только буквы и пробелы)
+  const handleNameChange = (e) => {
+    const val = e.target.value;
+    // Разрешаем только буквы (русские/латинские) и пробелы
+    const onlyLetters = val.replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, '');
+    if (val !== onlyLetters) {
+      setNameError(true);
+    } else {
+      setNameError(false);
+    }
+    setClientName(onlyLetters);
+  };
+
   const filteredProducts = products.filter(item => {
     const matchesCat = activeCategory === 'Все' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -112,34 +140,11 @@ export default function App() {
   const handleSendOrder = (e) => {
     e.preventDefault();
     if (!clientName || clientPhone.length < 5) {
-      alert('Пожалуйста, заполните обязательные поля (Имя и Телефон).');
+      alert('Пожалуйста, заполните корректно Имя и Телефон.');
       return;
     }
 
-    let orderText = `🥐 *Новый заказ в Уютной Пекарне!*\n\n`;
-    orderText += `👤 *Имя:* ${clientName}\n`;
-    orderText += `📞 *Телефон:* ${clientPhone}\n`;
-    orderText += `📦 *Способ:* ${deliveryType === 'pickup' ? 'Самовывоз 🏃' : 'Доставка 🛵'}\n`;
-    if (deliveryType === 'delivery') {
-      orderText += `📍 *Адрес:* ${clientAddress}\n`;
-    }
-    if (clientComment) {
-      orderText += `💬 *Комментарий:* ${clientComment}\n`;
-    }
-    orderText += `\n🛒 *Состав заказа:*\n`;
-    cart.forEach((item, idx) => {
-      orderText += `${idx + 1}. ${item.name} — ${item.price.toLocaleString()} ₩\n`;
-    });
-    orderText += `\n💰 *Итого к оплате:* *${totalPrice.toLocaleString()} ₩*`;
-
-    const bakeryWhatsAppNumber = '821012345678'; 
-    const encodedUrl = `https://wa.me/${bakeryWhatsAppNumber}?text=${encodeURIComponent(orderText)}`;
-
-    window.open(encodedUrl, '_blank');
-    
-    setCart([]);
-    setShowCheckoutModal(false);
-    alert('Заказ сформирован! Перенаправляем в WhatsApp...');
+    setOrderSuccess(true);
   };
 
   return (
@@ -164,6 +169,38 @@ export default function App() {
         </div>
       )}
 
+      {/* Успешное оформление заказа */}
+      {orderSuccess && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+          background: 'rgba(6, 8, 12, 0.95)', backdropFilter: 'blur(8px)',
+          zIndex: 2500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
+        }}>
+          <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '360px', textAlign: 'center' }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎉</div>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#fcd34d' }}>Заказ успешно оформлен!</h3>
+            <p style={{ margin: '0 0 20px 0', fontSize: '12px', color: '#9ca3af', lineHeight: '1.4' }}>
+              Спасибо, <b>{clientName}</b>! Мы приняли ваш заказ и свяжемся с вами в ближайшее время по номеру <b>{clientPhone}</b>.
+            </p>
+            <button 
+              type="button"
+              onClick={() => {
+                setCart([]);
+                setOrderSuccess(false);
+                setShowCheckoutModal(false);
+                setClientName('');
+                setClientPhone('');
+                setClientAddress('');
+                setClientComment('');
+              }}
+              style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '12px', padding: '12px', width: '100%', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}
+            >
+              Вернуться в меню
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 2. Модальное окно оформления заказа */}
       {showCheckoutModal && (
         <div style={{
@@ -179,7 +216,7 @@ export default function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '16px', color: '#fcd34d' }}>📋 Оформление заказа</h3>
-                <span style={{ fontSize: '10px', color: '#9ca3af' }}>Заполните данные для отправки в WhatsApp</span>
+                <span style={{ fontSize: '10px', color: '#9ca3af' }}>Заполните данные для отправки заказа</span>
               </div>
               <button 
                 type="button" 
@@ -209,19 +246,29 @@ export default function App() {
 
             <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ваше имя *</label>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ваше имя * (только буквы)</label>
                 <input 
-                  type="text" placeholder="Например: Александр" value={clientName} onChange={e => setClientName(e.target.value)}
-                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                  type="text" 
+                  placeholder="Например: Александр" 
+                  value={clientName} 
+                  onChange={handleNameChange}
+                  style={{ width: '100%', background: '#0b0e14', border: nameError ? '1px solid #ef4444' : '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} 
+                  required 
                 />
+                {nameError && <span style={{ fontSize: '10px', color: '#ef4444', marginTop: '3px', display: 'block' }}>Только буквы!</span>}
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Номер телефона *</label>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Номер телефона * (только цифры)</label>
                 <input 
-                  type="text" value={clientPhone} onChange={e => setClientPhone(e.target.value)}
-                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                  type="text" 
+                  placeholder="01012345678" 
+                  value={clientPhone} 
+                  onChange={handlePhoneChange}
+                  style={{ width: '100%', background: '#0b0e14', border: phoneError ? '1px solid #ef4444' : '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} 
+                  required 
                 />
+                {phoneError && <span style={{ fontSize: '10px', color: '#ef4444', marginTop: '3px', display: 'block' }}>Только цифры!</span>}
               </div>
 
               <div>
@@ -261,7 +308,7 @@ export default function App() {
               </div>
 
               <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '12px', padding: '12px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '6px' }}>
-                Подтвердить и отправить в WhatsApp ➔
+                Подтвердить и оформить заказ
               </button>
             </form>
           </div>
@@ -467,7 +514,7 @@ export default function App() {
         )}
       </div>
 
-      {/* 3. ФИКСИРОВАННАЯ НИЖНЯЯ ПЛАШКА КОРЗИНЫ (СТРОГО В САМОМ КОНЦЕ, ВНЕ ЛЮБЫХ ФОРМ) */}
+      {/* 3. ФИКСИРОВАННАЯ НИЖНЯЯ ПЛАШКА КОРЗИНЫ */}
       {cart.length > 0 && (
         <div style={{
           position: 'fixed', bottom: '16px', left: '16px', right: '16px',
