@@ -211,16 +211,23 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Все');
   
-  // Состояние поиска через иконку лупы
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Боковое меню (гамбургер)
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
 
-  // Скролл нижней панели
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Клик вне поиска для его закрытия
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      if (isSearchActive && !e.target.closest('.search-container')) {
+        setIsSearchActive(false);
+      }
+    };
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, [isSearchActive]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -236,26 +243,22 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Админка
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
-  // Кастомизация логотипа и баннера
   const [customLogo] = useState('🧁');
   const [bannerImage, setBannerImage] = useState('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80');
 
-  // Модалки
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [editingProduct, setEditingProduct] = useState(null); // Модалка полного редактирования товара
+  const [editingProduct, setEditingProduct] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddCatModal, setShowAddCatModal] = useState(false);
 
-  // Категории
   const [categories, setCategories] = useState(['Круассаны', 'Торты', 'Пироги', 'Печенье', 'Напитки']);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Поля добавления товара
+  // Поля добавления товара (пустые строки по умолчанию, чтобы избежать лишних нулей)
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -264,7 +267,6 @@ export default function App() {
   const [newImage, setNewImage] = useState('');
   const [newBadge, setNewBadge] = useState('ХИТ');
 
-  // Оформление заказа
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('010');
@@ -272,7 +274,7 @@ export default function App() {
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
 
-  const [cart, setCart] = useState([]); // массив объектов с количеством
+  const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
   const [ordersHistory, setOrdersHistory] = useState([]);
 
@@ -308,7 +310,7 @@ export default function App() {
       names: { RU: newTitle, EN: newTitle, KO: newTitle },
       category: newCat,
       price: Number(newPrice),
-      oldPrice: newOldPrice ? Number(newOldPrice) : null,
+      oldPrice: newOldPrice !== '' ? Number(newOldPrice) : null,
       rating: 5.0,
       descs: { RU: newDesc || 'Домашняя выпечка', EN: newDesc || 'Home baking', KO: newDesc || '홈 베이킹' },
       image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
@@ -333,7 +335,6 @@ export default function App() {
     setShowAddCatModal(false);
   };
 
-  // Сохранение отредактированного товара из модального окна
   const handleSaveEditedProduct = (e) => {
     e.preventDefault();
     setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
@@ -346,7 +347,6 @@ export default function App() {
     }
   };
 
-  // База товаров
   const [products, setProducts] = useState([
     { 
       id: 1, 
@@ -405,7 +405,6 @@ export default function App() {
     }
   };
 
-  // Управление корзиной с плюсиками и минусиками
   const addToCart = (product) => {
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
@@ -482,18 +481,21 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap');
         .premium-title {
           font-family: 'Playfair Display', serif;
-          font-size: 24px !important;
+          font-size: 22px !important;
           font-weight: 700;
-          letter-spacing: 0.8px;
+          letter-spacing: 0.5px;
           color: #ffffff;
+          white-space: nowrap;
+          line-height: 1.2;
         }
         .premium-subtitle {
           font-family: 'Playfair Display', serif;
           font-style: italic;
-          font-size: 13px !important;
+          font-size: 12px !important;
           color: #fcd34d;
           font-weight: 400;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
         }
       `}</style>
 
@@ -562,7 +564,7 @@ export default function App() {
               
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice !== null ? editingProduct.oldPrice : ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value !== '' ? Number(e.target.value) : null})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
               </div>
 
               <textarea placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={(e) => {
@@ -733,82 +735,87 @@ export default function App() {
       )}
 
       {/* ШАПКА САЙТА */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
-        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', position: 'relative' }}>
+        {/* Логотип и название строго в одну строку */}
+        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', minHeight: '42px' }}>
           <div style={{
             width: '42px', height: '42px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
             borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
-            boxShadow: '0 4px 12px rgba(245,158,11,0.3)'
+            boxShadow: '0 4px 12px rgba(245,158,11,0.3)', flexShrink: 0
           }}>
             {customLogo}
           </div>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <h1 className="premium-title" style={{ margin: 0 }}>{t.bakeryName}</h1>
             <span className="premium-subtitle">{t.bakerySub}</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Кнопка лупы для поиска */}
-          <button onClick={() => setIsSearchActive(!isSearchActive)} style={{
-            background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px'
-          }}>
-            🔍
-          </button>
-
-          {/* Языковая панель с флагами */}
-          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
-            background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: '8px', padding: '6px 6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'
-          }}>
-            <option value="RU">🇷🇺 RU</option>
-            <option value="EN">🇺🇸 EN</option>
-            <option value="KO">🇰🇷 KO</option>
-          </select>
-
-          {!isAdminLoggedIn ? (
-            <button onClick={() => setShowLoginModal(true)} style={{
-              background: 'transparent', color: '#9ca3af', border: '1px solid #334155',
-              borderRadius: '8px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer'
-            }}>
-              {t.loginBtn}
-            </button>
-          ) : (
-            <button onClick={handleExit} style={{
-              background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)',
-              borderRadius: '8px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold'
-            }}>
-              {t.exitBtn}
-            </button>
-          )}
-
-          {/* Меню с тремя полосками (гамбургер) */}
-          <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
-            background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
-            width: '32px', height: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer'
-          }}>
-            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-          </button>
-        </div>
-
-        {/* Выпадающее меню гамбургера */}
-        {showBurgerMenu && (
-          <div style={{
-            position: 'absolute', top: '55px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
-            borderRadius: '16px', width: '200px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '10px'
-          }}>
-            <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>🏠 {t.menuMain}</button>
-            <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>✨ {t.menuPromos}</button>
-            <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>📍 {t.menuContacts}</button>
-            <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>ℹ️ {t.menuAbout}</button>
+        {/* Правый блок управления с выравниванием по высоте и ширине под Login */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+          {/* Верхняя строка: Login / Exit */}
+          <div style={{ display: 'flex', alignItems: 'center', height: '30px' }}>
+            {!isAdminLoggedIn ? (
+              <button onClick={() => setShowLoginModal(true)} style={{
+                background: 'transparent', color: '#9ca3af', border: '1px solid #334155',
+                borderRadius: '8px', padding: '0 10px', height: '30px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                {t.loginBtn}
+              </button>
+            ) : (
+              <button onClick={handleExit} style={{
+                background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)',
+                borderRadius: '8px', padding: '0 10px', height: '30px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                {t.exitBtn}
+              </button>
+            )}
           </div>
-        )}
+
+          {/* Нижняя строка: Лупа, Языки и Меню-гамбургер, выровненные по высоте (30px) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }} className="search-container">
+            <button onClick={() => setIsSearchActive(!isSearchActive)} style={{
+              background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px'
+            }}>
+              🔍
+            </button>
+
+            <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
+              background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: '8px', height: '30px', padding: '0 4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
+            }}>
+              <option value="RU">🇷🇺 RU</option>
+              <option value="EN">🇺🇸 EN</option>
+              <option value="KO">🇰🇷 KO</option>
+            </select>
+
+            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
+              background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
+              width: '30px', height: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer'
+            }}>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+            </button>
+
+            {/* Выпадающее меню гамбургера */}
+            {showBurgerMenu && (
+              <div style={{
+                position: 'absolute', top: '36px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
+                borderRadius: '16px', width: '180px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '8px'
+              }}>
+                <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>🏠 {t.menuMain}</button>
+                <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>✨ {t.menuPromos}</button>
+                <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>📍 {t.menuContacts}</button>
+                <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '8px', fontSize: '12px', cursor: 'pointer', borderRadius: '6px' }}>ℹ️ {t.menuAbout}</button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
-      {/* АДМИН ПАНЕЛЬ (управление акциями: удаление/замена) */}
+      {/* АДМИН ПАНЕЛЬ */}
       {isAdminLoggedIn && (
         <div style={{
           background: '#141822', border: '1px dashed #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '20px'
@@ -830,7 +837,6 @@ export default function App() {
       {/* АКТИВНАЯ ВКЛАДКА: ГЛАВНАЯ */}
       {activeTab === 'home' && (
         <>
-          {/* Баннер акции */}
           <div style={{
             width: '100%', height: '140px', borderRadius: '16px', overflow: 'hidden', position: 'relative',
             marginBottom: '16px', border: '1px solid rgba(245, 158, 11, 0.2)', boxShadow: '0 8px 24px rgba(0,0,0,0.5)'
@@ -842,9 +848,9 @@ export default function App() {
             </div>
           </div>
 
-          {/* Строка поиска появляется при клике на лупу */}
+          {/* Поиск при активации лупы */}
           {isSearchActive && (
-            <div style={{ position: 'relative', marginBottom: '16px' }}>
+            <div className="search-container" style={{ position: 'relative', marginBottom: '16px' }}>
               <input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
                 width: '100%', background: '#141822', border: '1px solid #f59e0b', borderRadius: '12px',
                 padding: '12px 14px 12px 38px', color: '#fff', fontSize: '13px', boxSizing: 'border-box'
@@ -853,7 +859,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Чипсы категорий */}
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '16px', scrollbarWidth: 'none' }}>
             <button onClick={() => setActiveCategory('Все')} style={{
               background: activeCategory === 'Все' ? '#f59e0b' : '#141822',
@@ -873,7 +878,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Список товаров */}
           {filteredProducts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: '#9ca3af', fontSize: '14px' }}>{t.notFound}</div>
           ) : (
@@ -915,7 +919,6 @@ export default function App() {
                         </button>
                       </div>
 
-                      {/* Админские кнопки редактирования */}
                       {isAdminLoggedIn && (
                         <div style={{ display: 'flex', gap: '4px', marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '6px' }}>
                           <button onClick={() => setEditingProduct(item)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.editItem}</button>
@@ -1010,7 +1013,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА: ЗАКАЗЫ (С возможностью добавления количества + и -) */}
+      {/* ВКЛАДКА: ЗАКАЗЫ */}
       {activeTab === 'orders' && (
         <div>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.orderHistoryTitle}</h2>
@@ -1043,7 +1046,7 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПЛАВАЮЩАЯ КОРЗИНА С УПРАВЛЕНИЕМ КОЛИЧЕСТВОМ */}
+      {/* НИЖНЯЯ ПЛАВАЮЩАЯ КОРЗИНА */}
       {cart.length > 0 && activeTab === 'home' && (
         <div style={{
           position: 'fixed', bottom: '74px', left: '16px', right: '16px',
@@ -1079,7 +1082,7 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ КЛИЕНТА (Скрыта в админ-панели по вашему требованию) */}
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ КЛИЕНТА */}
       {!isAdminLoggedIn && (
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, width: '100vw', background: '#141822',
