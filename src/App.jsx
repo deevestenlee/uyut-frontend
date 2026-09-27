@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const translations = {
   RU: {
@@ -6,7 +6,6 @@ const translations = {
     bakerySub: 'домашняя выпечка',
     address: '📍 Сеул, Каннам-гу 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: 'Поиск...',
     allCategories: 'Все',
     addToCart: 'В корзину +',
     loginBtn: 'Login',
@@ -73,7 +72,6 @@ const translations = {
     bakerySub: 'home baking',
     address: '📍 Seoul, Gangnam-gu 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: 'Search...',
     allCategories: 'All',
     addToCart: 'Add to cart +',
     loginBtn: 'Login',
@@ -140,7 +138,6 @@ const translations = {
     bakerySub: '홈 베이킹',
     address: '📍 서울 강남구 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: '검색...',
     allCategories: '전체',
     addToCart: '담기 +',
     loginBtn: 'Login',
@@ -210,53 +207,10 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Все');
-  
-  const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showBurgerMenu, setShowBurgerMenu] = useState(false);
-
+  
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-
-  // Сброс масштаба страницы (viewport zoom)
-  const resetViewportZoom = () => {
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
-    if (viewportMeta) {
-      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0');
-      setTimeout(() => {
-        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-      }, 50);
-    }
-  };
-
-  // Глобальный клик: закрытие поиска сбросом масштаба и закрытие меню
-  useEffect(() => {
-    const handleGlobalClick = (e) => {
-      if (isSearchActive && !e.target.closest('.search-container')) {
-        setIsSearchActive(false);
-        resetViewportZoom();
-      }
-      if (showBurgerMenu && !e.target.closest('.burger-menu-container')) {
-        setShowBurgerMenu(false);
-      }
-    };
-    window.addEventListener('click', handleGlobalClick);
-    return () => window.removeEventListener('click', handleGlobalClick);
-  }, [isSearchActive, showBurgerMenu]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setShowBottomNav(false);
-      } else {
-        setShowBottomNav(true);
-      }
-      setLastScrollY(currentScrollY);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
 
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -291,6 +245,67 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
   const [ordersHistory, setOrdersHistory] = useState([]);
+
+  // Состояние для выпадающего меню языков
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const langDropdownRef = useRef(null);
+
+  const [products, setProducts] = useState([
+    { 
+      id: 1, 
+      names: { RU: 'Миндальный круассан', EN: 'Almond Croissant', KO: '아몬드 크루아상' },
+      category: 'Круассаны', 
+      price: 4500, 
+      oldPrice: 5000,
+      rating: 4.9, 
+      descs: { 
+        RU: 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
+        EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
+        KO: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' 
+      },
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
+      badge: 'ХИТ' 
+    },
+    { 
+      id: 2, 
+      names: { RU: 'Шоколадный бриошь', EN: 'Chocolate Brioche', KO: '초콜릿 브리오슈' },
+      category: 'Торты', 
+      price: 5500, 
+      oldPrice: 6500,
+      rating: 4.8, 
+      descs: { 
+        RU: 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
+        EN: 'Soft handmade brioche dough with Belgian cocoa...', 
+        KO: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' 
+      },
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
+      badge: 'НОВИНКА' 
+    }
+  ]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+        setIsLangOpen(false);
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowBottomNav(false);
+      } else {
+        setShowBottomNav(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const handleImageUpload = (e, setter) => {
     const file = e.target.files[0];
@@ -365,39 +380,6 @@ export default function App() {
       setProducts(products.filter(p => p.id !== id));
     }
   };
-
-  const [products, setProducts] = useState([
-    { 
-      id: 1, 
-      names: { RU: 'Миндальный круассан', EN: 'Almond Croissant', KO: '아몬드 크루아상' },
-      category: 'Круассаны', 
-      price: 4500, 
-      oldPrice: 5000,
-      rating: 4.9, 
-      descs: { 
-        RU: 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
-        EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
-        KO: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' 
-      },
-      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
-      badge: 'ХИТ' 
-    },
-    { 
-      id: 2, 
-      names: { RU: 'Шоколадный бриошь', EN: 'Chocolate Brioche', KO: '초콜릿 브리오슈' },
-      category: 'Торты', 
-      price: 5500, 
-      oldPrice: 6500,
-      rating: 4.8, 
-      descs: { 
-        RU: 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
-        EN: 'Soft handmade brioche dough with Belgian cocoa...', 
-        KO: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' 
-      },
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
-      badge: 'НОВИНКА' 
-    }
-  ]);
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -478,16 +460,6 @@ export default function App() {
   });
 
   const totalCartPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const goToHome = () => {
-    setActiveTab('home');
-    setActiveCategory('Все');
-    setSearchQuery('');
-    setIsSearchActive(false);
-    setShowBurgerMenu(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <div style={{
@@ -500,7 +472,7 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap');
         .premium-title {
           font-family: 'Playfair Display', serif;
-          font-size: 18px !important;
+          font-size: 16px !important;
           font-weight: 700;
           letter-spacing: 0.5px;
           color: #ffffff;
@@ -518,232 +490,235 @@ export default function App() {
         }
       `}</style>
 
-      {/* МОДАЛКА ПРОСМОТРА ТОВАРА */}
-      {selectedProduct && (
-        <div onClick={() => setSelectedProduct(null)} style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(5, 7, 10, 0.92)', backdropFilter: 'blur(10px)',
-          zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            background: '#141822', border: '1px solid rgba(245, 158, 11, 0.4)',
-            borderRadius: '24px', padding: '20px', width: '100%', maxWidth: '380px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.8)', position: 'relative'
-          }}>
-            <button onClick={() => setSelectedProduct(null)} style={{
-              position: 'absolute', top: '14px', right: '14px', background: 'rgba(255,255,255,0.1)',
-              border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer'
-            }}>✕</button>
+      {/* ШАПКА САЙТА (HEADER) СОГЛАСНО ТРЕБОВАНИЯМ */}
+      <header style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        paddingBottom: '16px',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        marginBottom: '16px'
+      }}>
+        {/* 1. Слева: Логотип и название */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => { setActiveTab('home'); setActiveCategory('Все'); }}>
+          <div style={{ fontSize: '32px', background: 'rgba(245,158,11,0.1)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.3)' }}>
+            {customLogo}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className="premium-title">{t.bakeryName}</span>
+            <span className="premium-subtitle">{t.bakerySub}</span>
+          </div>
+        </div>
 
-            <div style={{ width: '100%', height: '220px', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', border: '1px solid rgba(245,158,11,0.2)' }}>
-              <img src={selectedProduct.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
+        {/* 2. Справа от логотипа и названия: Адрес сверху, телефон снизу */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '12px', color: '#cbd5e1', gap: '2px' }}>
+          <div>{t.address}</div>
+          <div style={{ color: '#fcd34d', fontWeight: '600' }}>{t.phone}</div>
+        </div>
 
-            <h2 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '800', color: '#fff' }}>
-              {selectedProduct.names[lang] || selectedProduct.names['RU']}
-            </h2>
+        {/* 3. С крайнего правого края: Логин, меню и языковая панель в один ряд */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Логин / Выход */}
+          {isAdminLoggedIn ? (
+            <button onClick={handleExit} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+              {t.exitBtn}
+            </button>
+          ) : (
+            <button onClick={() => setShowLoginModal(true)} style={{ background: '#334155', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+              {t.loginBtn}
+            </button>
+          )}
 
-            <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5', margin: '0 0 16px 0' }}>
-              {selectedProduct.descs[lang] || selectedProduct.descs['RU']}
-            </p>
+          {/* Меню в шапке */}
+          <button onClick={() => setActiveTab('home')} style={{ background: activeTab === 'home' ? 'rgba(245,158,11,0.2)' : 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '6px 10px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer' }}>
+            {t.homeTab}
+          </button>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px' }}>
-              <div>
-                <div style={{ fontSize: '18px', fontWeight: '900', color: '#fcd34d' }}>{selectedProduct.price.toLocaleString()} ₩</div>
-                {selectedProduct.oldPrice && (
-                  <div style={{ fontSize: '12px', color: '#6b7280', textDecoration: 'line-through' }}>{selectedProduct.oldPrice.toLocaleString()} ₩</div>
-                )}
-              </div>
-              <button onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }} style={{
-                background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '12px 20px', borderRadius: '12px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
+          {/* Языковая панель с исправленным выравниванием и без боковых рамок */}
+          <div ref={langDropdownRef} style={{ position: 'relative' }}>
+            <button onClick={() => setIsLangOpen(!isLangOpen)} style={{
+              background: '#1e293b', border: '1px solid rgba(245,158,11,0.4)', color: '#fcd34d',
+              padding: '6px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '4px'
+            }}>
+              {lang} ▼
+            </button>
+            {isLangOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 'auto',
+                background: '#141822', border: 'none', borderRadius: '8px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)', zIndex: 100, minWidth: '60px',
+                overflow: 'hidden', padding: '4px 0'
               }}>
-                {t.addToCart}
+                {['RU', 'EN', 'KO'].map((l) => (
+                  <div key={l} onClick={() => { setLang(l); setIsLangOpen(false); }} style={{
+                    padding: '8px 12px', fontSize: '12px', color: lang === l ? '#fcd34d' : '#fff',
+                    background: lang === l ? 'rgba(245,158,11,0.1)' : 'transparent', cursor: 'pointer',
+                    textAlign: 'left', fontWeight: lang === l ? 'bold' : 'normal'
+                  }}>
+                    {l}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* МЕНЮ ПОД БАННЕРОМ С ИСПРАВЛЕННЫМИ ПЕРЕВОДАМИ */}
+      <nav style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
+        <button onClick={() => { setActiveTab('home'); setActiveCategory('Все'); }} style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          {t.menuMain}
+        </button>
+        <button onClick={() => { setActiveTab('home'); setActiveCategory('Круассаны'); }} style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          {t.menuPromos}
+        </button>
+        <button onClick={() => alert(t.contactsText)} style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          {t.menuContacts}
+        </button>
+        <button onClick={() => alert(t.aboutText)} style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px 14px', borderRadius: '10px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          {t.menuAbout}
+        </button>
+      </nav>
+
+      {/* ОСНОВНОЙ КОНТЕНТ ВКЛАДОК */}
+      {activeTab === 'home' && (
+        <div>
+          {/* Баннер */}
+          <div style={{ width: '100%', height: '160px', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', position: 'relative' }}>
+            <img src={bannerImage} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,14,20,0.8), transparent)', display: 'flex', alignItems: 'flex-end', padding: '16px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#fcd34d' }}>{t.promoSectionTitle}</span>
+            </div>
+          </div>
+
+          {/* Панель администратора / управление баннером и товарами */}
+          {isAdminLoggedIn && (
+            <div style={{ background: '#141822', border: '1px dashed #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#fcd34d', fontSize: '14px' }}>{t.adminEditMenuTitle}</h4>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  {t.addNewItemBtn}
+                </button>
+                <button onClick={() => setShowAddCatModal(true)} style={{ background: '#334155', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  {t.addNewCatBtn}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Категории */}
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
+            <button onClick={() => setActiveCategory('Все')} style={{
+              background: activeCategory === 'Все' ? '#f59e0b' : '#1e293b',
+              color: activeCategory === 'Все' ? '#0b0e14' : '#fff',
+              border: 'none', padding: '8px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap'
+            }}>
+              {t.allCategories}
+            </button>
+            {categories.map((cat) => (
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{
+                background: activeCategory === cat ? '#f59e0b' : '#1e293b',
+                color: activeCategory === cat ? '#0b0e14' : '#fff',
+                border: 'none', padding: '8px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap'
+              }}>
+                {cat}
               </button>
-            </div>
+            ))}
+          </div>
+
+          {/* Список товаров */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+            {filteredProducts.map((item) => (
+              <div key={item.id} style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ position: 'relative', height: '120px', cursor: 'pointer' }} onClick={() => setSelectedProduct(item)}>
+                  <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <button onClick={(e) => { e.stopPropagation(); toggleLike(item.id); }} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', color: likes.includes(item.id) ? '#ef4444' : '#fff' }}>
+                    ♥
+                  </button>
+                </div>
+                <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                  <div>
+                    <h5 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: 'bold', color: '#fff' }}>
+                      {item.names[lang] || item.names['RU']}
+                    </h5>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '8px' }}>
+                      {item.price.toLocaleString()} ₩
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => addToCart(item)} style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+                      {t.addToCart}
+                    </button>
+                    {isAdminLoggedIn && (
+                      <button onClick={() => setEditingProduct(item)} style={{ background: '#334155', color: '#fff', border: 'none', padding: '6px 8px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer' }}>
+                        ⚙
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* МОДАЛКА РЕДАКТИРОВАНИЯ ТОВАРА ДЛЯ АДМИНА */}
-      {editingProduct && (
-        <div onClick={() => setEditingProduct(null)} style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(5, 7, 10, 0.9)', backdropFilter: 'blur(8px)',
-          zIndex: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', maxHeight: '90dvh', overflowY: 'auto'
-          }}>
-            <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#fcd34d' }}>{t.editItem}</h3>
-            <form onSubmit={handleSaveEditedProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <input type="text" placeholder={t.dishNamePlaceholder} value={editingProduct.names[lang] || editingProduct.names['RU']} onChange={(e) => {
-                const val = e.target.value;
-                setEditingProduct({...editingProduct, names: {...editingProduct.names, [lang]: val}});
-              }} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-              
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="text" inputMode="numeric" placeholder={t.pricePlaceholder} value={editingProduct.price !== null ? editingProduct.price : ''} onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                <input type="text" inputMode="numeric" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice !== null ? editingProduct.oldPrice : ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
-              </div>
-
-              <textarea placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={(e) => {
-                const val = e.target.value;
-                setEditingProduct({...editingProduct, descs: {...editingProduct.descs, [lang]: val}});
-              }} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }} />
-
-              <div>
-                <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>{t.photoLabel}</label>
-                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (img) => setEditingProduct({...editingProduct, image: img}))} style={{ fontSize: '11px', color: '#fff', marginBottom: '4px' }} />
-                <input type="text" placeholder="URL картинки" value={editingProduct.image} onChange={(e) => setEditingProduct({...editingProduct, image: e.target.value})} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '8px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }} />
-              </div>
-
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                <button type="button" onClick={() => setEditingProduct(null)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.cancel}</button>
-                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.saveChanges}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* МОДАЛКА ОФОРМЛЕНИЯ ЗАКАЗА */}
-      {showCheckoutModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(6, 8, 12, 0.95)', backdropFilter: 'blur(8px)',
-          zIndex: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-          padding: '20px 16px', boxSizing: 'border-box', overflowY: 'auto'
-        }}>
-          <div style={{
-            background: '#141822', border: '1px solid rgba(245, 158, 11, 0.4)',
-            borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '420px', boxSizing: 'border-box'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#fcd34d' }}>{t.checkoutTitle}</h3>
-              <button onClick={() => setShowCheckoutModal(false)} style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '18px', cursor: 'pointer' }}>✕</button>
-            </div>
-
-            <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '130px', overflowY: 'auto' }}>
-              {cart.map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
-                  <span>{item.names[lang] || item.names['RU']} (x{item.quantity})</span>
-                  <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{(item.price * item.quantity).toLocaleString()} ₩</span>
+      {/* ВКЛАДКА ИЗБРАННОЕ */}
+      {activeTab === 'likes' && (
+        <div>
+          <h3 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '12px' }}>{t.likesTab}</h3>
+          {likes.length === 0 ? (
+            <p style={{ color: '#9ca3af', fontSize: '13px' }}>{t.emptyLikes}</p>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
+              {products.filter(p => likes.includes(p.id)).map(item => (
+                <div key={item.id} style={{ background: '#141822', borderRadius: '16px', padding: '10px' }}>
+                  <img src={item.image} alt="" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '10px' }} />
+                  <div style={{ fontSize: '13px', fontWeight: 'bold', marginTop: '6px' }}>{item.names[lang] || item.names['RU']}</div>
+                  <div style={{ color: '#fcd34d', fontSize: '12px' }}>{item.price.toLocaleString()} ₩</div>
                 </div>
               ))}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.1)', fontWeight: 'bold', fontSize: '13px' }}>
-                <span>{t.total}</span>
-                <span style={{ color: '#fcd34d' }}>{totalCartPrice.toLocaleString()} ₩</span>
-              </div>
             </div>
+          )}
+        </div>
+      )}
 
-            <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.nameLabel}</label>
-                <input type="text" placeholder={t.namePlaceholder} value={clientName} onChange={handleNameChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.phoneLabel}</label>
-                <input type="text" value={clientPhone} onChange={handlePhoneChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.deliveryTypeLabel}</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button type="button" onClick={() => setDeliveryType('pickup')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: deliveryType === 'pickup' ? '1px solid #f59e0b' : '1px solid #334155', background: deliveryType === 'pickup' ? 'rgba(245,158,11,0.15)' : '#0b0e14', color: '#fff', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>{t.pickup}</button>
-                  <button type="button" onClick={() => setDeliveryType('delivery')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: deliveryType === 'delivery' ? '1px solid #f59e0b' : '1px solid #334155', background: deliveryType === 'delivery' ? 'rgba(245,158,11,0.15)' : '#0b0e14', color: '#fff', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>{t.delivery}</button>
+      {/* ВКЛАДКА ЗАКАЗЫ */}
+      {activeTab === 'orders' && (
+        <div>
+          <h3 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '12px' }}>{t.orderHistoryTitle}</h3>
+          {ordersHistory.length === 0 ? (
+            <p style={{ color: '#9ca3af', fontSize: '13px' }}>{t.emptyOrders}</p>
+          ) : (
+            ordersHistory.map(order => (
+              <div key={order.id} style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '16px', padding: '14px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#9ca3af', marginBottom: '6px' }}>
+                  <span>{order.date}</span>
+                  <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{t.statusCompleted}</span>
                 </div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '6px' }}>{order.clientName} ({order.clientPhone})</div>
+                <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold' }}>{t.total} {order.total.toLocaleString()} ₩</div>
               </div>
-
-              {deliveryType === 'delivery' && (
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.addressLabel}</label>
-                  <input type="text" placeholder={t.addressPlaceholder} value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                </div>
-              )}
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>{t.commentLabel}</label>
-                <textarea placeholder={t.commentPlaceholder} value={clientComment} onChange={(e) => setClientComment(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '50px' }} />
-              </div>
-
-              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '6px' }}>
-                {t.confirmButton}
-              </button>
-            </form>
-          </div>
+            ))
+          )}
         </div>
       )}
 
-      {/* МОДАЛКА ВХОДА АДМИНИСТРАТОРА (Без подсказки по паролю) */}
-      {showLoginModal && (
-        <div onClick={() => setShowLoginModal(false)} style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(5, 7, 10, 0.9)', backdropFilter: 'blur(8px)',
-          zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            background: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '320px', boxSizing: 'border-box'
-          }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#fcd34d' }}>{t.adminLoginTitle}</h3>
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <input type="password" placeholder={t.adminPasswordPlaceholder} value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} autoFocus />
-              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>{t.login}</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* МОДАЛКА СОЗДАНИЯ КАТЕГОРИИ */}
-      {showAddCatModal && (
-        <div onClick={() => setShowAddCatModal(false)} style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(5, 7, 10, 0.9)', backdropFilter: 'blur(8px)',
-          zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            background: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px', boxSizing: 'border-box'
-          }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#fcd34d' }}>{t.addNewCatBtn}</h3>
-            <form onSubmit={handleAddCategory} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <input type="text" placeholder={t.catNamePlaceholder} value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required autoFocus />
-              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>{t.addCatButton}</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* МОДАЛКА ДОБАВЛЕНИЯ ТОВАРА */}
+      {/* МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ТОВАРА ДЛЯ АДМИНА */}
       {showAddModal && (
-        <div onClick={() => setShowAddModal(false)} style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          background: 'rgba(5, 7, 10, 0.9)', backdropFilter: 'blur(8px)',
-          zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box', overflowY: 'auto'
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            background: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', boxSizing: 'border-box', maxHeight: '90dvh', overflowY: 'auto'
-          }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,0.9)', zIndex: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px' }}>
             <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#fcd34d' }}>{t.addNewItemBtn}</h3>
             <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <input type="text" placeholder={t.dishNamePlaceholder} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="text" inputMode="numeric" placeholder={t.pricePlaceholder} value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
-                <input type="text" inputMode="numeric" placeholder={t.oldPricePlaceholder} value={newOldPrice} onChange={(e) => setNewOldPrice(e.target.value)} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
-              </div>
-              <select value={newCat} onChange={(e) => setNewCat(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }}>
-                {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
+              <input type="text" inputMode="numeric" placeholder={t.pricePlaceholder} value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <select value={newCat} onChange={(e) => setNewCat(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px' }}>
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
-              <textarea placeholder={t.descPlaceholder} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }} />
-              <div>
-                <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>{t.photoLabel}</label>
-                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setNewImage)} style={{ fontSize: '11px', color: '#fff', marginBottom: '4px' }} />
-                <input type="text" placeholder="Или URL картинки" value={newImage} onChange={(e) => setNewImage(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '8px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }} />
-              </div>
-              <select value={newBadge} onChange={(e) => setNewBadge(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }}>
-                <option value="ХИТ">Хит</option>
-                <option value="НОВИНКА">Новинка</option>
-                <option value="ПРЕМИУМ">Премиум</option>
-              </select>
+              <textarea placeholder={t.descPlaceholder} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', minHeight: '50px' }} />
+              <input type="text" placeholder="URL картинки" value={newImage} onChange={(e) => setNewImage(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
                 <button type="button" onClick={() => setShowAddModal(false)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.cancel}</button>
                 <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.addButton}</button>
@@ -753,384 +728,100 @@ export default function App() {
         </div>
       )}
 
-      {/* ШАПКА САЙТА (Строгое выравнивание всех элементов по высоте и ширине) */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
-        
-        {/* Логотип и название */}
-        <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', height: '36px' }}>
-          <div style={{
-            width: '36px', height: '36px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
-            boxShadow: '0 4px 12px rgba(245,158,11,0.3)', flexShrink: 0
-          }}>
-            {customLogo}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h1 className="premium-title" style={{ margin: 0 }}>{t.bakeryName}</h1>
-            <span className="premium-subtitle">{t.bakerySub}</span>
+      {/* МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ КАТЕГОРИИ */}
+      {showAddCatModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,0.9)', zIndex: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '320px' }}>
+            <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#fcd34d' }}>{t.addNewCatBtn}</h3>
+            <form onSubmit={handleAddCategory} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="text" placeholder={t.catNamePlaceholder} value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.addCatButton}</button>
+            </form>
           </div>
         </div>
+      )}
 
-        {/* Правый блок элементов управления в одну строку с одинаковой высотой (36px) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px' }}>
-          
-          {/* Кнопка поиска (Лупа) */}
-          <button onClick={() => {
-            const nextState = !isSearchActive;
-            setIsSearchActive(nextState);
-            if (!nextState) resetViewportZoom();
-          }} style={{
-            background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px', boxSizing: 'border-box'
-          }} className="search-container">
-            🔍
-          </button>
-
-          {/* Кнопка Login / Exit */}
-          {!isAdminLoggedIn ? (
-            <button onClick={() => setShowLoginModal(true)} style={{
-              background: '#141822', color: '#9ca3af', border: '1px solid #334155',
-              borderRadius: '8px', padding: '0 10px', height: '36px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', whiteSpace: 'nowrap'
-            }}>
-              {t.loginBtn}
-            </button>
-          ) : (
-            <button onClick={handleExit} style={{
-              background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)',
-              borderRadius: '8px', padding: '0 10px', height: '36px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', whiteSpace: 'nowrap'
-            }}>
-              {t.exitBtn}
-            </button>
-          )}
-
-          {/* Гамбургер меню */}
-          <div className="burger-menu-container" style={{ position: 'relative', display: 'inline-block', height: '36px' }}>
-            <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
-              background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
-              width: '36px', height: '36px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', cursor: 'pointer', boxSizing: 'border-box'
-            }}>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-              <div style={{ width: '12px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
-            </button>
-
-            {/* Выпадающее меню */}
-            {showBurgerMenu && (
-              <div style={{
-                position: 'absolute', top: '42px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
-                borderRadius: '12px', width: 'auto', minWidth: '130px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '6px',
-                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box'
-              }}>
-                <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>🏠 {t.menuMain}</button>
-                <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>✨ {t.menuPromos}</button>
-                <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>📍 {t.menuContacts}</button>
-                <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '11px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}>ℹ️ {t.menuAbout}</button>
+      {/* МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ТОВАРА */}
+      {editingProduct && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,0.9)', zIndex: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px' }}>
+            <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#fcd34d' }}>{t.editItem}</h3>
+            <form onSubmit={handleSaveEditedProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="text" value={editingProduct.names[lang] || editingProduct.names['RU']} onChange={(e) => setEditingProduct({...editingProduct, names: {...editingProduct.names, [lang]: e.target.value}})} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <input type="text" inputMode="numeric" value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button type="button" onClick={() => handleDeleteProduct(editingProduct.id)} style={{ flex: 1, background: '#ef4444', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.deleteItem}</button>
+                <button type="submit" style={{ flex: 1, background: '#22c55e', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.saveChanges}</button>
               </div>
-            )}
+            </form>
           </div>
-
-          {/* Языковая панель (Выровнена по правому краю, ширина сокращена по размеру контента) */}
-          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
-            background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: '8px', height: '36px', width: 'auto', padding: '0 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', boxSizing: 'border-box', textAlignLast: 'right'
-          }}>
-            <option value="RU">🇷🇺 RU</option>
-            <option value="EN">🇺🇸 EN</option>
-            <option value="KO">🇰🇷 KO</option>
-          </select>
-
         </div>
-      </header>
+      )}
 
-      {/* АДМИН ПАНЕЛЬ */}
-      {isAdminLoggedIn && (
+      {/* МОДАЛЬНОЕ ОКНО АДМИН-ВХОДА */}
+      {showLoginModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,10,0.9)', zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '320px' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#fcd34d' }}>{t.adminLoginTitle}</h3>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input type="password" placeholder={t.adminPasswordPlaceholder} value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} autoFocus />
+              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>{t.login}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* НИЖНЯЯ ПАНЕЛЬ С КОРЗИНОЙ И ПЕРЕКЛЮЧАТЕЛЯМИ */}
+      {showBottomNav && (
         <div style={{
-          background: '#141822', border: '1px dashed #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '20px'
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          background: 'rgba(20, 24, 34, 0.95)', backdropFilter: 'blur(10px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)', padding: '12px 16px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100
         }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '15px', color: '#fcd34d' }}>{t.editBannerTitle}</h3>
-          <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '8px' }}>{t.uploadBannerLabel}</p>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerImage)} style={{ fontSize: '11px', color: '#fff' }} />
-            <button onClick={() => setBannerImage('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80')} style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>{t.removeBannerBtn}</button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button onClick={() => setActiveTab('home')} style={{ background: 'transparent', border: 'none', color: activeTab === 'home' ? '#fcd34d' : '#9ca3af', fontSize: '12px', cursor: 'pointer' }}>{t.homeTab}</button>
+            <button onClick={() => setActiveTab('likes')} style={{ background: 'transparent', border: 'none', color: activeTab === 'likes' ? '#fcd34d' : '#9ca3af', fontSize: '12px', cursor: 'pointer' }}>{t.likesTab} ({likes.length})</button>
+            <button onClick={() => setActiveTab('orders')} style={{ background: 'transparent', border: 'none', color: activeTab === 'orders' ? '#fcd34d' : '#9ca3af', fontSize: '12px', cursor: 'pointer' }}>{t.ordersTab} ({ordersHistory.length})</button>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button onClick={() => setShowAddModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '8px 14px', borderRadius: '8px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.addNewItemBtn}</button>
-            <button onClick={() => setShowAddCatModal(true)} style={{ background: '#334155', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '8px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.addNewCatBtn}</button>
-          </div>
-        </div>
-      )}
-
-      {/* АКТИВНАЯ ВКЛАДКА: ГЛАВНАЯ */}
-      {activeTab === 'home' && (
-        <>
-          <div style={{
-            width: '100%', height: '140px', borderRadius: '16px', overflow: 'hidden', position: 'relative',
-            marginBottom: '16px', border: '1px solid rgba(245, 158, 11, 0.2)', boxShadow: '0 8px 24px rgba(0,0,0,0.5)'
-          }}>
-            <img src={bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.6)' }} />
-            <div style={{ position: 'absolute', bottom: '14px', left: '14px', right: '14px' }}>
-              <span style={{ background: '#f59e0b', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '3px 8px', borderRadius: '6px' }}>АКЦИЯ</span>
-              <p style={{ margin: '6px 0 0 0', fontSize: '12px', fontWeight: '600', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Скидка 20% по промокоду "SWEET20" на первый заказ!</p>
-            </div>
-          </div>
-
-          {/* Поиск при активации лупы */}
-          {isSearchActive && (
-            <div className="search-container" style={{ position: 'relative', marginBottom: '16px' }}>
-              <input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
-                width: '100%', background: '#141822', border: '1px solid #f59e0b', borderRadius: '12px',
-                padding: '12px 14px 12px 38px', color: '#fff', fontSize: '13px', boxSizing: 'border-box'
-              }} autoFocus />
-              <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px' }}>🔍</span>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '16px', scrollbarWidth: 'none' }}>
-            <button onClick={() => setActiveCategory('Все')} style={{
-              background: activeCategory === 'Все' ? '#f59e0b' : '#141822',
-              color: activeCategory === 'Все' ? '#0b0e14' : '#9ca3af',
-              border: '1px solid #334155', borderRadius: '10px', padding: '8px 14px', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer'
-            }}>
-              {t.allCategories}
+          {cart.length > 0 && (
+            <button onClick={() => setShowCheckoutModal(true)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px 16px', borderRadius: '12px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>
+              {t.checkoutBtn} ({totalCartPrice.toLocaleString()} ₩)
             </button>
-            {categories.map((cat, i) => (
-              <button key={i} onClick={() => setActiveCategory(cat)} style={{
-                background: activeCategory === cat ? '#f59e0b' : '#141822',
-                color: activeCategory === cat ? '#0b0e14' : '#9ca3af',
-                border: '1px solid #334155', borderRadius: '10px', padding: '8px 14px', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer'
-              }}>
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#9ca3af', fontSize: '14px' }}>{t.notFound}</div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
-              {filteredProducts.map(item => {
-                const isLiked = likes.includes(item.id);
-                return (
-                  <div key={item.id} style={{
-                    background: '#141822', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px',
-                    overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                  }}>
-                    <div style={{ width: '100%', height: '130px', position: 'relative', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setSelectedProduct(item)}>
-                      <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(11,14,20,0.8)', color: '#fcd34d', padding: '2px 6px', borderRadius: '6px', fontSize: '9px', fontWeight: 'bold' }}>{item.badge}</span>
-                      <button onClick={(e) => { e.stopPropagation(); toggleLike(item.id); }} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(11,14,20,0.8)', border: 'none', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {isLiked ? '❤️' : '🤍'}
-                      </button>
-                    </div>
-
-                    <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                      <div onClick={() => setSelectedProduct(item)} style={{ cursor: 'pointer' }}>
-                        <h4 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: 'bold', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.names[lang] || item.names['RU']}
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '11px', color: '#9ca3af', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.3' }}>
-                          {item.descs[lang] || item.descs['RU']}
-                        </p>
-                      </div>
-
-                      <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '900', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</div>
-                          {item.oldPrice && (
-                            <div style={{ fontSize: '10px', color: '#6b7280', textDecoration: 'line-through' }}>{item.oldPrice.toLocaleString()} ₩</div>
-                          )}
-                        </div>
-                        <button onClick={() => addToCart(item)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '30px', height: '30px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          +
-                        </button>
-                      </div>
-
-                      {isAdminLoggedIn && (
-                        <div style={{ display: 'flex', gap: '4px', marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '6px' }}>
-                          <button onClick={() => setEditingProduct(item)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.editItem}</button>
-                          <button onClick={() => handleDeleteProduct(item.id)} style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.deleteItem}</button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ВКЛАДКА: АКЦИИ */}
-      {activeTab === 'promos' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.promoSectionTitle}</h2>
-          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '16px', padding: '16px', marginBottom: '14px' }}>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', color: '#fff' }}>🎁 Скидка 20% на первый заказ</h3>
-            <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 10px 0' }}>Используйте промокод <strong style={{ color: '#fcd34d' }}>SWEET20</strong> при оформлении заказа в корзине.</p>
-          </div>
-          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '16px', padding: '16px' }}>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', color: '#fff' }}>🥐 Счастливые часы</h3>
-            <p style={{ fontSize: '13px', color: '#9ca3af', margin: 0 }}>Каждый вечер с 20:00 до 21:00 скидка 30% на все свежие круассаны в пекарне!</p>
-          </div>
-        </div>
-      )}
-
-      {/* ВКЛАДКА: КОНТАКТЫ */}
-      {activeTab === 'contacts' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.menuContacts}</h2>
-          <div style={{ background: '#141822', border: '1px solid #334155', borderRadius: '16px', padding: '16px', fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
-            <p style={{ margin: '0 0 8px 0', color: '#fff', fontWeight: 'bold' }}>Sweet Bakery Seoul</p>
-            <p style={{ margin: '0 0 8px 0' }}>{t.address}</p>
-            <p style={{ margin: '0 0 8px 0' }}>{t.phone}</p>
-            <p style={{ margin: 0 }}>Email: contact@sweetbakery.kr</p>
-          </div>
-        </div>
-      )}
-
-      {/* ВКЛАДКА: О НАС */}
-      {activeTab === 'about' && (
-        <div style={{ padding: '10px 0' }}>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.menuAbout}</h2>
-          <div style={{ background: '#141822', border: '1px solid #334155', borderRadius: '16px', padding: '16px', fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
-            <p style={{ margin: '0 0 12px 0', color: '#fff', fontWeight: '500' }}>{t.aboutText}</p>
-            <p style={{ margin: 0 }}>{t.contactsText}</p>
-          </div>
-        </div>
-      )}
-
-      {/* ВКЛАДКА: ПОИСК */}
-      {activeTab === 'search' && (
-        <div>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.searchTab}</h2>
-          <input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
-            width: '100%', background: '#141822', border: '1px solid #334155', borderRadius: '12px',
-            padding: '12px 14px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', marginBottom: '14px'
-          }} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
-            {filteredProducts.map(item => (
-              <div key={item.id} onClick={() => setSelectedProduct(item)} style={{ background: '#141822', borderRadius: '12px', padding: '10px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <img src={item.image} alt="" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', marginBottom: '8px' }} />
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#fff' }}>{item.names[lang] || item.names['RU']}</h4>
-                <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ВКЛАДКА: ИЗБРАННОЕ */}
-      {activeTab === 'likes' && (
-        <div>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.likesTab}</h2>
-          {likes.length === 0 ? (
-            <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', marginTop: '40px' }}>{t.emptyLikes}</p>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
-              {products.filter(p => likes.includes(p.id)).map(item => (
-                <div key={item.id} onClick={() => setSelectedProduct(item)} style={{ background: '#141822', borderRadius: '12px', padding: '10px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <img src={item.image} alt="" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px', marginBottom: '8px' }} />
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#fff' }}>{item.names[lang] || item.names['RU']}</h4>
-                  <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       )}
 
-      {/* ВКЛАДКА: ЗАКАЗЫ */}
-      {activeTab === 'orders' && (
-        <div>
-          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.orderHistoryTitle}</h2>
-          {ordersHistory.length === 0 ? (
-            <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', marginTop: '40px' }}>{t.emptyOrders}</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {ordersHistory.map(order => (
-                <div key={order.id} style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '14px', padding: '14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>
-                    <span>Заказ #{order.id.toString().slice(-5)}</span>
-                    <span style={{ color: '#fcd34d' }}>{order.date}</span>
-                  </div>
-                  <div style={{ fontSize: '12px', marginBottom: '8px' }}>
-                    {order.items.map((it, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
-                        <span>{it.names[lang] || it.names['RU']} (x{it.quantity})</span>
-                        <span style={{ color: '#fcd34d' }}>{(it.price * it.quantity).toLocaleString()} ₩</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px', fontWeight: 'bold', fontSize: '13px' }}>
-                    <span>{t.total} <span style={{ color: '#fcd34d' }}>{order.total.toLocaleString()} ₩</span></span>
-                    <span style={{ fontSize: '11px', color: '#34d399', background: 'rgba(52,211,153,0.1)', padding: '2px 6px', borderRadius: '6px' }}>{t.statusCompleted}</span>
+      {/* МОДАЛЬНОЕ ОКНО ОФОРМЛЕНИЯ ЗАКАЗА */}
+      {showCheckoutModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,8,12,0.95)', zIndex: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 16px', overflowY: 'auto' }}>
+          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '420px', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', color: '#fcd34d' }}>{t.checkoutTitle}</h3>
+              <button onClick={() => setShowCheckoutModal(false)} style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '18px', cursor: 'pointer' }}>✕</button>
+            </div>
+            
+            <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '130px', overflowY: 'auto' }}>
+              {cart.map((item, index) => (
+                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                  <span>{item.names[lang] || item.names['RU']} (x{item.quantity})</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{(item.price * item.quantity).toLocaleString()} ₩</span>
+                    <button onClick={() => decreaseQuantity(item.id)} style={{ background: '#ef4444', color: '#fff', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>-</button>
+                    <button onClick={() => addToCart(item)} style={{ background: '#22c55e', color: '#fff', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>+</button>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* НИЖНЯЯ ПЛАВАЮЩАЯ КОРЗИНА */}
-      {cart.length > 0 && activeTab === 'home' && (
-        <div style={{
-          position: 'fixed', bottom: '74px', left: '16px', right: '16px',
-          background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '12px 16px',
-          display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)', zIndex: 120
-        }}>
-          <div style={{ maxHeight: '100px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {cart.map((item, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                <span style={{ color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{item.names[lang] || item.names['RU']}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button onClick={() => decreaseQuantity(item.id)} style={{ background: '#334155', color: '#fff', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>-</button>
-                  <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.quantity}</span>
-                  <button onClick={() => addToCart(item)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>+</button>
-                  <span style={{ minWidth: '60px', textAlign: 'right', color: '#fcd34d', fontWeight: 'bold' }}>{(item.price * item.quantity).toLocaleString()} ₩</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
-            <div>
-              <div style={{ fontSize: '11px', color: '#9ca3af' }}>{t.selectedItems}: {totalCartCount}</div>
-              <div style={{ fontSize: '15px', color: '#fcd34d', fontWeight: '900' }}>{totalCartPrice.toLocaleString()} ₩</div>
-            </div>
-            <button onClick={() => setShowCheckoutModal(true)} style={{
-              background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px 18px', borderRadius: '10px',
-              fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
-            }}>
-              {t.checkoutBtn}
-            </button>
+            <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input type="text" placeholder={t.namePlaceholder} value={clientName} onChange={handleNameChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <input type="text" value={clientPhone} onChange={handlePhoneChange} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>{t.confirmButton}</button>
+            </form>
           </div>
         </div>
-      )}
-
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ КЛИЕНТА */}
-      {!isAdminLoggedIn && (
-        <nav style={{
-          position: 'fixed', bottom: 0, left: 0, width: '100vw', background: '#141822',
-          borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-around',
-          padding: '10px 0', zIndex: 130, transform: showBottomNav ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease'
-        }}>
-          <button onClick={goToHome} style={{ background: 'transparent', border: 'none', color: activeTab === 'home' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
-            <span style={{ fontSize: '16px' }}>🏠</span> {t.homeTab}
-          </button>
-          <button onClick={() => setActiveTab('search')} style={{ background: 'transparent', border: 'none', color: activeTab === 'search' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
-            <span style={{ fontSize: '16px' }}>🔍</span> {t.searchTab}
-          </button>
-          <button onClick={() => setActiveTab('likes')} style={{ background: 'transparent', border: 'none', color: activeTab === 'likes' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
-            <span style={{ fontSize: '16px' }}>❤️</span> {t.likesTab}
-            {likes.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{likes.length}</span>}
-          </button>
-          <button onClick={() => setActiveTab('orders')} style={{ background: 'transparent', border: 'none', color: activeTab === 'orders' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
-            <span style={{ fontSize: '16px' }}>📦</span> {t.ordersTab}
-            {ordersHistory.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ordersHistory.length}</span>}
-          </button>
-        </nav>
       )}
 
     </div>
