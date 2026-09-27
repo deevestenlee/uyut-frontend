@@ -1,27 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState([]);
   
-  // Языки и активная вкладка нижнего меню
   const [lang, setLang] = useState('RU');
   const [activeTab, setActiveTab] = useState('home');
+
+  // Управление видимостью нижней панели при скролле
+  const [showBottomNav, setShowBottomNav] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowBottomNav(false); // скролл вниз — прячем
+      } else {
+        setShowBottomNav(true); // скролл вверх — показываем
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Управление админкой
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
+  
+  // Увеличение товара (модалка детального просмотра)
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Управление модальным окном оформления заказа (телефон сразу 010)
+  // Оформление заказа (телефон с маской 010)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('010');
   const [deliveryType, setDeliveryType] = useState('pickup');
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
+
+  // Функция перевода плашек (Хит, Новинка, Премиум) для любых товаров
+  const getBadgeText = (badgeType, currentLang) => {
+    const normalized = (badgeType || '').toUpperCase();
+    if (normalized.includes('ХИТ') || normalized.includes('HIT')) {
+      if (currentLang === 'KO') return '인기';
+      if (currentLang === 'EN') return 'HIT';
+      return 'ХИТ';
+    }
+    if (normalized.includes('НОВ') || normalized.includes('NEW')) {
+      if (currentLang === 'KO') return '신메뉴';
+      if (currentLang === 'EN') return 'NEW';
+      return 'НОВИНКА';
+    }
+    if (normalized.includes('ПРЕМ') || normalized.includes('PREM')) {
+      if (currentLang === 'KO') return '프리미엄';
+      if (currentLang === 'EN') return 'PREMIUM';
+      return 'ПРЕМИУМ';
+    }
+    return badgeType;
+  };
 
   const [products, setProducts] = useState([
     { 
@@ -31,8 +72,8 @@ export default function App() {
       price: 4500, 
       oldPrice: 5000,
       rating: '4.9', 
-      desc: lang === 'KO' ? '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' : 'Франс буттердо онёк башакэн пейстри...', 
-      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80', 
+      desc: lang === 'KO' ? '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' : lang === 'EN' ? 'Crispy pastry made with French butter and smooth frangipane cream...' : 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
       badge: 'ХИТ' 
     },
     { 
@@ -42,8 +83,8 @@ export default function App() {
       price: 5500, 
       oldPrice: 6500,
       rating: '4.8', 
-      desc: lang === 'KO' ? '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' : 'Пышное сдобное тесто ручной работы...', 
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80', 
+      desc: lang === 'KO' ? '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' : lang === 'EN' ? 'Soft handmade brioche dough with Belgian cocoa...' : 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
       badge: 'НОВИНКА' 
     },
     { 
@@ -53,8 +94,8 @@ export default function App() {
       price: 6000, 
       oldPrice: null,
       rating: '5.0', 
-      desc: lang === 'KO' ? '달콤한 크림과 바닐라 시트...' : 'Нежный крем и ванильный бисквит...', 
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80', 
+      desc: lang === 'KO' ? '달콤한 크림과 바닐라 시트...' : lang === 'EN' ? 'Sweet cream and vanilla sponge...' : 'Нежнейший крем, ванильный бисквит и авторский декор...', 
+      image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=600&q=80', 
       badge: 'ПРЕМИУМ' 
     }
   ]);
@@ -97,8 +138,8 @@ export default function App() {
       price: Number(newPrice),
       oldPrice: newOldPrice ? Number(newOldPrice) : null,
       rating: '5.0',
-      desc: newDesc || 'Свежая выпечка ручной работы',
-      image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
+      desc: newDesc || 'Премиальная выпечка ручной работы',
+      image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
       badge: newBadge
     };
     setProducts([newItem, ...products]);
@@ -108,6 +149,30 @@ export default function App() {
     setNewDesc('');
     setNewImage('');
     alert('Товар успешно добавлен!');
+  };
+
+  // Валидация ввода телефона: только цифры, маска 010-XXXX-XXXX
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, ''); // оставляем только цифры
+    if (!val.startsWith('010')) {
+      val = '010' + val.replace(/^0+/, '');
+    }
+    if (val.length > 11) val = val.slice(0, 11);
+
+    let formatted = '010';
+    if (val.length > 3) {
+      formatted += '-' + val.slice(3, 7);
+    }
+    if (val.length > 7) {
+      formatted += '-' + val.slice(7, 11);
+    }
+    setClientPhone(formatted);
+  };
+
+  // Валидация ввода имени: только буквы (русские, английские, корейские и пробелы)
+  const handleNameChange = (e) => {
+    const val = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁㄱ-ㅎㅏ-ㅣ가-힣\s]/g, '');
+    setClientName(val);
   };
 
   const filteredProducts = products.filter(item => {
@@ -126,12 +191,12 @@ export default function App() {
 
   const handleSendOrder = (e) => {
     e.preventDefault();
-    if (!clientName || clientPhone.length < 5) {
-      alert('Пожалуйста, заполните обязательные поля (Имя и Телефон).');
+    if (!clientName.trim() || clientPhone.length < 13) {
+      alert('Пожалуйста, введите корректное имя (только буквы) и полный номер телефона.');
       return;
     }
 
-    let orderText = `🥐 *Новый заказ в Sweet Bakery!*\n\n`;
+    let orderText = `👑 *Новый премиум-заказ в Sweet Bakery!*\n\n`;
     orderText += `👤 *Имя:* ${clientName}\n`;
     orderText += `📞 *Телефон:* ${clientPhone}\n`;
     orderText += `📦 *Способ:* ${deliveryType === 'pickup' ? 'Самовывоз 🏃' : 'Доставка 🛵'}\n`;
@@ -163,27 +228,76 @@ export default function App() {
       margin: 0, padding: '16px 16px 110px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
-      {/* Просмотр фото */}
-      {selectedImage && (
+      {/* 7. МОДАЛЬНОЕ ОКНО УВЕЛИЧЕНИЯ ТОВАРА С РАМКОЙ И ИНФОРМАЦИЕЙ */}
+      {selectedProduct && (
         <div 
-          onClick={() => setSelectedImage(null)}
+          onClick={() => setSelectedProduct(null)}
           style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-            background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(8px)',
-            zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box', cursor: 'pointer'
+            background: 'rgba(5, 7, 10, 0.92)', backdropFilter: 'blur(10px)',
+            zIndex: 150, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
           }}
         >
-          <img src={selectedImage} alt="Zoomed" style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '16px', border: '1px solid rgba(245, 158, 11, 0.3)' }} />
-          <span style={{ color: '#f59e0b', fontSize: '13px', marginTop: '16px', fontWeight: 'bold' }}>Нажмите, чтобы закрыть ✕</span>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#141822', border: '1px solid rgba(245, 158, 11, 0.4)',
+              borderRadius: '24px', padding: '20px', width: '100%', maxWidth: '380px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.8)', boxSizing: 'border-box', position: 'relative'
+            }}
+          >
+            <button 
+              onClick={() => setSelectedProduct(null)}
+              style={{
+                position: 'absolute', top: '14px', right: '14px', background: 'rgba(255,255,255,0.1)',
+                border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ width: '100%', height: '220px', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <img src={selectedProduct.image} alt={selectedProduct.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#fff' }}>{selectedProduct.name}</h2>
+              <span style={{ background: 'rgba(245,158,11,0.15)', color: '#fcd34d', padding: '4px 8px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>
+                ★ {selectedProduct.rating}
+              </span>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5', margin: '0 0 16px 0' }}>
+              {selectedProduct.desc}
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px' }}>
+              <div>
+                <div style={{ fontSize: '18px', fontWeight: '900', color: '#fcd34d' }}>{selectedProduct.price.toLocaleString()} ₩</div>
+                {selectedProduct.oldPrice && (
+                  <div style={{ fontSize: '12px', color: '#6b7280', textDecoration: 'line-through' }}>{selectedProduct.oldPrice.toLocaleString()} ₩</div>
+                )}
+              </div>
+              <button 
+                onClick={() => {
+                  addToCart(selectedProduct);
+                  setSelectedProduct(null);
+                }}
+                style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '12px 20px', borderRadius: '12px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(245,158,11,0.3)' }}
+              >
+                В корзину +
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ОФОРМЛЕНИЕ ЗАКАЗА */}
+      {/* ОФОРМЛЕНИЕ ЗАКАЗА (8. Валидация и маска) */}
       {showCheckoutModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
           background: 'rgba(6, 8, 12, 0.95)', backdropFilter: 'blur(8px)',
-          zIndex: 95, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+          zIndex: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
           padding: '20px 16px', boxSizing: 'border-box', overflowY: 'auto'
         }}>
           <div style={{
@@ -193,12 +307,12 @@ export default function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '16px', color: '#fcd34d' }}>📋 Оформление заказа</h3>
-                <span style={{ fontSize: '10px', color: '#9ca3af' }}>Все поля обязательные, кроме комментариев</span>
+                <span style={{ fontSize: '10px', color: '#9ca3af' }}>Имя (только буквы) и телефон (010) обязательны</span>
               </div>
               <button onClick={() => setShowCheckoutModal(false)} style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '18px', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '150px', overflowY: 'auto' }}>
+            <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '140px', overflowY: 'auto' }}>
               <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>Ваш выбор:</div>
               {cart.map((item, index) => (
                 <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
@@ -217,18 +331,18 @@ export default function App() {
 
             <form onSubmit={handleSendOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ваше имя *</label>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ваше имя (только буквы) *</label>
                 <input 
-                  type="text" placeholder="Например: Александр" value={clientName} onChange={e => setClientName(e.target.value)}
+                  type="text" placeholder="Например: Alexander" value={clientName} onChange={handleNameChange}
                   style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Номер телефона *</label>
+                <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Номер телефона (010-****-****) *</label>
                 <input 
-                  type="text" value={clientPhone} onChange={e => setClientPhone(e.target.value)}
-                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
+                  type="text" value={clientPhone} onChange={handlePhoneChange} placeholder="010-____-____" maxLength={13}
+                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none', letterSpacing: '1px' }} required 
                 />
               </div>
 
@@ -254,7 +368,7 @@ export default function App() {
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Адрес доставки *</label>
                   <input 
-                    type="text" placeholder="Город, улица, дом" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
+                    type="text" placeholder="Seoul, Gangnam-gu..." value={clientAddress} onChange={e => setClientAddress(e.target.value)}
                     style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }} required 
                   />
                 </div>
@@ -263,8 +377,8 @@ export default function App() {
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Комментарий (необязательно)</label>
                 <textarea 
-                  placeholder="Пожелания..." value={clientComment} onChange={e => setClientComment(e.target.value)}
-                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none', minHeight: '50px' }} 
+                  placeholder="Пожелания к заказу..." value={clientComment} onChange={e => setClientComment(e.target.value)}
+                  style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', outline: 'none', minHeight: '45px' }} 
                 />
               </div>
 
@@ -276,21 +390,27 @@ export default function App() {
         </div>
       )}
 
-      {/* Верхняя премиальная панель (Языки + Админ) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '3px', gap: '2px' }}>
-          {['RU', 'EN', 'KO'].map((item) => (
+      {/* 6. ПАНЕЛЬ С ЯЗЫКАМИ СМЕЩЕНА НИЖЕ С ФЛАГАМИ */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', marginTop: '4px' }}>
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '4px', gap: '4px' }}>
+          {[
+            { code: 'RU', flag: '🇷🇺' },
+            { code: 'EN', flag: '🇬🇧' },
+            { code: 'KO', flag: '🇰🇷' }
+          ].map((item) => (
             <button
-              key={item}
-              onClick={() => setLang(item)}
+              key={item.code}
+              onClick={() => setLang(item.code)}
               style={{
-                background: lang === item ? '#f59e0b' : 'transparent',
-                color: lang === item ? '#0b0e14' : '#9ca3af',
-                border: 'none', borderRadius: '8px', padding: '4px 10px',
-                fontSize: '11px', fontWeight: '800', cursor: 'pointer', transition: '0.2s'
+                background: lang === item.code ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'transparent',
+                color: lang === item.code ? '#0b0e14' : '#9ca3af',
+                border: 'none', borderRadius: '10px', padding: '6px 12px',
+                fontSize: '11px', fontWeight: '800', cursor: 'pointer', transition: '0.2s',
+                display: 'flex', alignItems: 'center', gap: '6px'
               }}
             >
-              {item}
+              <span>{item.flag}</span>
+              <span>{item.code}</span>
             </button>
           ))}
         </div>
@@ -299,7 +419,7 @@ export default function App() {
           onClick={() => setShowLoginModal(true)}
           style={{
             background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
-            color: '#f59e0b', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+            color: '#f59e0b', padding: '8px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '6px'
           }}
         >
@@ -312,7 +432,7 @@ export default function App() {
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
           background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(6px)',
-          zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
+          zIndex: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
         }}>
           <form onSubmit={handleLogin} style={{
             background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -333,13 +453,13 @@ export default function App() {
         </div>
       )}
 
-      {/* Панель добавления товара для админа */}
+      {/* Панель добавления товара */}
       {isAdminLoggedIn && (
         <div style={{
           background: '#141822', border: '1px solid #f59e0b',
           borderRadius: '16px', padding: '14px', marginBottom: '16px'
         }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар в меню</h3>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить премиум товар</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <input 
               type="text" placeholder="Название блюда" value={newTitle} onChange={e => setNewTitle(e.target.value)}
@@ -380,51 +500,62 @@ export default function App() {
               style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
             />
             <div>
-              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Фото с устройства:</label>
+              <label style={{ display: 'block', fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Фото:</label>
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '11px', color: '#9ca3af', width: '100%' }} />
             </div>
             <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '10px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', marginTop: '4px' }}>
-              Добавить
+              Добавить в базу
             </button>
           </form>
         </div>
       )}
 
-      {/* Логотип и контакты в шапке */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      {/* 1 & 2. ПРЕМИАЛЬНЫЙ ЛОГОТИП И ИДЕАЛЬНО ВЫРАВНЕННОЕ НАЗВАНИЕ */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: '46px', height: '46px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', boxShadow: '0 4px 12px rgba(245,158,11,0.3)'
-          }}>🥐</div>
-          <div>
-            <div style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '0.5px' }}>SWEET BAKERY</div>
-            <div style={{ fontSize: '10px', fontWeight: '600', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              {lang === 'KO' ? '프리미엄 베이커리' : lang === 'EN' ? 'Premium Bakery' : 'Премиальная кондитерская'}
+            width: '48px', height: '48px', background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+            borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 6px 16px rgba(245,158,11,0.35)', border: '1px solid rgba(255,255,255,0.2)'
+          }}>👑</div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: '17px', fontWeight: '900', letterSpacing: '0.8px', color: '#fff', lineHeight: '1.2' }}>SWEET BAKERY</div>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '1.5px', lineHeight: '1.2', marginTop: '2px' }}>
+              {lang === 'KO' ? '프리미엄 베이커리' : lang === 'EN' ? 'PREMIUM BAKERY' : 'ПРЕМИАЛЬНАЯ КОНДИТЕРСКАЯ'}
             </div>
           </div>
         </div>
 
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '13px', fontWeight: '800', color: '#fcd34d' }}>📞 010-1234-5678</div>
+          <div style={{ fontSize: '12px', fontWeight: '800', color: '#fcd34d' }}>📞 010-1234-5678</div>
           <div style={{ fontSize: '10px', color: '#9ca3af' }}>📍 서울 강남구 12-3</div>
         </div>
       </div>
 
-      {/* Баннер акции */}
+      {/* 3. СОЧНАЯ И ЯРКАЯ АКЦИЯ С ПРЕМИУМ СТИЛЕМ И КАРТИНКОЙ */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(20, 24, 34, 0.8) 100%)',
-        border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '16px', padding: '14px', marginBottom: '16px',
-        display: 'flex', flexDirection: 'column', gap: '8px'
+        background: 'linear-gradient(135deg, #1e1b10 0%, #141822 100%)',
+        border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '18px', padding: '16px', marginBottom: '18px',
+        display: 'flex', alignItems: 'center', gap: '14px', position: 'relative', overflow: 'hidden',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ background: '#f59e0b', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '2px 8px', borderRadius: '6px' }}>
-            {lang === 'KO' ? '이벤트' : lang === 'EN' ? 'EVENT' : 'АКЦИЯ'}
-          </span>
-          <span style={{ fontSize: '11px', color: '#fcd34d', fontWeight: 'bold' }}>스페셜 이벤트</span>
-        </div>
-        <div style={{ fontSize: '12px', color: '#e5e7eb', lineHeight: '1.4' }}>
-          {lang === 'KO' ? '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인 혜택을 드립니다' : 'Промокод "SWEET20" дает скидку 20% на первый заказ!'}
+        <div style={{
+          position: 'absolute', top: 0, right: 0, width: '120px', height: '100%',
+          backgroundImage: 'url("https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80")',
+          backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.25,
+          maskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))',
+          WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))'
+        }}></div>
+
+        <div style={{ flex: 1, zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+              {lang === 'KO' ? '스페셜 이벤트' : lang === 'EN' ? 'SPECIAL EVENT' : 'СПЕЦ-АКЦИЯ'}
+            </span>
+            <span style={{ fontSize: '10px', color: '#fcd34d', fontWeight: 'bold' }}>✨ -20% OFF</span>
+          </div>
+          <div style={{ fontSize: '12px', color: '#e5e7eb', lineHeight: '1.4', fontWeight: '500' }}>
+            {lang === 'KO' ? '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인!' : lang === 'EN' ? 'Use promo code "SWEET20" for 20% off your first order!' : 'Введите промокод "SWEET20" и получите скидку 20% на первый заказ!'}
+          </div>
         </div>
       </div>
 
@@ -485,18 +616,19 @@ export default function App() {
           filteredProducts.map((item) => (
             <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
               
+              {/* 4. МНОГОЯЗЫЧНЫЕ ПЛАШКИ (ХИТ / НОВИНКА / ПРЕМИУМ) */}
               {item.badge && (
                 <div style={{
                   position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)',
                   color: '#0b0e14', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, textTransform: 'uppercase', letterSpacing: '0.5px'
                 }}>
-                  {item.badge}
+                  {getBadgeText(item.badge, lang)}
                 </div>
               )}
 
               <div 
-                onClick={() => setSelectedImage(item.image)}
+                onClick={() => setSelectedProduct(item)}
                 style={{ height: '140px', width: '100%', overflow: 'hidden', background: '#141822', position: 'relative', cursor: 'pointer' }}
               >
                 <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -532,14 +664,14 @@ export default function App() {
         )}
       </div>
 
-      {/* Плашка корзины если есть товары */}
+      {/* Плашка корзины */}
       {cart.length > 0 && (
         <div style={{
-          position: 'fixed', bottom: '70px', left: '16px', right: '16px',
+          position: 'fixed', bottom: showBottomNav ? '70px' : '16px', left: '16px', right: '16px',
           background: 'rgba(20, 24, 34, 0.95)', backdropFilter: 'blur(10px)',
           border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '16px', padding: '12px 16px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box', zIndex: 50,
-          boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+          boxShadow: '0 10px 25px rgba(0,0,0,0.5)', transition: 'bottom 0.3s ease'
         }}>
           <div>
             <div style={{ fontSize: '11px', color: '#9ca3af' }}>Выбрано: {cart.length} тов.</div>
@@ -554,12 +686,12 @@ export default function App() {
         </div>
       )}
 
-      {/* Нижняя навигация */}
+      {/* 5. НИЖНЯЯ ПАНЕЛЬ СХОДИТ И ПРИХОДИТ ПРИ СКРОЛЛЕ */}
       <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, height: '60px',
+        position: 'fixed', bottom: showBottomNav ? 0 : '-70px', left: 0, right: 0, height: '60px',
         background: '#0e121b', borderTop: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex', justifyContent: 'space-around', alignItems: 'center', zIndex: 40,
-        paddingBottom: 'env(safe-area-inset-bottom)'
+        paddingBottom: 'env(safe-area-inset-bottom)', transition: 'bottom 0.3s ease'
       }}>
         {[
           { id: 'home', label: lang === 'KO' ? '홈' : lang === 'EN' ? 'Home' : 'Домой', icon: '🏠' },
