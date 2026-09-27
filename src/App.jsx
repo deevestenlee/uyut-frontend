@@ -1,517 +1,277 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, Plus, Trash2, Phone, Calendar, User, Clock, Check } from 'lucide-react';
 
-// Начальный список товаров
-const INITIAL_PRODUCTS = [
-  {
-    id: 1,
-    name: 'Тартин на закваске',
-    desc: 'Хрустящая корочка, мягкий и ароматный мякиш долгого брожения',
-    price: 7000,
-    category: 'Выпечка',
-    image: 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=600&q=80',
-    tag: 'Хит',
-    isAvailable: true
-  },
-  {
-    id: 2,
-    name: 'Круассан классический',
-    desc: 'Воздушное слоёное тесто на натуральном сливочном масле',
-    price: 4000,
-    category: 'Выпечка',
-    image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80',
-    tag: 'Свежее',
-    isAvailable: true
-  },
-  {
-    id: 3,
-    name: 'Борщ с говядиной',
-    desc: 'Наваристый домашний борщ, подается со сметаной и зеленью',
-    price: 11000,
-    category: 'Домашняя еда',
-    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-    tag: 'Сытно',
-    isAvailable: true
-  },
-  {
-    id: 4,
-    name: 'Торт Медовик',
-    desc: 'Нежные медовые коржи со сметанно-сливочным кремом',
-    price: 6500,
-    category: 'Десерты',
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
-    tag: 'Десерт',
-    isAvailable: true
-  }
-];
+const API_URL = "https://uyut-backend.onrender.com";
 
 export default function App() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
-  const [activeCategory, setActiveCategory] = useState('Все');
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  
-  // Режим админа
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-
-  // Поля формы нового товара
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    desc: '',
-    price: '',
-    category: 'Выпечка',
-    image: '',
-    tag: ''
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [orderSent, setOrderSent] = useState(false);
+  const [formData, setFormData] = useState({
+    customer_name: '',
+    phone: '',
+    delivery_date: ''
   });
 
-  const categories = ['Все', 'Выпечка', 'Домашняя еда', 'Салаты', 'Десерты'];
+  useEffect(() => {
+    fetch(`${API_URL}/api/menu`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки меню:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  // Фильтрация товаров для клиентов (скрываем стоп-лист)
-  const filteredProducts = products.filter(p => {
-    const matchesCategory = activeCategory === 'Все' || p.category === activeCategory;
-    return isAdmin ? matchesCategory : (matchesCategory && p.isAvailable);
-  });
-
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
-  // Функция добавления товара админом
-  const handleAddProduct = (e) => {
-    e.preventDefault();
-    if (!newProduct.name || !newProduct.price) return;
-
-    const itemToAdd = {
-      id: Date.now(),
-      name: newProduct.name,
-      desc: newProduct.desc || 'Описание не указано',
-      price: Number(newProduct.price),
-      category: newProduct.category,
-      image: newProduct.image || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
-      tag: newProduct.tag || null,
-      isAvailable: true
-    };
-
-    setProducts([itemToAdd, ...products]);
-    setNewProduct({ name: '', desc: '', price: '', category: 'Выпечка', image: '', tag: '' });
-    setShowAddForm(false);
-  };
-
-  // Включение / выключение стоп-листа
-  const toggleAvailability = (id) => {
-    setProducts(products.map(p => p.id === id ? { ...p, isAvailable: !p.isAvailable } : p));
-  };
-
-  // Удаление товара
-  const handleDeleteProduct = (id) => {
-    if (window.confirm('Удалить это блюдо из меню?')) {
-      setProducts(products.filter(p => p.id !== id));
+  const addToCart = (product, variant) => {
+    const cartItemId = `${product.id}-${variant.size}`;
+    const existing = cart.find((item) => item.cartItemId === cartItemId);
+    if (existing) {
+      setCart(cart.map((item) =>
+        item.cartItemId === cartItemId ? { ...item, count: item.count + 1 } : item
+      ));
+    } else {
+      setCart([...cart, {
+        cartItemId,
+        id: product.id,
+        title: product.title,
+        size: variant.size,
+        price: variant.price,
+        count: 1
+      }]);
     }
   };
 
-  return (
-    <div style={{
-      maxWidth: '480px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      backgroundColor: '#0F172A',
-      color: '#F8FAFC',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: '90px',
-      boxShadow: '0 0 30px rgba(0,0,0,0.5)'
-    }}>
-      {/* Шапка с кнопкой переключения в админку */}
-      <div style={{
-        position: 'relative',
-        height: '180px',
-        backgroundImage: 'linear-gradient(to bottom, rgba(15,23,42,0.4), rgba(15,23,42,1)), url("https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
-      }}>
-        {/* Панель сверху: Режим Админа */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button
-            onClick={() => setIsAdmin(!isAdmin)}
-            style={{
-              backgroundColor: isAdmin ? '#E11D48' : 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(10px)',
-              color: '#FFF',
-              border: '1px solid rgba(255,255,255,0.2)',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              fontSize: '11px',
-              fontWeight: '700',
-              cursor: 'pointer'
-            }}
-          >
-            {isAdmin ? '⚙️ Выйти из админки' : '🔐 Режим владельца'}
-          </button>
-          
-          <span style={{
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            padding: '6px 12px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '600',
-            border: '1px solid rgba(255,255,255,0.2)'
-          }}>
-            🇰🇷 KRW (₩)
-          </span>
-        </div>
+  const removeFromCart = (cartItemId) => {
+    setCart(cart.filter((item) => item.cartItemId !== cartItemId));
+  };
 
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800' }}>
-            {isAdmin ? '⚙️ Управление меню' : 'Uyut Bakery ✨'}
-          </h1>
-          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94A3B8' }}>
-            {isAdmin ? 'Панель администратора кафе' : 'Домашняя пекарня & Кухня'}
-          </p>
+  const updateCount = (cartItemId, delta) => {
+    setCart(cart.map((item) => {
+      if (item.cartItemId === cartItemId) {
+        const newCount = item.count + delta;
+        return newCount > 0 ? { ...item, count: newCount } : item;
+      }
+      return item;
+    }));
+  };
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.count, 0);
+
+  const handleOrder = async (e) => {
+    e.preventDefault();
+    if (cart.length === 0) return alert("Корзина пуста!");
+
+    try {
+      const response = await fetch(`${API_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          total_price: totalPrice
+        })
+      });
+
+      if (response.ok) {
+        setOrderSent(true);
+        setCart([]);
+      } else {
+        alert("Ошибка при создании заказа");
+      }
+    } catch (err) {
+      alert("Не удалось отправить заказ. Проверьте соединение.");
+    }
+  };
+
+  if (orderSent) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
+        <div className="bg-slate-800 p-8 rounded-2xl max-w-md w-full text-center border border-slate-700">
+          <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Заказ успешно оформлен!</h2>
+          <p className="text-slate-400 mb-6">Мы свяжемся с вами в ближайшее время для подтверждения.</p>
+          <button 
+            onClick={() => setOrderSent(false)} 
+            className="w-full py-3 bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl transition"
+          >
+            Вернуться в меню
+          </button>
         </div>
       </div>
+    );
+  }
 
-      {/* Кнопка добавления нового товара (только для Админа) */}
-      {isAdmin && (
-        <div style={{ padding: '16px 20px 0 20px' }}>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            style={{
-              width: '100%',
-              backgroundColor: showAddForm ? '#334155' : '#10B981',
-              color: '#FFF',
-              border: 'none',
-              padding: '12px',
-              borderRadius: '14px',
-              fontWeight: '700',
-              fontSize: '14px',
-              cursor: 'pointer',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            {showAddForm ? '❌ Отменить' : '➕ Добавить новое блюдо'}
-          </button>
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 pb-24">
+      {/* Шапка */}
+      <header className="bg-slate-900/80 backdrop-blur sticky top-0 z-40 border-b border-slate-800 p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-amber-500">Уютная Пекарня</h1>
+            <p className="text-xs text-slate-400">Свежая выпечка и десерты</p>
+          </div>
+          <div className="relative">
+            <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+              <ShoppingBag className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-semibold">{totalPrice.toLocaleString()} ₩</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-          {/* Форма добавления блюда */}
-          {showAddForm && (
-            <form onSubmit={handleAddProduct} style={{
-              backgroundColor: '#1E293B',
-              padding: '16px',
-              borderRadius: '16px',
-              marginTop: '12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-              border: '1px solid #10B981'
-            }}>
-              <input
-                type="text"
-                placeholder="Название блюда *"
-                value={newProduct.name}
-                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                required
-                style={inputStyle}
-              />
-              <input
-                type="number"
-                placeholder="Цена в вонах (например: 8000) *"
-                value={newProduct.price}
-                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                required
-                style={inputStyle}
-              />
-              <select
-                value={newProduct.category}
-                onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                style={inputStyle}
+      {/* Список товаров */}
+      <main className="max-w-4xl mx-auto p-4">
+        {loading ? (
+          <div className="text-center py-12 text-slate-400">Загрузка меню...</div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12 text-slate-400">Товары пока не добавлены</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {products.map((product) => (
+              <div key={product.id} className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between">
+                <div>
+                  <div className="relative h-48 bg-slate-800">
+                    <img 
+                      src={product.image || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500'} 
+                      alt={product.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    {product.badge && (
+                      <span className="absolute top-2 left-2 bg-amber-500 text-slate-950 text-xs font-bold px-2 py-1 rounded-md">
+                        {product.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg">{product.title}</h3>
+                    <p className="text-sm text-slate-400 mt-1">{product.description}</p>
+                  </div>
+                </div>
+
+                <div className="p-4 pt-0">
+                  <div className="text-xs text-slate-400 mb-2 font-medium">Варианты:</div>
+                  <div className="space-y-2">
+                    {product.variants?.map((variant) => (
+                      <div key={variant.id} className="flex items-center justify-between bg-slate-800/50 p-2 rounded-xl border border-slate-800">
+                        <span className="text-sm font-medium">{variant.size}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-amber-400">{variant.price.toLocaleString()} ₩</span>
+                          <button 
+                            onClick={() => addToCart(product, variant)}
+                            className="p-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg transition"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Корзина и форма заказа */}
+        {cart.length > 0 && (
+          <div className="mt-8 bg-slate-900 rounded-2xl border border-slate-800 p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <ShoppingBag className="text-amber-500" />
+              Ваш заказ
+            </h2>
+
+            <div className="space-y-3 mb-6">
+              {cart.map((item) => (
+                <div key={item.cartItemId} className="flex items-center justify-between bg-slate-800/40 p-3 rounded-xl">
+                  <div>
+                    <div className="font-semibold text-sm">{item.title}</div>
+                    <div className="text-xs text-slate-400">Размер: {item.size}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-1">
+                      <button onClick={() => updateCount(item.cartItemId, -1)} className="px-2 py-0.5 hover:bg-slate-700 rounded text-xs">-</button>
+                      <span className="text-xs font-bold">{item.count}</span>
+                      <button onClick={() => updateCount(item.cartItemId, 1)} className="px-2 py-0.5 hover:bg-slate-700 rounded text-xs">+</button>
+                    </div>
+                    <span className="text-sm font-bold text-amber-400 w-20 text-right">
+                      {(item.price * item.count).toLocaleString()} ₩
+                    </span>
+                    <button onClick={() => removeFromCart(item.cartItemId)} className="text-slate-500 hover:text-red-400">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-800 pt-4 mb-6 flex justify-between items-center">
+              <span className="text-slate-400 font-medium">Итого:</span>
+              <span className="text-2xl font-bold text-amber-500">{totalPrice.toLocaleString()} ₩</span>
+            </div>
+
+            <form onSubmit={handleOrder} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Ваше имя</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="Иван"
+                    value={formData.customer_name}
+                    onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Номер телефона</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                  <input 
+                    type="tel" 
+                    required 
+                    placeholder="010-1234-5678"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Дата и время доставки</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="Завтра к 14:00"
+                    value={formData.delivery_date}
+                    onChange={(e) => setFormData({...formData, delivery_date: e.target.value})}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-500/10 mt-2"
               >
-                {categories.filter(c => c !== 'Все').map(cat => (
-                  <option key={cat} value={cat} style={{ background: '#1E293B' }}>{cat}</option>
-                ))}
-              </select>
-              <textarea
-                placeholder="Описание блюда и состав"
-                value={newProduct.desc}
-                onChange={(e) => setNewProduct({ ...newProduct, desc: e.target.value })}
-                style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }}
-              />
-              <input
-                type="text"
-                placeholder="Ссылка на фото (URL)"
-                value={newProduct.image}
-                onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                style={inputStyle}
-              />
-              <input
-                type="text"
-                placeholder="Бейдж (например: Хит, Свежее, Острое)"
-                value={newProduct.tag}
-                onChange={(e) => setNewProduct({ ...newProduct, tag: e.target.value })}
-                style={inputStyle}
-              />
-
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: '#10B981',
-                  color: '#FFF',
-                  border: 'none',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  marginTop: '6px'
-                }}
-              >
-                💾 Сохранить блюдо в меню
+                Оформить заказ
               </button>
             </form>
-          )}
-        </div>
-      )}
-
-      {/* Категории */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        overflowX: 'auto',
-        padding: '16px 20px',
-        scrollbarWidth: 'none'
-      }}>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '25px',
-              border: 'none',
-              backgroundColor: activeCategory === cat ? '#E11D48' : '#1E293B',
-              color: activeCategory === cat ? '#FFFFFF' : '#94A3B8',
-              fontWeight: '600',
-              fontSize: '13px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Список карточек */}
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {filteredProducts.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              backgroundColor: '#1E293B',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-              border: '1px solid rgba(255,255,255,0.05)',
-              opacity: item.isAvailable ? 1 : 0.5
-            }}
-          >
-            <div style={{ display: 'flex' }}>
-              {/* Картинка товара */}
-              <div style={{ position: 'relative', width: '120px', minWidth: '120px', height: '120px' }}>
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                {item.tag && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '8px',
-                    left: '8px',
-                    backgroundColor: '#E11D48',
-                    color: '#FFF',
-                    fontSize: '10px',
-                    fontWeight: '700',
-                    padding: '2px 8px',
-                    borderRadius: '10px'
-                  }}>
-                    {item.tag}
-                  </span>
-                )}
-              </div>
-
-              {/* Информация */}
-              <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div>
-                  <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '700', color: '#F1F5F9' }}>
-                    {item.name}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '11px', color: '#94A3B8', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {item.desc}
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                  <span style={{ fontSize: '15px', fontWeight: '800', color: '#38BDF8' }}>
-                    {item.price.toLocaleString()} ₩
-                  </span>
-                  {!isAdmin && (
-                    <button
-                      onClick={() => addToCart(item)}
-                      style={{
-                        backgroundColor: '#E11D48',
-                        color: '#FFF',
-                        border: 'none',
-                        borderRadius: '12px',
-                        padding: '6px 14px',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      + В корзину
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* ЭЛЕМЕНТЫ УПРАВЛЕНИЯ В РЕЖИМЕ АДМИНА */}
-            {isAdmin && (
-              <div style={{
-                display: 'flex',
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                backgroundColor: '#0F172A'
-              }}>
-                <button
-                  onClick={() => toggleAvailability(item.id)}
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    color: item.isAvailable ? '#F59E0B' : '#10B981',
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {item.isAvailable ? '🚫 В стоп-лист' : '✅ Вернуть в меню'}
-                </button>
-                <div style={{ width: '1px', backgroundColor: 'rgba(255,255,255,0.08)' }} />
-                <button
-                  onClick={() => handleDeleteProduct(item.id)}
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    color: '#EF4444',
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    cursor: 'pointer'
-                  }}
-                >
-                  🗑 Удалить
-                </button>
-              </div>
-            )}
           </div>
-        ))}
-      </div>
-
-      {/* Корзина (только для покупателей) */}
-      {!isAdmin && (
-        <div style={{
-          position: 'fixed',
-          bottom: '0',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: '480px',
-          backgroundColor: '#0F172A',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          padding: '12px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxSizing: 'border-box'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              position: 'relative',
-              backgroundColor: '#1E293B',
-              width: '44px',
-              height: '44px',
-              borderRadius: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px'
-            }}>
-              🛒
-              {cart.length > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  backgroundColor: '#E11D48',
-                  color: '#FFF',
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  fontSize: '10px',
-                  fontWeight: '800',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {cart.length}
-                </span>
-              )}
-            </div>
-            <div>
-              <div style={{ fontSize: '12px', color: '#94A3B8' }}>Выбрано товаров: {cart.length}</div>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#F8FAFC' }}>
-                {cart.length > 0 ? `${cart.reduce((s, i) => s + i.price, 0).toLocaleString()} ₩` : 'Корзина пуста'}
-              </div>
-            </div>
-          </div>
-
-          <button
-            disabled={cart.length === 0}
-            style={{
-              backgroundColor: cart.length > 0 ? '#E11D48' : '#334155',
-              color: cart.length > 0 ? '#FFFFFF' : '#64748B',
-              border: 'none',
-              padding: '12px 20px',
-              borderRadius: '14px',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: cart.length > 0 ? 'pointer' : 'not-allowed'
-            }}
-          >
-            Оформить ➔
-          </button>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 }
-
-// Вспомогательный стиль для полей ввода
-const inputStyle = {
-  backgroundColor: '#0F172A',
-  border: '1px solid #334155',
-  borderRadius: '10px',
-  padding: '10px 12px',
-  color: '#FFF',
-  fontSize: '13px',
-  outline: 'none'
-};
