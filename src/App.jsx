@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-// Полные переводы интерфейса и базы данных
 const translations = {
   RU: {
     bakeryName: 'Sweet Bakery',
     bakerySub: 'домашняя выпечка',
     address: '📍 Сеул, Каннам-гу 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: 'Поиск по изысканному меню...',
+    searchPlaceholder: 'Поиск...',
     allCategories: 'Все',
-    catCroissants: 'Круассаны',
-    catCakes: 'Торты',
-    catPies: 'Пироги',
-    catCookies: 'Печенье',
-    catDrinks: 'Напитки',
-    specialEvent: 'СПЕЦ-АКЦИЯ',
-    promoText: 'Введите промокод "SWEET20" и получите скидку 20% на первый заказ!',
     addToCart: 'В корзину +',
     loginBtn: 'Login',
-    exitBtn: 'Exit (Выйти)',
+    exitBtn: 'Exit',
     editBannerTitle: '🖼️ Управление баннером',
-    uploadBannerLabel: 'Загрузить новый баннер (JPG/PNG):',
+    uploadBannerLabel: 'Загрузить новый баннер (заменит текущий):',
     removeBannerBtn: 'Удалить баннер',
     adminEditMenuTitle: '🛠️ Управление меню и товарами',
     editItem: 'Редактировать',
@@ -29,25 +21,25 @@ const translations = {
     addNewItemBtn: '+ Добавить товар',
     addNewCatBtn: '+ Добавить категорию',
     dishNamePlaceholder: 'Название блюда',
-    pricePlaceholder: 'Цена (₩)',
+    pricePlaceholder: 'Новая цена (₩)',
     oldPricePlaceholder: 'Старая цена (₩)',
     descPlaceholder: 'Описание',
     photoLabel: 'Фото (файл или ссылка):',
     addButton: 'Добавить в меню',
     addCatButton: 'Создать категорию',
-    catNamePlaceholder: 'Название категории (например, Пирожные)',
+    catNamePlaceholder: 'Название категории',
     cancel: 'Отмена',
     checkoutTitle: '📋 Оформление заказа',
-    nameLabel: 'Ваше имя (только буквы) *',
-    namePlaceholder: 'Например: Alexander',
-    phoneLabel: 'Номер телефона (010-****-****) *',
+    nameLabel: 'Ваше имя *',
+    namePlaceholder: 'Alexander',
+    phoneLabel: 'Телефон (010-****-****) *',
     deliveryTypeLabel: 'Способ получения *',
     pickup: '🏃 Самовывоз',
     delivery: '🛵 Доставка',
     addressLabel: 'Адрес доставки *',
     addressPlaceholder: 'Seoul, Gangnam-gu...',
-    commentLabel: 'Комментарий (необязательно)',
-    commentPlaceholder: 'Пожелания к заказу...',
+    commentLabel: 'Комментарий',
+    commentPlaceholder: 'Пожелания...',
     confirmButton: 'Подтвердить заказ ➔',
     selectedItems: 'Выбрано тов.',
     total: 'Итого:',
@@ -68,30 +60,26 @@ const translations = {
     badgeNew: 'НОВИНКА',
     badgePrem: 'ПРЕМИУМ',
     notFound: 'Ничего не найдено 😢',
-    telegramSettingsTitle: '🔔 Telegram уведомления админа',
-    tgTokenLabel: 'Токен бота (Bot Token):',
-    tgChatIdLabel: 'Ваш Chat ID (@leedkor):',
-    saveTgSettings: 'Сохранить Telegram настройки'
+    menuMain: 'Главная',
+    menuPromos: 'Акции',
+    menuContacts: 'Контакты',
+    menuAbout: 'О нас',
+    aboutText: 'Sweet Bakery — семейная пекарня в самом сердце Сеула. Мы готовим для вас традиционную французскую выпечку по авторским рецептам, используя только натуральные и свежие ингредиенты премиум-класса каждый день.',
+    contactsText: 'Мы ждем вас ежедневно с 09:00 до 21:00 по адресу: Сеул, Каннам-гу 12-3. Телефон для предзаказа: 010-1234-5678.',
+    promoSectionTitle: '✨ Специальные предложения и акции'
   },
   EN: {
     bakeryName: 'Sweet Bakery',
     bakerySub: 'home baking',
     address: '📍 Seoul, Gangnam-gu 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: 'Search menu...',
+    searchPlaceholder: 'Search...',
     allCategories: 'All',
-    catCroissants: 'Croissants',
-    catCakes: 'Cakes',
-    catPies: 'Pies',
-    catCookies: 'Cookies',
-    catDrinks: 'Drinks',
-    specialEvent: 'SPECIAL EVENT',
-    promoText: 'Use promo code "SWEET20" for 20% off your first order!',
     addToCart: 'Add to cart +',
     loginBtn: 'Login',
     exitBtn: 'Exit',
     editBannerTitle: '🖼️ Banner Management',
-    uploadBannerLabel: 'Upload new banner (JPG/PNG):',
+    uploadBannerLabel: 'Upload new banner (replaces current):',
     removeBannerBtn: 'Remove banner',
     adminEditMenuTitle: '🛠️ Menu & Item Management',
     editItem: 'Edit',
@@ -100,25 +88,25 @@ const translations = {
     addNewItemBtn: '+ Add item',
     addNewCatBtn: '+ Add category',
     dishNamePlaceholder: 'Dish name',
-    pricePlaceholder: 'Price (₩)',
+    pricePlaceholder: 'New price (₩)',
     oldPricePlaceholder: 'Old price (₩)',
     descPlaceholder: 'Description',
     photoLabel: 'Photo (file or URL):',
     addButton: 'Add to menu',
     addCatButton: 'Create category',
-    catNamePlaceholder: 'Category name (e.g. Pastries)',
+    catNamePlaceholder: 'Category name',
     cancel: 'Cancel',
     checkoutTitle: '📋 Checkout',
-    nameLabel: 'Your name (letters only) *',
-    namePlaceholder: 'E.g., Alexander',
-    phoneLabel: 'Phone number (010-****-****) *',
+    nameLabel: 'Your name *',
+    namePlaceholder: 'Alexander',
+    phoneLabel: 'Phone (010-****-****) *',
     deliveryTypeLabel: 'Delivery method *',
     pickup: '🏃 Pickup',
     delivery: '🛵 Delivery',
     addressLabel: 'Delivery address *',
     addressPlaceholder: 'Seoul, Gangnam-gu...',
-    commentLabel: 'Comment (optional)',
-    commentPlaceholder: 'Wishes for the order...',
+    commentLabel: 'Comment',
+    commentPlaceholder: 'Wishes...',
     confirmButton: 'Confirm order ➔',
     selectedItems: 'Selected items',
     total: 'Total:',
@@ -139,57 +127,53 @@ const translations = {
     badgeNew: 'NEW',
     badgePrem: 'PREMIUM',
     notFound: 'Nothing found 😢',
-    telegramSettingsTitle: '🔔 Telegram Admin Alerts',
-    tgTokenLabel: 'Bot Token:',
-    tgChatIdLabel: 'Your Chat ID (@leedkor):',
-    saveTgSettings: 'Save Telegram Settings'
+    menuMain: 'Home',
+    menuPromos: 'Promotions',
+    menuContacts: 'Contacts',
+    menuAbout: 'About us',
+    aboutText: 'Sweet Bakery is a family bakery in the heart of Seoul. We bake traditional French pastries using only premium natural ingredients every day.',
+    contactsText: 'We are open daily from 09:00 to 21:00 at Seoul, Gangnam-gu 12-3. Phone: 010-1234-5678.',
+    promoSectionTitle: '✨ Special Offers & Promos'
   },
   KO: {
     bakeryName: 'Sweet Bakery',
     bakerySub: '홈 베이킹',
     address: '📍 서울 강남구 12-3',
     phone: '📞 010-1234-5678',
-    searchPlaceholder: '메뉴 검색...',
+    searchPlaceholder: '검색...',
     allCategories: '전체',
-    catCroissants: '크루아상',
-    catCakes: '케이크',
-    catPies: '파이',
-    catCookies: '쿠키',
-    catDrinks: '음료',
-    specialEvent: '스페셜 이벤트',
-    promoText: '프로모션 코드 "SWEET20" 입력 시 첫 주문 20% 할인!',
     addToCart: '담기 +',
     loginBtn: 'Login',
-    exitBtn: 'Exit (나가기)',
+    exitBtn: '나가기',
     editBannerTitle: '🖼️ 배너 관리',
-    uploadBannerLabel: '새 배너 업로드 (JPG/PNG):',
+    uploadBannerLabel: '새 배너 업로드 (기존 교체):',
     removeBannerBtn: '배너 삭제',
     adminEditMenuTitle: '🛠️ 메뉴 및 상품 관리',
     editItem: '수정',
     deleteItem: '삭제',
-    saveChanges: '변경사항 저장',
+    saveChanges: '저장',
     addNewItemBtn: '+ 상품 추가',
     addNewCatBtn: '+ 카테고리 추가',
     dishNamePlaceholder: '상품명',
-    pricePlaceholder: '가격 (₩)',
+    pricePlaceholder: '새 가격 (₩)',
     oldPricePlaceholder: '할인 전 가격 (₩)',
     descPlaceholder: '설명',
     photoLabel: '사진 (파일 또는 URL):',
-    addButton: '메뉴에 추가',
+    addButton: '추가하기',
     addCatButton: '카테고리 생성',
-    catNamePlaceholder: '카테고리 이름 (예: 패스트리)',
+    catNamePlaceholder: '카테고리 이름',
     cancel: '취소',
     checkoutTitle: '📋 주문하기',
-    nameLabel: '이름 (문자만) *',
-    namePlaceholder: '예: Alexander',
+    nameLabel: '이름 *',
+    namePlaceholder: 'Alexander',
     phoneLabel: '전화번호 (010-****-****) *',
     deliveryTypeLabel: '수령 방법 *',
     pickup: '🏃 픽업',
     delivery: '🛵 배달',
-    addressLabel: '배달 주소 *',
+    addressLabel: '주소 *',
     addressPlaceholder: 'Seoul, Gangnam-gu...',
-    commentLabel: '요청사항 (선택)',
-    commentPlaceholder: '주문 요청사항...',
+    commentLabel: '요청사항',
+    commentPlaceholder: '요청사항...',
     confirmButton: '주문 확정 ➔',
     selectedItems: '선택됨',
     total: '합계:',
@@ -201,7 +185,7 @@ const translations = {
     emptyLikes: '찜한 상품이 없습니다 ❤️',
     emptyOrders: '주문 내역이 없습니다 📦',
     orderHistoryTitle: '📦 주문 내역',
-    orderDate: '날짜 및 시간:',
+    orderDate: '날짜:',
     statusCompleted: '접수 완료 ✅',
     adminLoginTitle: '관리자 로그인',
     adminPasswordPlaceholder: '비밀번호 (1234)',
@@ -210,10 +194,13 @@ const translations = {
     badgeNew: '신메뉴',
     badgePrem: '프리미엄',
     notFound: '검색 결과가 없습니다 😢',
-    telegramSettingsTitle: '🔔 텔레그램 관리자 알림',
-    tgTokenLabel: '봇 토큰 (Bot Token):',
-    tgChatIdLabel: '챗 ID (@leedkor):',
-    saveTgSettings: '텔레그램 설정 저장'
+    menuMain: '홈',
+    menuPromos: '이벤트',
+    menuContacts: '연락처',
+    menuAbout: '소개',
+    aboutText: '스위트 베이커리는 서울 중심부에 위치한 홈 베이커리입니다. 매일 신선한 천연 재료로 정성껏 빵을 굽습니다.',
+    contactsText: '매일 오전 9시부터 오후 9시까지 운영합니다. 주소: 서울 강남구 12-3. 전화: 010-1234-5678.',
+    promoSectionTitle: '✨ 스페셜 이벤트 및 프로모션'
   }
 };
 
@@ -223,11 +210,13 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('Все');
-  const [searchQuery, setSearchQuery] = useState('');
   
-  const [cart, setCart] = useState([]);
-  const [likes, setLikes] = useState([]);
-  const [ordersHistory, setOrdersHistory] = useState([]);
+  // Состояние поиска через иконку лупы
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Боковое меню (гамбургер)
+  const [showBurgerMenu, setShowBurgerMenu] = useState(false);
 
   // Скролл нижней панели
   const [showBottomNav, setShowBottomNav] = useState(true);
@@ -252,25 +241,21 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
-  // Настройки Telegram для администратора (@leedkor)
-  const [tgBotToken, setTgBotToken] = useState('');
-  const [tgChatId, setTgChatId] = useState('');
-
-  // Кастомизация логотипа и баннера администратором
-  const [customLogo, setCustomLogo] = useState('🧁');
+  // Кастомизация логотипа и баннера
+  const [customLogo] = useState('🧁');
   const [bannerImage, setBannerImage] = useState('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80');
 
   // Модалки
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null); // Модалка полного редактирования товара
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddCatModal, setShowAddCatModal] = useState(false);
 
-  // Список категорий
+  // Категории
   const [categories, setCategories] = useState(['Круассаны', 'Торты', 'Пироги', 'Печенье', 'Напитки']);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Поля формы добавления товара
+  // Поля добавления товара
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
@@ -287,54 +272,9 @@ export default function App() {
   const [clientAddress, setClientAddress] = useState('');
   const [clientComment, setClientComment] = useState('');
 
-  // База товаров
-  const [products, setProducts] = useState([
-    { 
-      id: 1, 
-      names: { RU: 'Миндальный круассан', EN: 'Almond Croissant', KO: '아몬드 크루아상' },
-      category: 'Круассаны', 
-      price: 4500, 
-      oldPrice: 5000,
-      rating: 4.9, 
-      descs: { 
-        RU: 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
-        EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
-        KO: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' 
-      },
-      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
-      badge: 'ХИТ' 
-    },
-    { 
-      id: 2, 
-      names: { RU: 'Шоколадный бриошь', EN: 'Chocolate Brioche', KO: '초콜릿 브리오슈' },
-      category: 'Торты', 
-      price: 5500, 
-      oldPrice: 6500,
-      rating: 4.8, 
-      descs: { 
-        RU: 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
-        EN: 'Soft handmade brioche dough with Belgian cocoa...', 
-        KO: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' 
-      },
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
-      badge: 'НОВИНКА' 
-    },
-    { 
-      id: 3, 
-      names: { RU: 'Премиум капкейк', EN: 'Premium Cupcake', KO: '프리미엄 컵케이크' },
-      category: 'Торты', 
-      price: 6000, 
-      oldPrice: null,
-      rating: 5.0, 
-      descs: { 
-        RU: 'Нежнейший крем, ванильный бисквит и авторский декор...', 
-        EN: 'Sweet cream and vanilla sponge...', 
-        KO: '달콤한 크림과 바닐라 시트...' 
-      },
-      image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=600&q=80', 
-      badge: 'ПРЕМИУМ' 
-    }
-  ]);
+  const [cart, setCart] = useState([]); // массив объектов с количеством
+  const [likes, setLikes] = useState([]);
+  const [ordersHistory, setOrdersHistory] = useState([]);
 
   const handleImageUpload = (e, setter) => {
     const file = e.target.files[0];
@@ -393,7 +333,8 @@ export default function App() {
     setShowAddCatModal(false);
   };
 
-  const handleUpdateProduct = (e) => {
+  // Сохранение отредактированного товара из модального окна
+  const handleSaveEditedProduct = (e) => {
     e.preventDefault();
     setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
     setEditingProduct(null);
@@ -404,6 +345,40 @@ export default function App() {
       setProducts(products.filter(p => p.id !== id));
     }
   };
+
+  // База товаров
+  const [products, setProducts] = useState([
+    { 
+      id: 1, 
+      names: { RU: 'Миндальный круассан', EN: 'Almond Croissant', KO: '아몬드 크루아상' },
+      category: 'Круассаны', 
+      price: 4500, 
+      oldPrice: 5000,
+      rating: 4.9, 
+      descs: { 
+        RU: 'Изысканное слоеное тесто на французском масле с нежным франжипаном...', 
+        EN: 'Crispy pastry made with French butter and smooth frangipane cream...', 
+        KO: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림...' 
+      },
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
+      badge: 'ХИТ' 
+    },
+    { 
+      id: 2, 
+      names: { RU: 'Шоколадный бриошь', EN: 'Chocolate Brioche', KO: '초콜릿 브리오슈' },
+      category: 'Торты', 
+      price: 5500, 
+      oldPrice: 6500,
+      rating: 4.8, 
+      descs: { 
+        RU: 'Пышное сдобное тесто ручной работы, бельгийский шоколад и какао...', 
+        EN: 'Soft handmade brioche dough with Belgian cocoa...', 
+        KO: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아...' 
+      },
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
+      badge: 'НОВИНКА' 
+    }
+  ]);
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -430,31 +405,29 @@ export default function App() {
     }
   };
 
-  // Функция отправки уведомления в Telegram админу (@leedkor)
-  const sendTelegramNotification = async (orderData) => {
-    if (!tgBotToken || !tgChatId) return;
-    const itemsList = orderData.items.map(i => `• ${i.names.RU} — ${i.price.toLocaleString()} ₩`).join('\n');
-    const message = `🚨 <b>Новый заказ #${orderData.id}</b>\n\n👤 Имя: ${orderData.clientName}\n📞 Телефон: ${orderData.clientPhone}\n🚚 Способ: ${orderData.deliveryType === 'pickup' ? 'Самовывоз' : 'Доставка'}\n📍 Адрес: ${orderData.clientAddress || 'Самовывоз'}\n\n🛒 <b>Состав заказа:</b>\n${itemsList}\n\n💰 <b>Итого:</b> ${orderData.total.toLocaleString()} ₩`;
+  // Управление корзиной с плюсиками и минусиками
+  const addToCart = (product) => {
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+      setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
+  };
 
-    try {
-      await fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: tgChatId,
-          text: message,
-          parse_mode: 'HTML'
-        })
-      });
-    } catch (err) {
-      console.error('Ошибка отправки в Telegram:', err);
+  const decreaseQuantity = (productId) => {
+    const existing = cart.find(item => item.id === productId);
+    if (existing.quantity > 1) {
+      setCart(cart.map(item => item.id === productId ? { ...item, quantity: item.quantity - 1 } : item));
+    } else {
+      setCart(cart.filter(item => item.id !== productId));
     }
   };
 
   const handleSendOrder = (e) => {
     e.preventDefault();
     if (!clientName.trim() || clientPhone.length < 13) {
-      alert('Заполните имя (только буквы) и телефон.');
+      alert('Заполните имя и телефон.');
       return;
     }
 
@@ -465,7 +438,7 @@ export default function App() {
       id: Date.now(),
       date: dateStr,
       items: [...cart],
-      total: cart.reduce((sum, item) => sum + item.price, 0),
+      total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
       clientName,
       clientPhone,
       deliveryType,
@@ -473,15 +446,12 @@ export default function App() {
     };
 
     setOrdersHistory([newOrder, ...ordersHistory]);
-    sendTelegramNotification(newOrder);
-
     setCart([]);
     setShowCheckoutModal(false);
     setActiveTab('orders');
     alert('Заказ успешно оформлен!');
   };
 
-  // Фильтрация товаров по категории и поиску
   const filteredProducts = products.filter(item => {
     const itemName = item.names[lang] || item.names['RU'];
     const matchesCat = activeCategory === 'Все' || activeCategory === 'All' || activeCategory === '전체' || item.category === activeCategory;
@@ -489,12 +459,15 @@ export default function App() {
     return matchesCat && matchesSearch;
   });
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  const totalCartPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const goToHome = () => {
     setActiveTab('home');
     setActiveCategory('Все');
     setSearchQuery('');
+    setIsSearchActive(false);
+    setShowBurgerMenu(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -505,7 +478,6 @@ export default function App() {
       margin: 0, padding: '16px 16px 110px 16px', color: '#fff', overflowX: 'hidden'
     }}>
       
-      {/* Премиальные шрифты */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@400;500;600&display=swap');
         .premium-title {
@@ -546,14 +518,9 @@ export default function App() {
               <img src={selectedProduct.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#fff' }}>
-                {selectedProduct.names[lang] || selectedProduct.names['RU']}
-              </h2>
-              <span style={{ background: 'rgba(245,158,11,0.15)', color: '#fcd34d', padding: '4px 8px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>
-                ★ {selectedProduct.rating}
-              </span>
-            </div>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '800', color: '#fff' }}>
+              {selectedProduct.names[lang] || selectedProduct.names['RU']}
+            </h2>
 
             <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5', margin: '0 0 16px 0' }}>
               {selectedProduct.descs[lang] || selectedProduct.descs['RU']}
@@ -566,12 +533,54 @@ export default function App() {
                   <div style={{ fontSize: '12px', color: '#6b7280', textDecoration: 'line-through' }}>{selectedProduct.oldPrice.toLocaleString()} ₩</div>
                 )}
               </div>
-              <button onClick={() => { setCart([...cart, selectedProduct]); setSelectedProduct(null); }} style={{
+              <button onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }} style={{
                 background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '12px 20px', borderRadius: '12px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
               }}>
                 {t.addToCart}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* МОДАЛКА ПОЛНОГО РЕДАКТИРОВАНИЯ ТОВАРА ДЛЯ АДМИНА */}
+      {editingProduct && (
+        <div onClick={() => setEditingProduct(null)} style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+          background: 'rgba(5, 7, 10, 0.9)', backdropFilter: 'blur(8px)',
+          zIndex: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box'
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: '#141822', border: '1px solid #f59e0b', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '380px', maxHeight: '90dvh', overflowY: 'auto'
+          }}>
+            <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', color: '#fcd34d' }}>{t.editItem}</h3>
+            <form onSubmit={handleSaveEditedProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input type="text" placeholder={t.dishNamePlaceholder} value={editingProduct.names[lang] || editingProduct.names['RU']} onChange={(e) => {
+                const val = e.target.value;
+                setEditingProduct({...editingProduct, names: {...editingProduct.names, [lang]: val}});
+              }} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="number" placeholder={t.pricePlaceholder} value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} required />
+                <input type="number" placeholder={t.oldPricePlaceholder} value={editingProduct.oldPrice || ''} onChange={(e) => setEditingProduct({...editingProduct, oldPrice: e.target.value ? Number(e.target.value) : null})} style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
+              </div>
+
+              <textarea placeholder={t.descPlaceholder} value={editingProduct.descs[lang] || editingProduct.descs['RU']} onChange={(e) => {
+                const val = e.target.value;
+                setEditingProduct({...editingProduct, descs: {...editingProduct.descs, [lang]: val}});
+              }} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '10px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical', minHeight: '60px' }} />
+
+              <div>
+                <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>{t.photoLabel}</label>
+                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (img) => setEditingProduct({...editingProduct, image: img}))} style={{ fontSize: '11px', color: '#fff', marginBottom: '4px' }} />
+                <input type="text" placeholder="URL картинки" value={editingProduct.image} onChange={(e) => setEditingProduct({...editingProduct, image: e.target.value})} style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '8px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setEditingProduct(null)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.cancel}</button>
+                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>{t.saveChanges}</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -596,13 +605,13 @@ export default function App() {
             <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '130px', overflowY: 'auto' }}>
               {cart.map((item, index) => (
                 <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
-                  <span>{item.names[lang] || item.names['RU']}</span>
-                  <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</span>
+                  <span>{item.names[lang] || item.names['RU']} (x{item.quantity})</span>
+                  <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{(item.price * item.quantity).toLocaleString()} ₩</span>
                 </div>
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.1)', fontWeight: 'bold', fontSize: '13px' }}>
                 <span>{t.total}</span>
-                <span style={{ color: '#fcd34d' }}>{totalPrice.toLocaleString()} ₩</span>
+                <span style={{ color: '#fcd34d' }}>{totalCartPrice.toLocaleString()} ₩</span>
               </div>
             </div>
 
@@ -724,7 +733,7 @@ export default function App() {
       )}
 
       {/* ШАПКА САЙТА */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
         <div onClick={goToHome} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
           <div style={{
             width: '42px', height: '42px', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
@@ -740,13 +749,22 @@ export default function App() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Кнопка лупы для поиска */}
+          <button onClick={() => setIsSearchActive(!isSearchActive)} style={{
+            background: isSearchActive ? '#f59e0b' : '#141822', border: '1px solid rgba(245,158,11,0.3)',
+            borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px'
+          }}>
+            🔍
+          </button>
+
+          {/* Языковая панель с флагами */}
           <select value={lang} onChange={(e) => setLang(e.target.value)} style={{
             background: '#141822', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: '8px', padding: '6px 8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'
+            borderRadius: '8px', padding: '6px 6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer'
           }}>
-            <option value="RU">RU</option>
-            <option value="EN">EN</option>
-            <option value="KO">KO</option>
+            <option value="RU">🇷🇺 RU</option>
+            <option value="EN">🇺🇸 EN</option>
+            <option value="KO">🇰🇷 KO</option>
           </select>
 
           {!isAdminLoggedIn ? (
@@ -764,18 +782,42 @@ export default function App() {
               {t.exitBtn}
             </button>
           )}
+
+          {/* Меню с тремя полосками (гамбургер) */}
+          <button onClick={() => setShowBurgerMenu(!showBurgerMenu)} style={{
+            background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px',
+            width: '32px', height: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer'
+          }}>
+            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+            <div style={{ width: '14px', height: '2px', background: '#fcd34d', borderRadius: '1px' }}></div>
+          </button>
         </div>
+
+        {/* Выпадающее меню гамбургера */}
+        {showBurgerMenu && (
+          <div style={{
+            position: 'absolute', top: '55px', right: 0, background: '#141822', border: '1px solid rgba(245,158,11,0.4)',
+            borderRadius: '16px', width: '200px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', zIndex: 200, padding: '10px'
+          }}>
+            <button onClick={() => { setActiveTab('home'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>🏠 {t.menuMain}</button>
+            <button onClick={() => { setActiveTab('promos'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>✨ {t.menuPromos}</button>
+            <button onClick={() => { setActiveTab('contacts'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>📍 {t.menuContacts}</button>
+            <button onClick={() => { setActiveTab('about'); setShowBurgerMenu(false); }} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', padding: '10px', fontSize: '13px', cursor: 'pointer', borderRadius: '8px' }}>ℹ️ {t.menuAbout}</button>
+          </div>
+        )}
       </header>
 
-      {/* АДМИН ПАНЕЛЬ */}
+      {/* АДМИН ПАНЕЛЬ (управление акциями: удаление/замена) */}
       {isAdminLoggedIn && (
         <div style={{
           background: '#141822', border: '1px dashed #f59e0b', borderRadius: '16px', padding: '16px', marginBottom: '20px'
         }}>
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '15px', color: '#fcd34d' }}>{t.telegramSettingsTitle}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-            <input type="text" placeholder={t.tgTokenLabel} value={tgBotToken} onChange={(e) => setTgBotToken(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px' }} />
-            <input type="text" placeholder={t.tgChatIdLabel} value={tgChatId} onChange={(e) => setTgChatId(e.target.value)} style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px', color: '#fff', fontSize: '12px' }} />
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '15px', color: '#fcd34d' }}>{t.editBannerTitle}</h3>
+          <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '8px' }}>{t.uploadBannerLabel}</p>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBannerImage)} style={{ fontSize: '11px', color: '#fff' }} />
+            <button onClick={() => setBannerImage('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80')} style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>{t.removeBannerBtn}</button>
           </div>
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -785,7 +827,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА: ГЛАВНАЯ */}
+      {/* АКТИВНАЯ ВКЛАДКА: ГЛАВНАЯ */}
       {activeTab === 'home' && (
         <>
           {/* Баннер акции */}
@@ -795,19 +837,21 @@ export default function App() {
           }}>
             <img src={bannerImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.6)' }} />
             <div style={{ position: 'absolute', bottom: '14px', left: '14px', right: '14px' }}>
-              <span style={{ background: '#f59e0b', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '3px 8px', borderRadius: '6px' }}>{t.specialEvent}</span>
-              <p style={{ margin: '6px 0 0 0', fontSize: '12px', fontWeight: '600', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{t.promoText}</p>
+              <span style={{ background: '#f59e0b', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '3px 8px', borderRadius: '6px' }}>АКЦИЯ</span>
+              <p style={{ margin: '6px 0 0 0', fontSize: '12px', fontWeight: '600', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Скидка 20% по промокоду "SWEET20" на первый заказ!</p>
             </div>
           </div>
 
-          {/* Строка поиска */}
-          <div style={{ position: 'relative', marginBottom: '16px' }}>
-            <input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
-              width: '100%', background: '#141822', border: '1px solid #334155', borderRadius: '12px',
-              padding: '12px 14px 12px 38px', color: '#fff', fontSize: '13px', boxSizing: 'border-box'
-            }} />
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px' }}>🔍</span>
-          </div>
+          {/* Строка поиска появляется при клике на лупу */}
+          {isSearchActive && (
+            <div style={{ position: 'relative', marginBottom: '16px' }}>
+              <input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{
+                width: '100%', background: '#141822', border: '1px solid #f59e0b', borderRadius: '12px',
+                padding: '12px 14px 12px 38px', color: '#fff', fontSize: '13px', boxSizing: 'border-box'
+              }} autoFocus />
+              <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px' }}>🔍</span>
+            </div>
+          )}
 
           {/* Чипсы категорий */}
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '16px', scrollbarWidth: 'none' }}>
@@ -866,20 +910,15 @@ export default function App() {
                             <div style={{ fontSize: '10px', color: '#6b7280', textDecoration: 'line-through' }}>{item.oldPrice.toLocaleString()} ₩</div>
                           )}
                         </div>
-                        <button onClick={() => setCart([...cart, item])} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '30px', height: '30px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button onClick={() => addToCart(item)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '30px', height: '30px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           +
                         </button>
                       </div>
 
-                      {/* Кнопки управления для админа прямо в карточке */}
+                      {/* Админские кнопки редактирования */}
                       {isAdminLoggedIn && (
                         <div style={{ display: 'flex', gap: '4px', marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '6px' }}>
-                          <button onClick={() => {
-                            const newPriceVal = prompt('Новая цена:', item.price);
-                            if (newPriceVal) {
-                              setProducts(products.map(p => p.id === item.id ? { ...p, price: Number(newPriceVal) } : p));
-                            }
-                          }} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.editItem}</button>
+                          <button onClick={() => setEditingProduct(item)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.editItem}</button>
                           <button onClick={() => handleDeleteProduct(item.id)} style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>{t.deleteItem}</button>
                         </div>
                       )}
@@ -890,6 +929,45 @@ export default function App() {
             </div>
           )}
         </>
+      )}
+
+      {/* ВКЛАДКА: АКЦИИ */}
+      {activeTab === 'promos' && (
+        <div style={{ padding: '10px 0' }}>
+          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.promoSectionTitle}</h2>
+          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '16px', padding: '16px', marginBottom: '14px' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', color: '#fff' }}>🎁 Скидка 20% на первый заказ</h3>
+            <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 10px 0' }}>Используйте промокод <strong style={{ color: '#fcd34d' }}>SWEET20</strong> при оформлении заказа в корзине.</p>
+          </div>
+          <div style={{ background: '#141822', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '16px', padding: '16px' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', color: '#fff' }}>🥐 Счастливые часы</h3>
+            <p style={{ fontSize: '13px', color: '#9ca3af', margin: 0 }}>Каждый вечер с 20:00 до 21:00 скидка 30% на все свежие круассаны в пекарне!</p>
+          </div>
+        </div>
+      )}
+
+      {/* ВКЛАДКА: КОНТАКТЫ */}
+      {activeTab === 'contacts' && (
+        <div style={{ padding: '10px 0' }}>
+          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.menuContacts}</h2>
+          <div style={{ background: '#141822', border: '1px solid #334155', borderRadius: '16px', padding: '16px', fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
+            <p style={{ margin: '0 0 8px 0', color: '#fff', fontWeight: 'bold' }}>Sweet Bakery Seoul</p>
+            <p style={{ margin: '0 0 8px 0' }}>{t.address}</p>
+            <p style={{ margin: '0 0 8px 0' }}>{t.phone}</p>
+            <p style={{ margin: 0 }}>Email: contact@sweetbakery.kr</p>
+          </div>
+        </div>
+      )}
+
+      {/* ВКЛАДКА: О НАС */}
+      {activeTab === 'about' && (
+        <div style={{ padding: '10px 0' }}>
+          <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.menuAbout}</h2>
+          <div style={{ background: '#141822', border: '1px solid #334155', borderRadius: '16px', padding: '16px', fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
+            <p style={{ margin: '0 0 12px 0', color: '#fff', fontWeight: '500' }}>{t.aboutText}</p>
+            <p style={{ margin: 0 }}>{t.contactsText}</p>
+          </div>
+        </div>
       )}
 
       {/* ВКЛАДКА: ПОИСК */}
@@ -932,7 +1010,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА: ЗАКАЗЫ */}
+      {/* ВКЛАДКА: ЗАКАЗЫ (С возможностью добавления количества + и -) */}
       {activeTab === 'orders' && (
         <div>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.orderHistoryTitle}</h2>
@@ -948,9 +1026,9 @@ export default function App() {
                   </div>
                   <div style={{ fontSize: '12px', marginBottom: '8px' }}>
                     {order.items.map((it, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <span>{it.names[lang] || it.names['RU']}</span>
-                        <span style={{ color: '#fcd34d' }}>{it.price.toLocaleString()} ₩</span>
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
+                        <span>{it.names[lang] || it.names['RU']} (x{it.quantity})</span>
+                        <span style={{ color: '#fcd34d' }}>{(it.price * it.quantity).toLocaleString()} ₩</span>
                       </div>
                     ))}
                   </div>
@@ -965,47 +1043,65 @@ export default function App() {
         </div>
       )}
 
-      {/* НИЖНЯЯ ПЛАВАЮЩАЯ КОРЗИНА И НАВИГАЦИЯ */}
+      {/* НИЖНЯЯ ПЛАВАЮЩАЯ КОРЗИНА С УПРАВЛЕНИЕМ КОЛИЧЕСТВОМ */}
       {cart.length > 0 && activeTab === 'home' && (
         <div style={{
           position: 'fixed', bottom: '74px', left: '16px', right: '16px',
-          background: 'linear-gradient(135deg, #f59e0b, #d97706)', borderRadius: '16px', padding: '12px 16px',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 8px 24px rgba(245,158,11,0.4)', zIndex: 120
+          background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '12px 16px',
+          display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)', zIndex: 120
         }}>
-          <div>
-            <div style={{ fontSize: '11px', color: '#0b0e14', fontWeight: 'bold' }}>{t.selectedItems}: {cart.length}</div>
-            <div style={{ fontSize: '15px', color: '#0b0e14', fontWeight: '900' }}>{totalPrice.toLocaleString()} ₩</div>
+          <div style={{ maxHeight: '100px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {cart.map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                <span style={{ color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{item.names[lang] || item.names['RU']}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button onClick={() => decreaseQuantity(item.id)} style={{ background: '#334155', color: '#fff', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>-</button>
+                  <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.quantity}</span>
+                  <button onClick={() => addToCart(item)} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>+</button>
+                  <span style={{ minWidth: '60px', textAlign: 'right', color: '#fcd34d', fontWeight: 'bold' }}>{(item.price * item.quantity).toLocaleString()} ₩</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <button onClick={() => setShowCheckoutModal(true)} style={{
-            background: '#0b0e14', color: '#fcd34d', border: 'none', padding: '10px 18px', borderRadius: '10px',
-            fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-          }}>
-            {t.checkoutBtn}
-          </button>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
+            <div>
+              <div style={{ fontSize: '11px', color: '#9ca3af' }}>{t.selectedItems}: {totalCartCount}</div>
+              <div style={{ fontSize: '15px', color: '#fcd34d', fontWeight: '900' }}>{totalCartPrice.toLocaleString()} ₩</div>
+            </div>
+            <button onClick={() => setShowCheckoutModal(true)} style={{
+              background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '10px 18px', borderRadius: '10px',
+              fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
+            }}>
+              {t.checkoutBtn}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, width: '100vw', background: '#141822',
-        borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-around',
-        padding: '10px 0', zIndex: 130, transform: showBottomNav ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease'
-      }}>
-        <button onClick={goToHome} style={{ background: 'transparent', border: 'none', color: activeTab === 'home' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
-          <span style={{ fontSize: '16px' }}>🏠</span> {t.homeTab}
-        </button>
-        <button onClick={() => setActiveTab('search')} style={{ background: 'transparent', border: 'none', color: activeTab === 'search' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
-          <span style={{ fontSize: '16px' }}>🔍</span> {t.searchTab}
-        </button>
-        <button onClick={() => setActiveTab('likes')} style={{ background: 'transparent', border: 'none', color: activeTab === 'likes' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
-          <span style={{ fontSize: '16px' }}>❤️</span> {t.likesTab}
-          {likes.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{likes.length}</span>}
-        </button>
-        <button onClick={() => setActiveTab('orders')} style={{ background: 'transparent', border: 'none', color: activeTab === 'orders' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
-          <span style={{ fontSize: '16px' }}>📦</span> {t.ordersTab}
-          {ordersHistory.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ordersHistory.length}</span>}
-        </button>
-      </nav>
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ КЛИЕНТА (Скрыта в админ-панели по вашему требованию) */}
+      {!isAdminLoggedIn && (
+        <nav style={{
+          position: 'fixed', bottom: 0, left: 0, width: '100vw', background: '#141822',
+          borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-around',
+          padding: '10px 0', zIndex: 130, transform: showBottomNav ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease'
+        }}>
+          <button onClick={goToHome} style={{ background: 'transparent', border: 'none', color: activeTab === 'home' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
+            <span style={{ fontSize: '16px' }}>🏠</span> {t.homeTab}
+          </button>
+          <button onClick={() => setActiveTab('search')} style={{ background: 'transparent', border: 'none', color: activeTab === 'search' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px' }}>
+            <span style={{ fontSize: '16px' }}>🔍</span> {t.searchTab}
+          </button>
+          <button onClick={() => setActiveTab('likes')} style={{ background: 'transparent', border: 'none', color: activeTab === 'likes' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
+            <span style={{ fontSize: '16px' }}>❤️</span> {t.likesTab}
+            {likes.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{likes.length}</span>}
+          </button>
+          <button onClick={() => setActiveTab('orders')} style={{ background: 'transparent', border: 'none', color: activeTab === 'orders' ? '#f59e0b' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '10px', cursor: 'pointer', gap: '2px', position: 'relative' }}>
+            <span style={{ fontSize: '16px' }}>📦</span> {t.ordersTab}
+            {ordersHistory.length > 0 && <span style={{ position: 'absolute', top: '-2px', right: '10px', background: '#f59e0b', color: '#0b0e14', fontSize: '8px', fontWeight: 'bold', width: '14px', height: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ordersHistory.length}</span>}
+          </button>
+        </nav>
+      )}
 
     </div>
   );
