@@ -175,23 +175,18 @@ export default function App() {
   const [lang, setLang] = useState('ru');
   const t = TRANSLATIONS[lang];
 
-  // Активная вкладка нижнего меню: 'home', 'search', 'favorites', 'orders'
   const [activeTab, setActiveTab] = useState('home');
-
   const [activeCategory, setActiveCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState([]);
   const [favorites, setFavorites] = useState([]);
   
-  // Управление админкой
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   
-  // Увеличенный товар с подробностями в красивой рамке
   const [selectedProductModal, setSelectedProductModal] = useState(null);
 
-  // Управление корзиной и заказом
   const [showCartModal, setShowCartModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clientName, setClientName] = useState('');
@@ -204,47 +199,59 @@ export default function App() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [myOrdersList, setMyOrdersList] = useState([]);
 
+  // База товаров с переводами названий и описаний на 3 языка (RU, EN, KO)
   const [products, setProducts] = useState([
     { 
       id: 1, 
-      name: 'Миндальный круассан', 
+      translations: {
+        ru: { name: 'Миндальный круассан', desc: 'Изысканное слоёное тесто на французском масле, нежный крем франжипан, отборный миндаль высшего сорта' },
+        en: { name: 'Almond Croissant', desc: 'Exquisite puff pastry with French butter, delicate frangipane cream, and select premium almonds' },
+        ko: { name: '아몬드 크루아상', desc: '프랑스 버터로 만든 바삭한 페이스트리와 부드러운 프랑지판 크림, 엄선된 아몬드가 들어간 프리미엄 크루아상' }
+      },
       category: 'Круассаны', 
       price: 4500, 
       oldPrice: 5000,
       rating: '4.9', 
-      desc: 'Изысканное слоёное тесто на французском масле, нежный крем франжипан, отборный миндаль высшего сорта', 
       image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80', 
       badge: 'ХИТ' 
     },
     { 
       id: 2, 
-      name: 'Шоколадный бриошь', 
+      translations: {
+        ru: { name: 'Шоколадный бриошь', desc: 'Пышное сдобное тесто ручной работы, настоящее бельгийское какао и кусочки темного премиального шоколада' },
+        en: { name: 'Chocolate Brioche', desc: 'Fluffy handmade enriched dough, authentic Belgian cocoa, and chunks of premium dark chocolate' },
+        ko: { name: '초콜릿 브리오슈', desc: '정성껏 만든 부드러운 브리오슈 반죽에 벨기에산 코코아와 다크 초콜릿 칩이 가득한 달콤한 빵' }
+      },
       category: 'Торты', 
       price: 5500, 
       oldPrice: 6500,
       rating: '4.8', 
-      desc: 'Пышное сдобное тесто ручной работы, настоящее бельгийское какао и кусочки темного премиального шоколада', 
       image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80', 
       badge: 'НОВИНКА' 
     },
     { 
       id: 3, 
-      name: 'Ванильный тарт с ягодами', 
+      translations: {
+        ru: { name: 'Ванильный тарт с ягодами', desc: 'Песочная хрустящая основа, заварной крем с бурбонской ванилью и свежие сезонные лесные ягоды' },
+        en: { name: 'Vanilla Berry Tart', desc: 'Crispy shortcrust pastry, custard with bourbon vanilla, and fresh seasonal wild berries' },
+        ko: { name: '바닐라 베리 타르트', desc: '바삭한 타르트 시트 위에 부드러운 바닐라 커스터드 크림과 신선한 제철 산딸기를 올린 디저트' }
+      },
       category: 'Пироги', 
       price: 7200, 
       oldPrice: 8000,
       rating: '5.0', 
-      desc: 'Песочная хрустящая основа, заварной крем с бурбонской ванилью и свежие сезонные лесные ягоды', 
       image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80', 
       badge: 'ПРЕМИУМ' 
     }
   ]);
 
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitleRu, setNewTitleRu] = useState('');
+  const [newTitleEn, setNewTitleEn] = useState('');
+  const [newTitleKo, setNewTitleKo] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newOldPrice, setNewOldPrice] = useState('');
   const [newCat, setNewCat] = useState('Круассаны');
-  const [newDesc, setNewDesc] = useState('');
+  const [newDescRu, setNewDescRu] = useState('');
   const [newImage, setNewImage] = useState('');
   const [newBadge, setNewBadge] = useState('ХИТ');
 
@@ -270,23 +277,28 @@ export default function App() {
 
   const handleAddProduct = (e) => {
     e.preventDefault();
-    if (!newTitle || !newPrice) return;
+    if (!newTitleRu || !newPrice) return;
     const newItem = {
       id: Date.now(),
-      name: newTitle,
+      translations: {
+        ru: { name: newTitleRu, desc: newDescRu || 'Свежая элитная выпечка ручной работы' },
+        en: { name: newTitleEn || newTitleRu, desc: newDescRu || 'Fresh handmade artisanal pastry' },
+        ko: { name: newTitleKo || newTitleRu, desc: newDescRu || '신선한 수제 프리미엄 베이커리' }
+      },
       category: newCat,
       price: Number(newPrice),
       oldPrice: newOldPrice ? Number(newOldPrice) : null,
       rating: '5.0',
-      desc: newDesc || 'Свежая элитная выпечка ручной работы',
       image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
       badge: newBadge
     };
     setProducts([newItem, ...products]);
-    setNewTitle('');
+    setNewTitleRu('');
+    setNewTitleEn('');
+    setNewTitleKo('');
     setNewPrice('');
     setNewOldPrice('');
-    setNewDesc('');
+    setNewDescRu('');
     setNewImage('');
     alert('Товар успешно добавлен на витрину!');
   };
@@ -316,7 +328,8 @@ export default function App() {
 
   const filteredProducts = products.filter(item => {
     const matchesCat = activeCategory === 'Все' || item.category === activeCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const currentName = (item.translations[lang]?.name || item.translations.ru.name).toLowerCase();
+    const matchesSearch = currentName.includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
@@ -376,7 +389,6 @@ export default function App() {
               boxShadow: '0 20px 40px rgba(0,0,0,0.8)', position: 'relative', boxSizing: 'border-box'
             }}
           >
-            {/* Кнопка закрытия */}
             <button 
               type="button" 
               onClick={() => setSelectedProductModal(null)}
@@ -389,9 +401,8 @@ export default function App() {
               ✕
             </button>
 
-            {/* Картинка с пропорциями */}
             <div style={{ width: '100%', height: '240px', background: '#0b0e14', position: 'relative' }}>
-              <img src={selectedProductModal.image} alt={selectedProductModal.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={selectedProductModal.image} alt={selectedProductModal.translations[lang]?.name || selectedProductModal.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               {selectedProductModal.badge && (
                 <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: '#0b0e14', fontSize: '10px', fontWeight: '900', padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase' }}>
                   {selectedProductModal.badge}
@@ -399,17 +410,18 @@ export default function App() {
               )}
             </div>
 
-            {/* Рамка с текстом, описанием и ценой */}
             <div style={{ padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#fff' }}>{selectedProductModal.name}</h2>
+                <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#fff' }}>
+                  {selectedProductModal.translations[lang]?.name || selectedProductModal.translations.ru.name}
+                </h2>
                 <div style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '700', background: 'rgba(245,158,11,0.1)', padding: '4px 8px', borderRadius: '8px' }}>
                   ★ {selectedProductModal.rating}
                 </div>
               </div>
 
               <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#9ca3af', lineHeight: '1.5' }}>
-                {selectedProductModal.desc}
+                {selectedProductModal.translations[lang]?.desc || selectedProductModal.translations.ru.desc}
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}>
@@ -467,7 +479,7 @@ export default function App() {
                 <div style={{ background: '#0b0e14', borderRadius: '12px', padding: '10px', marginBottom: '16px', maxHeight: '250px', overflowY: 'auto' }}>
                   {cart.map((item, index) => (
                     <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '6px' }}>
-                      <span>{item.name}</span>
+                      <span>{item.translations[lang]?.name || item.translations.ru.name}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</span>
                         <button type="button" onClick={() => removeFromCart(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
@@ -549,7 +561,7 @@ export default function App() {
               <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>{t.yourChoice}</div>
               {cart.map((item, index) => (
                 <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
-                  <span>{item.name}</span>
+                  <span>{item.translations[lang]?.name || item.translations.ru.name}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#fcd34d', fontWeight: 'bold' }}>{item.price.toLocaleString()} ₩</span>
                     <button type="button" onClick={() => removeFromCart(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
@@ -687,14 +699,22 @@ export default function App() {
         </div>
       )}
 
-      {/* Админ-панель */}
+      {/* Админ-панель с возможностью ввода на разных языках */}
       {isAdminLoggedIn && (
         <div style={{ background: '#141822', border: '1px solid #f59e0b', borderRadius: '16px', padding: '14px', marginBottom: '14px' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар в коллекцию</h3>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b' }}>✨ Добавить товар (с мультиязычным описанием)</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <input 
-              type="text" placeholder="Название блюда" value={newTitle} onChange={e => setNewTitle(e.target.value)}
+              type="text" placeholder="Название (RU)" value={newTitleRu} onChange={e => setNewTitleRu(e.target.value)}
               style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }} required
+            />
+            <input 
+              type="text" placeholder="Название (EN - English)" value={newTitleEn} onChange={e => setNewTitleEn(e.target.value)}
+              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
+            />
+            <input 
+              type="text" placeholder="Название (KO - 한국어)" value={newTitleKo} onChange={e => setNewTitleKo(e.target.value)}
+              style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
               <input 
@@ -727,7 +747,7 @@ export default function App() {
               </select>
             </div>
             <input 
-              type="text" placeholder="Описание" value={newDesc} onChange={e => setNewDesc(e.target.value)}
+              type="text" placeholder="Описание товара (на русском)" value={newDescRu} onChange={e => setNewDescRu(e.target.value)}
               style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '13px', outline: 'none' }}
             />
             <div>
@@ -741,10 +761,9 @@ export default function App() {
         </div>
       )}
 
-      {/* Шапка бренда (Премиальный логотип слева, название по центру/слева, адрес и телефон справа) */}
+      {/* Шапка бренда */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Премиальный логотип с короной и золотым градиентом */}
           <div style={{ 
             width: '46px', height: '46px', 
             background: 'linear-gradient(135deg, #fcd34d 0%, #d97706 100%)', 
@@ -762,7 +781,6 @@ export default function App() {
           </div>
         </div>
         
-        {/* Контакты (адрес и телефон) перенесены направо */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
           <div style={{ fontSize: '11px', fontWeight: '800', color: '#fcd34d', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', padding: '4px 10px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span>📞</span> 010-1234-5678
@@ -773,7 +791,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* ПРЕМИАЛЬНЫЙ АКЦИОННЫЙ БАННЕР */}
+      {/* АКЦИОННЫЙ БАННЕР */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%)',
         border: '1px solid rgba(245, 158, 11, 0.35)',
@@ -813,10 +831,9 @@ export default function App() {
         </button>
       </div>
 
-      {/* ОСНОВНОЙ КОНТЕНТ В ЗАВИСИМОСТИ ОТ ВКЛАДКИ НИЖНЕГО МЕНЮ */}
+      {/* ОСНОВНОЙ КОНТЕНТ */}
       {activeTab === 'home' && (
         <>
-          {/* Поиск */}
           <div style={{ margin: '4px 0 14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
             <div style={{ flex: 1, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>🔍</span>
@@ -827,7 +844,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Категории */}
           <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '14px', scrollbarWidth: 'none' }}>
             {[
               { key: 'Все', label: t.categories.All, icon: '🌟' },
@@ -856,11 +872,14 @@ export default function App() {
             <div style={{ fontSize: '16px', fontWeight: '800' }}>{t.menuTitle} ({filteredProducts.length}) ✨</div>
           </div>
 
-          {/* Список товаров */}
+          {/* Список товаров с переводом названий и описаний */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', paddingBottom: '20px' }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((item) => {
                 const isFavorite = favorites.some(fav => fav.id === item.id);
+                const currentName = item.translations[lang]?.name || item.translations.ru.name;
+                const currentDesc = item.translations[lang]?.desc || item.translations.ru.desc;
+
                 return (
                   <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
                     
@@ -870,7 +889,6 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Кнопка "Нравится" (Сердечко) на карточке */}
                     <button 
                       type="button"
                       onClick={(e) => toggleFavorite(item, e)}
@@ -883,19 +901,18 @@ export default function App() {
                       {isFavorite ? '❤️' : '🤍'}
                     </button>
 
-                    {/* Клик по картинке открывает красивое увеличенное модальное окно */}
                     <div 
                       onClick={() => setSelectedProductModal(item)}
                       style={{ height: '130px', width: '100%', overflow: 'hidden', background: '#141822', position: 'relative', cursor: 'pointer' }}
                     >
-                      <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={item.image} alt={currentName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <div style={{ position: 'absolute', right: '6px', bottom: '6px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '2px 6px', fontSize: '11px' }}>🔍</div>
                     </div>
 
                     <div style={{ padding: '10px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+                      <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentName}</div>
                       <div style={{ fontSize: '10px', color: '#f59e0b', fontWeight: '700', marginBottom: '3px' }}>★ {item.rating}</div>
-                      <div style={{ fontSize: '9px', color: '#6b7280', marginBottom: '8px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.desc}</div>
+                      <div style={{ fontSize: '9px', color: '#6b7280', marginBottom: '8px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{currentDesc}</div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '8px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -939,11 +956,11 @@ export default function App() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-            {products.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase())).map(item => (
+            {products.filter(item => (item.translations[lang]?.name || item.translations.ru.name).toLowerCase().includes(searchQuery.toLowerCase())).map(item => (
               <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }}>
-                <div style={{ height: '120px' }}><img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                <div style={{ height: '120px' }}><img src={item.image} alt={item.translations[lang]?.name || item.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                 <div style={{ padding: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.name}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
                   <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold', marginTop: '4px' }}>{item.price.toLocaleString()} ₩</div>
                 </div>
               </div>
@@ -952,7 +969,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ВКЛАДКА ИЗБРАННОЕ (НРАВИТСЯ) */}
+      {/* ВКЛАДКА ИЗБРАННОЕ */}
       {activeTab === 'favorites' && (
         <div style={{ padding: '10px 0' }}>
           <h2 style={{ fontSize: '18px', color: '#fcd34d', marginBottom: '14px' }}>{t.favoritesTitle}</h2>
@@ -964,9 +981,9 @@ export default function App() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
               {favorites.map(item => (
                 <div key={item.id} onClick={() => setSelectedProductModal(item)} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }}>
-                  <div style={{ height: '120px' }}><img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+                  <div style={{ height: '120px' }}><img src={item.image} alt={item.translations[lang]?.name || item.translations.ru.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div style={{ padding: '10px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.name}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{item.translations[lang]?.name || item.translations.ru.name}</div>
                     <div style={{ fontSize: '12px', color: '#fcd34d', fontWeight: 'bold', marginTop: '4px' }}>{item.price.toLocaleString()} ₩</div>
                   </div>
                 </div>
@@ -995,7 +1012,7 @@ export default function App() {
                   <div style={{ marginBottom: '10px', fontSize: '13px' }}>
                     {order.items.map((it, idx) => (
                       <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', marginBottom: '4px' }}>
-                        <span>• {it.name}</span>
+                        <span>• {it.translations[lang]?.name || it.translations.ru.name}</span>
                         <span style={{ color: '#fcd34d' }}>{it.price.toLocaleString()} ₩</span>
                       </div>
                     ))}
@@ -1011,7 +1028,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ФИКСИРОВАННАЯ НИЖНЯЯ ПЛАШКА КОРЗИНЫ (если есть товары) */}
+      {/* НИЖНЯЯ ПЛАШКА КОРЗИНЫ */}
       {cart.length > 0 && activeTab !== 'orders' && (
         <div style={{
           position: 'fixed', bottom: '74px', left: '16px', right: '16px',
@@ -1041,7 +1058,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 5. ФИКСИРОВАННАЯ НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (Домой, Поиск, Нравится, Мои заказы) */}
+      {/* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, height: '64px',
         background: '#141822', borderTop: '1px solid rgba(255, 255, 255, 0.08)',
