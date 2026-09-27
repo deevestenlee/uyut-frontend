@@ -1,666 +1,408 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Уютная пекарня — премиум</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+import React, { useState } from 'react';
 
-    body {
-      background: #06080c;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      font-family: 'Inter', sans-serif;
-      padding: 16px;
-    }
+export default function App() {
+  const [activeCategory, setActiveCategory] = useState('Круассаны');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cart, setCart] = useState([]);
+  
+  // Управление админкой и паролем
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
 
-    /* Мобильный фрейм */
-    .phone {
-      max-width: 390px;
-      width: 100%;
-      background: #0b0e14;
-      border-radius: 44px;
-      box-shadow: 
-        0 30px 60px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(245, 158, 11, 0.12),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-      overflow: hidden;
-      padding: 20px 18px 24px;
-      position: relative;
-    }
+  // Состояние для увеличения картинки товара при клике
+  const [selectedImage, setSelectedImage] = useState(null);
 
-    /* Фоновые градиенты и свечение */
-    .phone::before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      right: -60px;
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+  // Список товаров со старой и новой ценой
+  const [products, setProducts] = useState([
+    { 
+      id: 1, 
+      name: 'Миндальный круассан', 
+      category: 'Круассаны', 
+      price: 4500, 
+      oldPrice: 5000,
+      rating: '4.9', 
+      desc: 'Слоёное тесто, франжипан, миндаль', 
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80', 
+      badge: 'ХИТ' 
+    },
+    { 
+      id: 2, 
+      name: 'Шоколадный бриошь', 
+      category: 'Торты', 
+      price: 5500, 
+      oldPrice: 6500,
+      rating: '4.8', 
+      desc: 'Сдобное тесто, бельгийский шоколад', 
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80', 
+      badge: 'НОВИНКА' 
     }
+  ]);
 
-    .phone > * {
-      position: relative;
-      z-index: 1;
+  // Состояния для формы добавления товара (включая старую цену)
+  const [newTitle, setNewTitle] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newOldPrice, setNewOldPrice] = useState('');
+  const [newCat, setNewCat] = useState('Круассаны');
+  const [newDesc, setNewDesc] = useState('');
+  const [newImage, setNewImage] = useState('');
+  const [newBadge, setNewBadge] = useState('ХИТ');
+
+  // Загрузка файла с устройства
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+  };
 
-    /* Статус-бар */
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 4px 12px;
-      color: #9ca3af;
-      font-size: 13px;
-      font-weight: 600;
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passwordInput === '1234') {
+      setIsAdminLoggedIn(true);
+      setShowLoginModal(false);
+      setPasswordInput('');
+    } else {
+      alert('Неверный пароль! (подсказка: 1234)');
     }
+  };
 
-    /* Шапка */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0 12px;
-    }
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+    if (!newTitle || !newPrice) return;
+    const newItem = {
+      id: Date.now(),
+      name: newTitle,
+      category: newCat,
+      price: Number(newPrice),
+      oldPrice: newOldPrice ? Number(newOldPrice) : null,
+      rating: '5.0',
+      desc: newDesc || 'Свежая выпечка ручной работы',
+      image: newImage || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
+      badge: newBadge
+    };
+    setProducts([newItem, ...products]);
+    setNewTitle('');
+    setNewPrice('');
+    setNewOldPrice('');
+    setNewDesc('');
+    setNewImage('');
+    alert('Товар успешно добавлен на витрину!');
+  };
 
-    .logo-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+  const filteredProducts = products.filter(item => {
+    const matchesCat = activeCategory === 'Все' || item.category === activeCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
 
-    .logo-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
-      flex-shrink: 0;
-    }
+  const addToCart = (item) => {
+    setCart([...cart, item]);
+  };
 
-    .logo-title {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      color: #ffffff;
-      text-transform: uppercase;
-      line-height: 1.1;
-    }
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-    .logo-sub {
-      font-size: 9px;
-      font-weight: 500;
-      color: #f59e0b;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
+  return (
+    <div style={{
+      background: '#06080c',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      fontFamily: 'Inter, sans-serif',
+      padding: '16px'
+    }}>
+      {/* Мобильный фрейм */}
+      <div style={{
+        maxWidth: '390px',
+        width: '100%',
+        background: '#0b0e14',
+        borderRadius: '44px',
+        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(245, 158, 11, 0.12)',
+        overflow: 'hidden',
+        padding: '20px 18px 24px',
+        position: 'relative',
+        color: '#fff',
+        boxSizing: 'border-box'
+      }}>
+        
+        {/* Модальное окно увеличения картинки */}
+        {selectedImage && (
+          <div 
+            onClick={() => setSelectedImage(null)}
+            style={{
+              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+              background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+              zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box', cursor: 'pointer'
+            }}
+          >
+            <img src={selectedImage} alt="Zoomed" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '16px', border: '1px solid rgba(245, 158, 11, 0.3)' }} />
+            <span style={{ color: '#f59e0b', fontSize: '12px', marginTop: '12px', fontWeight: 'bold' }}>Нажмите, чтобы закрыть ✕</span>
+          </div>
+        )}
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        {/* Верхняя строка: Адрес + Вход админа */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px 8px', fontSize: '11px', color: '#9ca3af' }}>
+          <span>📍 Сеул, Каннам-гу 12-3</span>
+          {!isAdminLoggedIn ? (
+            <button 
+              onClick={() => setShowLoginModal(true)}
+              style={{
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                color: '#f59e0b',
+                padding: '2px 8px',
+                borderRadius: '8px',
+                fontSize: '10px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              ⚙️ Вход для админа
+            </button>
+          ) : (
+            <button 
+              onClick={() => setIsAdminLoggedIn(false)}
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#ef4444',
+                padding: '2px 8px',
+                borderRadius: '8px',
+                fontSize: '10px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Выйти
+            </button>
+          )}
+        </div>
 
-    .icon-btn {
-      width: 38px;
-      height: 38px;
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #d1d5db;
-      font-size: 16px;
-      cursor: pointer;
-      position: relative;
-    }
+        {/* Модалка входа */}
+        {showLoginModal && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            background: 'rgba(6, 8, 12, 0.9)', backdropFilter: 'blur(6px)',
+            zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box'
+          }}>
+            <form onSubmit={handleLogin} style={{
+              background: '#141822', border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '20px', padding: '20px', width: '100%', textAlign: 'center'
+            }}>
+              <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', color: '#fff' }}>Вход для администратора</h3>
+              <p style={{ margin: '0 0 14px 0', fontSize: '10px', color: '#9ca3af' }}>Пароль по умолчанию: 1234</p>
+              <input 
+                type="password" placeholder="Пароль" value={passwordInput} onChange={e => setPasswordInput(e.target.value)}
+                style={{ width: '100%', background: '#0b0e14', border: '1px solid #334155', borderRadius: '10px', padding: '8px 12px', color: '#fff', fontSize: '13px', boxSizing: 'border-box', marginBottom: '12px', outline: 'none' }}
+                autoFocus
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button type="button" onClick={() => setShowLoginModal(false)} style={{ flex: 1, background: '#334155', color: '#fff', border: 'none', borderRadius: '10px', padding: '8px', fontSize: '12px', cursor: 'pointer' }}>Отмена</button>
+                <button type="submit" style={{ flex: 1, background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '10px', padding: '8px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>Войти</button>
+              </div>
+            </form>
+          </div>
+        )}
 
-    .badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #f59e0b;
-      color: #0b0e14;
-      font-size: 9px;
-      font-weight: 800;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #0b0e14;
-    }
+        {/* Форма админа с поддержкой старой цены и ленточки */}
+        {isAdminLoggedIn && (
+          <div style={{
+            background: '#141822', border: '1px solid #f59e0b',
+            borderRadius: '16px', padding: '12px', marginBottom: '14px'
+          }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#f59e0b' }}>✨ Добавить товар со скидкой</h3>
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <input 
+                type="text" placeholder="Название блюда" value={newTitle} onChange={e => setNewTitle(e.target.value)}
+                style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }} required
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input 
+                  type="number" placeholder="Цена (₩) 95" value={newPrice} onChange={e => setNewPrice(e.target.value)}
+                  style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }} required
+                />
+                <input 
+                  type="number" placeholder="Старая цена (₩) 100" value={newOldPrice} onChange={e => setNewOldPrice(e.target.value)}
+                  style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  value={newCat} onChange={e => setNewCat(e.target.value)}
+                  style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                >
+                  <option value="Круассаны">Круассаны</option>
+                  <option value="Торты">Торты</option>
+                  <option value="Пироги">Пироги</option>
+                  <option value="Печенье">Печенье</option>
+                  <option value="Напитки">Напитки</option>
+                </select>
+                <select 
+                  value={newBadge} onChange={e => setNewBadge(e.target.value)}
+                  style={{ flex: 1, background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                >
+                  <option value="ХИТ">Ленточка: ХИТ</option>
+                  <option value="НОВИНКА">Ленточка: НОВИНКА</option>
+                  <option value="СКИДКА">Ленточка: СКИДКА</option>
+                </select>
+              </div>
+              <input 
+                type="text" placeholder="Описание" value={newDesc} onChange={e => setNewDesc(e.target.value)}
+                style={{ background: '#0b0e14', border: '1px solid #334155', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', outline: 'none' }}
+              />
+              <div>
+                <label style={{ display: 'block', fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>Фото:</label>
+                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '10px', color: '#9ca3af', width: '100%' }} />
+              </div>
+              <button type="submit" style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', borderRadius: '8px', padding: '8px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', marginTop: '4px' }}>
+                Добавить на витрину
+              </button>
+            </form>
+          </div>
+        )}
 
-    /* Поиск */
-    .search-section {
-      margin: 4px 0 14px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+        {/* Шапка */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '38px', height: '38px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px'
+            }}>🥐</div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>Уютная Пекарня</div>
+              <div style={{ fontSize: '9px', fontWeight: '500', color: '#f59e0b' }}>📞 +82 10-1234-5678</div>
+            </div>
+          </div>
+          <div style={{
+            width: '38px', height: '38px', background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '14px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', position: 'relative'
+          }}>
+            🛒
+            {cart.length > 0 && (
+              <span style={{
+                position: 'absolute', top: '-4px', right: '-4px', background: '#f59e0b', color: '#0b0e14',
+                fontSize: '9px', fontWeight: '800', width: '16px', height: '16px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0b0e14'
+              }}>{cart.length}</span>
+            )}
+          </div>
+        </div>
 
-    .search-box {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
-      padding: 0 14px;
-      height: 46px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        {/* Поиск */}
+        <div style={{ margin: '4px 0 14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{
+            flex: 1, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: '16px', padding: '0 14px', height: '46px', display: 'flex', alignItems: 'center', gap: '10px'
+          }}>
+            <span>🔍</span>
+            <input 
+              type="text" placeholder="Поиск по меню..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f3f4f6', fontSize: '13px', width: '100%' }} 
+            />
+          </div>
+        </div>
 
-    .search-box input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #f3f4f6;
-      font-size: 13px;
-      width: 100%;
-      font-family: 'Inter', sans-serif;
-    }
+        {/* Категории */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '14px', scrollbarWidth: 'none' }}>
+          {['Все', 'Круассаны', 'Торты', 'Пироги', 'Печенье', 'Напитки'].map((cat) => {
+            const isActive = activeCategory === cat;
+            return (
+              <div 
+                key={cat} onClick={() => setActiveCategory(cat)}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <div style={{
+                  width: '46px', height: '46px', background: isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.04)',
+                  border: `1px solid ${isActive ? '#f59e0b' : 'rgba(255, 255, 255, 0.06)'}`, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: '0.2s'
+                }}>
+                  {cat === 'Все' ? '🌟' : cat === 'Круассаны' ? '🥐' : cat === 'Торты' ? '🍰' : cat === 'Пироги' ? '🥧' : cat === 'Печенье' ? '🍪' : '☕'}
+                </div>
+                <span style={{ fontSize: '10px', color: isActive ? '#fcd34d' : '#9ca3af', fontWeight: isActive ? '700' : '500' }}>{cat}</span>
+              </div>
+            );
+          })}
+        </div>
 
-    .search-box input::placeholder {
-      color: #6b7280;
-    }
+        {/* Заголовок */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0 12px' }}>
+          <div style={{ fontSize: '15px', fontWeight: '800' }}>Меню ({filteredProducts.length}) 🔥</div>
+        </div>
 
-    .filter-btn {
-      width: 46px;
-      height: 46px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9ca3af;
-      font-size: 16px;
-    }
+        {/* Сетка товаров с красивой ленточкой и кликом по фото */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', maxHeight: '280px', overflowY: 'auto', paddingRight: '2px' }}>
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((item) => (
+              <div key={item.id} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
+                
+                {/* Красивая ленточка (бейджик) */}
+                {item.badge && (
+                  <div style={{
+                    position: 'absolute', top: '8px', left: '0', background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                    color: '#0b0e14', fontSize: '8px', fontWeight: '900', padding: '3px 8px', borderRadius: '0 8px 8px 0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, textTransform: 'uppercase', letterSpacing: '0.5px'
+                  }}>
+                    {item.badge}
+                  </div>
+                )}
 
-    /* Премиум-баннер в стиле референса */
-    .hero-banner {
-      background: linear-gradient(135deg, #121620 0%, #1a1510 100%);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      border-radius: 24px;
-      padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+                {/* Картинка с лупой при наведении и кликом для увеличения */}
+                <div 
+                  onClick={() => setSelectedImage(item.image)}
+                  style={{ height: '90px', width: '100%', overflow: 'hidden', background: '#141822', position: 'relative', cursor: 'pointer' }}
+                  title="Нажмите для увеличения"
+                >
+                  <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
+                  <div style={{ position: 'absolute', right: '6px', bottom: '6px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '2px 5px', fontSize: '10px' }}>🔍</div>
+                </div>
 
-    .hero-banner::after {
-      content: '';
-      position: absolute;
-      right: -20px;
-      bottom: -20px;
-      width: 120px;
-      height: 120px;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
-    }
+                <div style={{ padding: '8px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '700', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+                  <div style={{ fontSize: '9px', color: '#f59e0b', fontWeight: '700', marginBottom: '2px' }}>★ {item.rating}</div>
+                  <div style={{ fontSize: '8px', color: '#6b7280', marginBottom: '6px', lineHeight: '1.2', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.desc}</div>
+                  
+                  {/* Цены: новая и перечеркнутая старая */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: '800', color: '#fcd34d' }}>{item.price.toLocaleString()} ₩</span>
+                      {item.oldPrice && (
+                        <span style={{ fontSize: '8px', color: '#6b7280', textDecoration: 'line-through' }}>{item.oldPrice.toLocaleString()} ₩</span>
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => addToCart(item)}
+                      style={{ width: '24px', height: '24px', background: '#f59e0b', color: '#0b0e14', borderRadius: '6px', border: 'none', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ gridColumn: 'span 2', textAlign: 'center', color: '#6b7280', padding: '20px', fontSize: '12px' }}>
+              Ничего не найдено 😢
+            </div>
+          )}
+        </div>
 
-    .hero-text-sub {
-      font-family: serif;
-      font-style: italic;
-      color: #f59e0b;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-    }
+        {/* Корзина */}
+        {cart.length > 0 && (
+          <div style={{ marginTop: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px' }}>В корзине: {cart.length} тов. ({totalPrice.toLocaleString()} ₩)</span>
+            <button onClick={() => alert('Заказ успешно оформлен!')} style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}>
+              Оформить
+            </button>
+          </div>
+        )}
 
-    .hero-title {
-      font-size: 15px;
-      font-weight: 900;
-      color: #ffffff;
-      text-transform: uppercase;
-      line-height: 1.15;
-      margin: 2px 0 6px;
-      letter-spacing: 0.5px;
-    }
-
-    .hero-desc {
-      font-size: 10px;
-      color: #9ca3af;
-      margin-bottom: 10px;
-      max-width: 170px;
-      line-height: 1.3;
-    }
-
-    .hero-btn {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: #0b0e14;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      text-transform: uppercase;
-    }
-
-    .hero-img-emoji {
-      font-size: 52px;
-      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
-    }
-
-    /* Категории (иконки в кружочках) */
-    .categories {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 14px;
-      scrollbar-width: none;
-    }
-
-    .categories::-webkit-scrollbar {
-      display: none;
-    }
-
-    .cat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .cat-circle {
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      transition: all 0.2s;
-    }
-
-    .cat-item.active .cat-circle {
-      background: #f59e0b;
-      border-color: #f59e0b;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    }
-
-    .cat-name {
-      font-size: 10px;
-      color: #9ca3af;
-      font-weight: 500;
-    }
-
-    .cat-item.active .cat-name {
-      color: #fcd34d;
-      font-weight: 700;
-    }
-
-    /* Заголовок секции */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 6px 0 12px;
-    }
-
-    .section-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: 0.3px;
-    }
-
-    .see-all {
-      font-size: 12px;
-      font-weight: 600;
-      color: #f59e0b;
-      cursor: pointer;
-    }
-
-    /* Карточки товаров */
-    .products-scroll {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scrollbar-width: none;
-    }
-
-    .products-scroll::-webkit-scrollbar {
-      display: none;
-    }
-
-    .product-card {
-      min-width: 160px;
-      width: 160px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 20px;
-      padding: 10px;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .product-badge {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      background: #f59e0b;
-      color: #0b0e14;
-      font-size: 9px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 6px;
-      z-index: 2;
-    }
-
-    .product-img-box {
-      background: #141822;
-      border-radius: 14px;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 42px;
-      margin-bottom: 8px;
-    }
-
-    .product-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2px;
-    }
-
-    .product-name {
-      font-size: 12px;
-      font-weight: 700;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .product-rating {
-      font-size: 10px;
-      color: #f59e0b;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .product-desc {
-      font-size: 9px;
-      color: #6b7280;
-      margin-bottom: 8px;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .product-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 6px;
-    }
-
-    .product-price {
-      font-size: 12px;
-      font-weight: 800;
-      color: #fcd34d;
-    }
-
-    .mini-add-btn {
-      width: 24px;
-      height: 24px;
-      background: #f59e0b;
-      color: #0b0e14;
-      border-radius: 8px;
-      border: none;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    /* Нижний таббар в точности как на референсе */
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: rgba(11, 14, 20, 0.95);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding-top: 10px;
-      margin-top: 14px;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      background: transparent;
-      border: none;
-      color: #6b7280;
-      font-size: 9px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .nav-item.active {
-      color: #f59e0b;
-    }
-
-    .nav-icon {
-      font-size: 18px;
-    }
-
-    /* Центральная круглая кнопка заказа */
-    .nav-center-btn {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #0b0e14;
-      font-size: 18px;
-      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
-      margin-top: -22px;
-      border: 4px solid #0b0e14;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="phone">
-    
-    <!-- Статус-бар мобильного -->
-    <div class="status-bar">
-      <span>9:41</span>
-      <div style="display: flex; gap: 4px;">
-        <span>📶</span>
-        <span>🔋</span>
       </div>
     </div>
-
-    <!-- Шапка приложения -->
-    <div class="header">
-      <div class="logo-group">
-        <div class="logo-icon">👨‍🍳</div>
-        <div class="logo-text">
-          <div class="logo-title">Уютная Пекарня</div>
-          <div class="logo-sub">Свежая выпечка</div>
-        </div>
-      </div>
-      <div class="header-actions">
-        <div class="icon-btn" title="Корзина">
-          🛒
-          <span class="badge">2</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Строка поиска -->
-    <div class="search-section">
-      <div class="search-box">
-        <span>🔍</span>
-        <input type="text" placeholder="Поиск круассанов, десертов...">
-      </div>
-      <div class="filter-btn">⚡</div>
-    </div>
-
-    <!-- Главный промо-баннер (в стиле референса) -->
-    <div class="hero-banner">
-      <div>
-        <span class="hero-text-sub">Искусство вкуса</span>
-        <div class="hero-title">Свежее.<br>Ароматное.<br>Незабываемое.</div>
-        <div class="hero-desc">Премиальные ингредиенты. Мастерски приготовлено.</div>
-        <button class="hero-btn">Заказать сейчас ›</button>
-      </div>
-      <div class="hero-img-emoji">🥐</div>
-    </div>
-
-    <!-- Круглые иконки категорий -->
-    <div class="categories">
-      <div class="cat-item active">
-        <div class="cat-circle">🥐</div>
-        <span class="cat-name">Круассаны</span>
-      </div>
-      <div class="cat-item">
-        <div class="cat-circle">🍰</div>
-        <span class="cat-name">Торты</span>
-      </div>
-      <div class="cat-item">
-        <div class="cat-circle">🥧</div>
-        <span class="cat-name">Пироги</span>
-      </div>
-      <div class="cat-item">
-        <div class="cat-circle">🍪</div>
-        <span class="cat-name">Печенье</span>
-      </div>
-      <div class="cat-item">
-        <div class="cat-circle">☕</div>
-        <span class="cat-name">Напитки</span>
-      </div>
-    </div>
-
-    <!-- Блок популярного -->
-    <div class="section-header">
-      <div class="section-title">Популярное 🔥</div>
-      <div class="see-all">Все ›</div>
-    </div>
-
-    <!-- Горизонтальная лента карточек товаров -->
-    <div class="products-scroll">
-      
-      <!-- Карточка 1 -->
-      <div class="product-card">
-        <span class="product-badge">ХИТ</span>
-        <div class="product-img-box">🥐</div>
-        <div class="product-top-row">
-          <div class="product-name">Миндальный круассан</div>
-        </div>
-        <div class="product-rating">★ 4.9 <span style="color:#6b7280; font-weight:400;">(1.2K)</span></div>
-        <div class="product-desc">Слоёное тесто, франжипан, миндаль</div>
-        <div class="product-footer">
-          <div class="product-price">250 ₽</div>
-          <button class="mini-add-btn">+</button>
-        </div>
-      </div>
-
-      <!-- Карточка 2 -->
-      <div class="product-card">
-        <span class="product-badge" style="background:#3b82f6; color:#fff;">НОВИНКА</span>
-        <div class="product-img-box">🍰</div>
-        <div class="product-top-row">
-          <div class="product-name">Шоколадный бриошь</div>
-        </div>
-        <div class="product-rating">★ 4.8 <span style="color:#6b7280; font-weight:400;">(856)</span></div>
-        <div class="product-desc">Сдобное тесто, бельгийский шоколад</div>
-        <div class="product-footer">
-          <div class="product-price">320 ₽</div>
-          <button class="mini-add-btn">+</button>
-        </div>
-      </div>
-
-      <!-- Карточка 3 -->
-      <div class="product-card">
-        <span class="product-badge" style="background:#10b981; color:#fff;">ТОП</span>
-        <div class="product-img-box">🥧</div>
-        <div class="product-top-row">
-          <div class="product-name">Вишневый пай</div>
-        </div>
-        <div class="product-rating">★ 4.7 <span style="color:#6b7280; font-weight:400;">(743)</span></div>
-        <div class="product-desc">Сочная вишня, песочное тесто</div>
-        <div class="product-footer">
-          <div class="product-price">280 ₽</div>
-          <button class="mini-add-btn">+</button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Нижняя панель навигации (таббар) -->
-    <div class="bottom-nav">
-      <button class="nav-item active">
-        <span class="nav-icon">🏠</span>
-        <span>Главная</span>
-      </button>
-      <button class="nav-item">
-        <span class="nav-icon">📖</span>
-        <span>Меню</span>
-      </button>
-      <!-- Центральная кнопка заказа как на референсе -->
-      <div class="nav-center-btn" title="Заказ">
-        🛍️
-      </div>
-      <button class="nav-item">
-        <span class="nav-icon">📅</span>
-        <span>Столик</span>
-      </button>
-      <button class="nav-item">
-        <span class="nav-icon">⋯</span>
-        <span>Ещё</span>
-      </button>
-    </div>
-
-  </div>
-
-</body>
-</html>
+  );
+}
