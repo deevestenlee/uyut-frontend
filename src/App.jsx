@@ -2,10 +2,27 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ==========================================
-// ИНИЦИАЛИЗАЦИЯ SUPABASE
+// ИНИЦИАЛИЗАЦИЯ SUPABASE (Безопасная для Vite и CRA)
 // ==========================================
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+const getEnvVar = (key) => {
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+  
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
+      return process.env[key];
+    }
+  } catch (e) {}
+  
+  return '';
+};
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('REACT_APP_SUPABASE_URL') || '';
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('REACT_APP_SUPABASE_ANON_KEY') || '';
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ==========================================
@@ -242,9 +259,13 @@ export default function App() {
   };
 
   const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUser(session.user);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      }
+    } catch (e) {
+      console.error('Auth session error:', e);
     }
   };
 
@@ -368,6 +389,7 @@ export default function App() {
   }, [products, selectedCategory, selectedSubCategory, searchQuery, lang]);
 
   const getProductImages = (item) => {
+    if (!item) return ['https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600'];
     if (Array.isArray(item.images) && item.images.length > 0) return item.images;
     if (item.image) return [item.image];
     return ['https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600'];
@@ -378,7 +400,7 @@ export default function App() {
     const title = item.names?.[lang] || item.name || 'Десерт';
     const desc = item.descs?.[lang] || item.description || '';
     const badgeText = t.badges[item.badge] || (item.badge ? item.badge.toUpperCase() : null);
-    images = getProductImages(item);
+    const images = getProductImages(item);
 
     return (
       <div 
@@ -428,7 +450,7 @@ export default function App() {
 
           <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(item.price).toLocaleString()} ₩</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(item.price || 0).toLocaleString()} ₩</div>
               {item.old_price && (
                 <div style={{ fontSize: '9px', color: '#6b7280', textDecoration: 'line-through' }}>{Number(item.old_price).toLocaleString()} ₩</div>
               )}
@@ -445,8 +467,6 @@ export default function App() {
       </div>
     );
   };
-
-  let images = [];
 
   return (
     <div style={{
@@ -820,7 +840,7 @@ export default function App() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold' }}>
                       <span>{order.customer_name}</span>
-                      <span style={{ color: '#fcd34d' }}>{Number(order.total).toLocaleString()} ₩</span>
+                      <span style={{ color: '#fcd34d' }}>{Number(order.total || 0).toLocaleString()} ₩</span>
                     </div>
                   </div>
                 ))}
@@ -865,7 +885,7 @@ export default function App() {
             <p style={{ fontSize: '11px', color: '#9ca3af', lineHeight: '1.4', marginBottom: '16px' }}>{selectedProduct.descs?.[lang] || selectedProduct.description}</p>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(selectedProduct.price).toLocaleString()} ₩</span>
+              <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(selectedProduct.price || 0).toLocaleString()} ₩</span>
               <button 
                 onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
                 style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
@@ -903,7 +923,7 @@ export default function App() {
                         <img src={getProductImages(item)[0]} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} />
                         <div style={{ overflow: 'hidden' }}>
                           <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.names?.[lang] || item.name}</div>
-                          <div style={{ fontSize: '11px', color: '#fcd34d' }}>{Number(item.price).toLocaleString()} ₩</div>
+                          <div style={{ fontSize: '11px', color: '#fcd34d' }}>{Number(item.price || 0).toLocaleString()} ₩</div>
                         </div>
                       </div>
 
