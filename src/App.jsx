@@ -2,14 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ==========================================
-// ИНИЦИАЛИЗАЦИЯ SUPABASE (Сохранена оригинальная)
+// ИНИЦИАЛИЗАЦИЯ SUPABASE
 // ==========================================
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ==========================================
-// ПОЛНЫЙ СЛОВАРЬ ЛОКАЛИЗАЦИИ (RU / EN / KO)
+// МУЛЬТИЯЗЫЧНЫЙ СЛОВАРЬ (RU / EN / KO)
 // ==========================================
 const TRANSLATIONS = {
   RU: {
@@ -162,45 +162,38 @@ const TRANSLATIONS = {
 };
 
 export default function App() {
-  // Локализация с сохранением в localStorage
   const [lang, setLang] = useState(() => localStorage.getItem('sweet_bakery_lang') || 'RU');
   useEffect(() => {
     localStorage.setItem('sweet_bakery_lang', lang);
   }, [lang]);
   const t = TRANSLATIONS[lang] || TRANSLATIONS.RU;
 
-  // Навигация и состояния страниц
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'menu' | 'likes' | 'orders'
-  const [selectedCategory, setSelectedCategory] = useState(null); // ID выбранной категории
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null); // ID подкатегории
+  const [activeTab, setActiveTab] = useState('home');
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Данные из Supabase
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Корзина и Избранное
   const [cart, setCart] = useState([]);
   const [likes, setLikes] = useState([]);
   const [ordersHistory, setOrdersHistory] = useState([]);
 
-  // Модальные окна
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null); // Для детального просмотра товара
-  const [activeImageIndex, setActiveImageIndex] = useState(0); // Карусель фото в карточке
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Авторизация
   const [user, setUser] = useState(null);
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
 
-  // Форма оформления заказа
-  const [orderType, setOrderType] = useState('pickup'); // 'pickup' | 'delivery'
+  const [orderType, setOrderType] = useState('pickup');
   const [checkoutForm, setCheckoutForm] = useState({
     name: '',
     phone: '',
@@ -209,7 +202,6 @@ export default function App() {
     comment: ''
   });
 
-  // Управление видимостью нижней панели при скролле
   const [showBottomNav, setShowBottomNav] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -227,7 +219,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Загрузка данных из Supabase
   useEffect(() => {
     fetchData();
     checkUser();
@@ -236,7 +227,6 @@ export default function App() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Загружаем товары и категории из существующих таблиц Supabase
       const [prodRes, catRes] = await Promise.all([
         supabase.from('products').select('*'),
         supabase.from('categories').select('*')
@@ -258,7 +248,6 @@ export default function App() {
     }
   };
 
-  // Обработчики авторизации
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -283,7 +272,6 @@ export default function App() {
     setUser(null);
   };
 
-  // Управление корзиной
   const addToCart = (product, qty = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -322,14 +310,12 @@ export default function App() {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
   }, [cart]);
 
-  // Избранное
   const toggleLike = (productId) => {
     setLikes((prev) =>
       prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
-  // Оформление заказа через Supabase
   const handleConfirmOrder = async (e) => {
     e.preventDefault();
     if (!checkoutForm.name || !checkoutForm.phone) {
@@ -352,7 +338,7 @@ export default function App() {
         created_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase.from('orders').insert([orderData]);
+      const { error } = await supabase.from('orders').insert([orderData]);
       if (error) throw error;
 
       setOrdersHistory((prev) => [{ id: Date.now(), ...orderData }, ...prev]);
@@ -367,7 +353,6 @@ export default function App() {
     }
   };
 
-  // Фильтрация товаров для главной и каталога
   const newProducts = useMemo(() => products.filter((p) => p.badge === 'new' || p.is_new), [products]);
   const hitProducts = useMemo(() => products.filter((p) => p.badge === 'hit' || p.is_hit), [products]);
   const saleProducts = useMemo(() => products.filter((p) => p.old_price || p.badge === 'sale'), [products]);
@@ -382,12 +367,86 @@ export default function App() {
     });
   }, [products, selectedCategory, selectedSubCategory, searchQuery, lang]);
 
-  // Вспомогательная функция для получения изображений товара (поддержка массива или строки)
   const getProductImages = (item) => {
     if (Array.isArray(item.images) && item.images.length > 0) return item.images;
     if (item.image) return [item.image];
     return ['https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600'];
   };
+
+  const renderProductCard = (item, isGrid = false) => {
+    const isLiked = likes.includes(item.id);
+    const title = item.names?.[lang] || item.name || 'Десерт';
+    const desc = item.descs?.[lang] || item.description || '';
+    const badgeText = t.badges[item.badge] || (item.badge ? item.badge.toUpperCase() : null);
+    images = getProductImages(item);
+
+    return (
+      <div 
+        key={item.id}
+        style={{
+          flex: isGrid ? 'unset' : '0 0 160px',
+          width: isGrid ? '100%' : '160px',
+          background: '#141822',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '14px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+        }}
+      >
+        <div 
+          style={{ width: '100%', aspectRatio: '1/1', position: 'relative', cursor: 'pointer', backgroundColor: '#1e293b' }}
+          onClick={() => { setSelectedProduct(item); setActiveImageIndex(0); }}
+        >
+          <img src={images[0]} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          
+          {badgeText && (
+            <span style={{ position: 'absolute', top: '6px', left: '6px', background: 'rgba(11,14,20,0.85)', color: '#fcd34d', padding: '2px 6px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>
+              {badgeText}
+            </span>
+          )}
+
+          <button 
+            onClick={(e) => { e.stopPropagation(); toggleLike(item.id); }}
+            style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(11,14,20,0.85)', border: 'none', width: '26px', height: '26px', borderRadius: '50%', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            aria-label="Like"
+          >
+            {isLiked ? '❤️' : '🤍'}
+          </button>
+        </div>
+
+        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+          <div onClick={() => { setSelectedProduct(item); setActiveImageIndex(0); }} style={{ cursor: 'pointer' }}>
+            <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', fontWeight: 'bold', color: '#fff', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {title}
+            </h4>
+            <p style={{ margin: 0, fontSize: '10px', color: '#9ca3af', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {desc}
+            </p>
+          </div>
+
+          <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(item.price).toLocaleString()} ₩</div>
+              {item.old_price && (
+                <div style={{ fontSize: '9px', color: '#6b7280', textDecoration: 'line-through' }}>{Number(item.old_price).toLocaleString()} ₩</div>
+              )}
+            </div>
+            <button 
+              onClick={() => addToCart(item)}
+              style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '28px', height: '28px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              aria-label="Add"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  let images = [];
 
   return (
     <div style={{
@@ -399,9 +458,7 @@ export default function App() {
       boxSizing: 'border-box'
     }}>
 
-      {/* ==========================================
-          1. ШАПКА САЙТА (COMPACT HEADER)
-          ========================================== */}
+      {/* ШАПКА САЙТА */}
       <header style={{
         position: 'sticky',
         top: 0,
@@ -419,7 +476,6 @@ export default function App() {
           justifyContent: 'space-between',
           gap: '8px'
         }}>
-          {/* Левый блок: Бургер-меню + Логотип */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button 
               onClick={() => setIsMenuOpen(true)}
@@ -466,9 +522,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Правый блок: Переключатель языков + Корзина + Вход */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Языковой селектор */}
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
@@ -522,7 +576,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Иконка корзины */}
             <button 
               onClick={() => setShowCartDrawer(true)}
               style={{
@@ -542,7 +595,6 @@ export default function App() {
               🛒 {totalCartCount > 0 && <span>{totalCartCount}</span>}
             </button>
 
-            {/* Вход для работников */}
             {user ? (
               <button 
                 onClick={handleLogout}
@@ -580,9 +632,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ==========================================
-          2. ВЫДВИЖНОЕ МЕНЮ (SIDE DRAWER)
-          ========================================== */}
+      {/* ВЫДВИЖНОЕ МЕНЮ */}
       {isMenuOpen && (
         <div 
           onClick={() => setIsMenuOpen(false)}
@@ -624,21 +674,16 @@ export default function App() {
         </div>
       )}
 
-      {/* ==========================================
-          3. ОСНОВНОЙ КОНТЕНТ (STRINGS & VIEWS)
-          ========================================== */}
+      {/* ОСНОВНОЙ КОНТЕНТ */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
 
-        {/* ВКЛАДКА: ГЛАВНАЯ (Home) */}
+        {/* ГЛАВНАЯ */}
         {activeTab === 'home' && (
           <div>
-            {/* Рендеринг трех блоков: Новинки, Хиты, Sale */}
             {loading ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Загрузка...</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-                
-                {/* 1. Новинки */}
                 {newProducts.length > 0 && (
                   <section>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -651,7 +696,6 @@ export default function App() {
                   </section>
                 )}
 
-                {/* 2. Хиты продаж */}
                 {hitProducts.length > 0 && (
                   <section>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -664,7 +708,6 @@ export default function App() {
                   </section>
                 )}
 
-                {/* 3. Sale / Скидки */}
                 {saleProducts.length > 0 && (
                   <section>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -676,13 +719,12 @@ export default function App() {
                     </div>
                   </section>
                 )}
-
               </div>
             )}
           </div>
         )}
 
-        {/* ВКЛАДКА: МЕНЮ И КАТЕГОРИИ (Menu) */}
+        {/* МЕНЮ И КАТЕГОРИИ */}
         {activeTab === 'menu' && (
           <div>
             <div style={{ position: 'relative', marginBottom: '16px' }}>
@@ -699,7 +741,6 @@ export default function App() {
               <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px' }}>🔍</span>
             </div>
 
-            {/* Выбор категорий */}
             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px', scrollbarWidth: 'none' }}>
               <button 
                 onClick={() => { setSelectedCategory(null); setSelectedSubCategory(null); }}
@@ -726,7 +767,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Кнопка сброса фильтра */}
             {selectedCategory && (
               <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button 
@@ -738,7 +778,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Сетка товаров каталога */}
             {filteredCatalogProducts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '50px 0', color: '#9ca3af', fontSize: '13px' }}>
                 {t.notFound}
@@ -751,7 +790,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ВКЛАДКА: ИЗБРАННОЕ (Likes) */}
+        {/* ИЗБРАННОЕ */}
         {activeTab === 'likes' && (
           <div>
             <h2 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '16px' }}>{t.likesTab}</h2>
@@ -765,7 +804,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ВКЛАДКА: ЗАКАЗЫ (Orders) */}
+        {/* ЗАКАЗЫ */}
         {activeTab === 'orders' && (
           <div>
             <h2 style={{ fontSize: '16px', color: '#fcd34d', marginBottom: '16px' }}>{t.orderHistoryTitle}</h2>
@@ -792,87 +831,7 @@ export default function App() {
 
       </main>
 
-      {/* ==========================================
-          КОМПОНЕНТ КАРТОЧКИ ТОВАРА (CARD COMPONENT)
-          ========================================== */}
-      function renderProductCard(item, isGrid = false) {
-        const isLiked = likes.includes(item.id);
-        const title = item.names?.[lang] || item.name || 'Десерт';
-        const desc = item.descs?.[lang] || item.description || '';
-        const badgeText = t.badges[item.badge] || (item.badge ? item.badge.toUpperCase() : null);
-        const images = getProductImages(item);
-
-        return (
-          <div 
-            key={item.id}
-            style={{
-              flex: isGrid ? 'unset' : '0 0 160px',
-              width: isGrid ? '100%' : '160px',
-              background: '#141822',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '14px',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-            }}
-          >
-            {/* Картинка / Карусель в карточке */}
-            <div 
-              style={{ width: '100%', aspectRatio: '1/1', position: 'relative', cursor: 'pointer', backgroundColor: '#1e293b' }}
-              onClick={() => { setSelectedProduct(item); setActiveImageIndex(0); }}
-            >
-              <img src={images[0]} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              
-              {badgeText && (
-                <span style={{ position: 'absolute', top: '6px', left: '6px', background: 'rgba(11,14,20,0.85)', color: '#fcd34d', padding: '2px 6px', borderRadius: '4px', fontSize: '8px', fontWeight: 'bold' }}>
-                  {badgeText}
-                </span>
-              )}
-
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleLike(item.id); }}
-                style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(11,14,20,0.85)', border: 'none', width: '26px', height: '26px', borderRadius: '50%', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                aria-label="Like"
-              >
-                {isLiked ? '❤️' : '🤍'}
-              </button>
-            </div>
-
-            {/* Контент карточки */}
-            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-              <div onClick={() => { setSelectedProduct(item); setActiveImageIndex(0); }} style={{ cursor: 'pointer' }}>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', fontWeight: 'bold', color: '#fff', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {title}
-                </h4>
-                <p style={{ margin: 0, fontSize: '10px', color: '#9ca3af', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {desc}
-                </p>
-              </div>
-
-              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fcd34d' }}>{Number(item.price).toLocaleString()} ₩</div>
-                  {item.old_price && (
-                    <div style={{ fontSize: '9px', color: '#6b7280', textDecoration: 'line-through' }}>{Number(item.old_price).toLocaleString()} ₩</div>
-                  )}
-                </div>
-                <button 
-                  onClick={() => addToCart(item)}
-                  style={{ background: '#f59e0b', color: '#0b0e14', border: 'none', width: '28px', height: '28px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  aria-label="Add"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      {/* ==========================================
-          4. МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ ТОВАРА
-          ========================================== */}
+      {/* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ ТОВАРА */}
       {selectedProduct && (
         <div 
           onClick={() => setSelectedProduct(null)}
@@ -882,15 +841,14 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
             style={{ backgroundColor: '#141822', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '18px', padding: '20px', width: '100%', maxWidth: '380px', boxSizing: 'border-box' }}
           >
-            {/* Карусель фото в модалке */}
             {(() => {
-              const images = getProductImages(selectedProduct);
+              const modalImages = getProductImages(selectedProduct);
               return (
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', marginBottom: '14px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#1e293b' }}>
-                  <img src={images[activeImageIndex] || images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  {images.length > 1 && (
+                  <img src={modalImages[activeImageIndex] || modalImages[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {modalImages.length > 1 && (
                     <div style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: '6px' }}>
-                      {images.map((_, i) => (
+                      {modalImages.map((_, i) => (
                         <button 
                           key={i} 
                           onClick={() => setActiveImageIndex(i)}
@@ -919,9 +877,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ==========================================
-          5. КОРЗИНА И ОФОРМЛЕНИЕ ЗАКАЗА (CART DRAWER & CHECKOUT)
-          ========================================== */}
+      {/* КОРЗИНА И ОФОРМЛЕНИЕ ЗАКАЗА */}
       {showCartDrawer && (
         <div 
           onClick={() => { setShowCartDrawer(false); setShowCheckout(false); }}
@@ -937,7 +893,6 @@ export default function App() {
             </div>
 
             {!showCheckout ? (
-              // Список товаров в корзине
               <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {cart.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af', fontSize: '13px' }}>{t.emptyCart}</div>
@@ -963,9 +918,7 @@ export default function App() {
                 )}
               </div>
             ) : (
-              // Пошаговая форма оформления заказа
               <form onSubmit={handleConfirmOrder} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Переключатель способа получения */}
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button type="button" onClick={() => setOrderType('pickup')} style={{ flex: 1, background: orderType === 'pickup' ? '#f59e0b' : '#0b0e14', color: orderType === 'pickup' ? '#0b0e14' : '#9ca3af', border: '1px solid #334155', borderRadius: '8px', padding: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>{t.pickup}</button>
                   <button type="button" onClick={() => setOrderType('delivery')} style={{ flex: 1, background: orderType === 'delivery' ? '#f59e0b' : '#0b0e14', color: orderType === 'delivery' ? '#0b0e14' : '#9ca3af', border: '1px solid #334155', borderRadius: '8px', padding: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>{t.delivery}</button>
@@ -1000,7 +953,6 @@ export default function App() {
               </form>
             )}
 
-            {/* Итоги и кнопка действия */}
             {cart.length > 0 && (
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px', marginTop: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '10px' }}>
@@ -1027,9 +979,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ==========================================
-          6. МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ СОТРУДНИКОВ
-          ========================================== */}
+      {/* МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ */}
       {showAuthModal && (
         <div 
           onClick={() => setShowAuthModal(false)}
@@ -1056,9 +1006,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ==========================================
-          7. НИЖНЯЯ НАВИГАЦИОННАЯ ПАНЕЛЬ (BOTTOM NAV)
-          ========================================== */}
+      {/* НИЖНЯЯ НАВИГАЦИЯ */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         backgroundColor: '#141822',
