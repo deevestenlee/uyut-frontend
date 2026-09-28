@@ -7,12 +7,12 @@ import {
   Lock, LogOut, Package, Sparkles, Star, ShieldCheck
 } from 'lucide-react';
 
-// Инициализация Supabase (используйте ваши переменные окружения)
+// Инициализация Supabase
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-project.supabase.co';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Локализация интерфейса (RU, EN, KO)
+// Полная локализация интерфейса (RU, EN, KO)
 const t = {
   RU: {
     home: 'Главная', menu: 'Меню', favorites: 'Избранное', orders: 'Заказы',
@@ -53,6 +53,16 @@ const t = {
 };
 
 export default function App() {
+  // Автоматическая инъекция Tailwind CSS для стабильности на Vercel
+  useEffect(() => {
+    if (!document.getElementById('tailwind-cdn')) {
+      const script = document.createElement('script');
+      script.id = 'tailwind-cdn';
+      script.src = 'https://cdn.tailwindcss.com';
+      document.head.appendChild(script);
+    }
+  }, []);
+
   // Состояния приложения
   const [lang, setLang] = useState(localStorage.getItem('sb_lang') || 'RU');
   const [currentTab, setCurrentTab] = useState('home');
@@ -121,7 +131,6 @@ export default function App() {
       if (error) throw error;
       if (data) {
         setProducts(data);
-        // Извлечение уникальных категорий и подкатегорий
         const cats = [...new Set(data.map(item => item.category).filter(Boolean))];
         setCategories(cats);
       }
@@ -130,7 +139,7 @@ export default function App() {
     }
   };
 
-  // Управление корзиной (Задача 4)
+  // Управление количеством и корзиной (Задача 4)
   const updateQuantity = (product, delta) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -262,7 +271,6 @@ export default function App() {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           
-          {/* Кнопка Избранное */}
           <button 
             onClick={(e) => toggleFavorite(product.id, e)}
             className="absolute top-3 right-3 p-2 rounded-full bg-black/50 backdrop-blur-md text-white hover:text-[#d4af37] transition-colors"
@@ -270,14 +278,12 @@ export default function App() {
             <Heart className={`w-5 h-5 ${isFav ? 'fill-[#d4af37] text-[#d4af37]' : ''}`} />
           </button>
 
-          {/* Скидка бейдж */}
           {product.old_price && (
             <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#d4af37] text-black font-bold text-xs uppercase tracking-wider">
               Sale
             </span>
           )}
 
-          {/* Стрелки карусели при наличии нескольких фото */}
           {images.length > 1 && (
             <>
               <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/40 text-white hover:bg-black/70">
@@ -313,7 +319,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Контроллер количества (Задача 4) */}
             <div onClick={(e) => e.stopPropagation()} className="flex items-center bg-[#242424] rounded-lg border border-[#444] overflow-hidden">
               <button 
                 onClick={() => updateQuantity(product, -1)}
@@ -351,7 +356,7 @@ export default function App() {
               <Globe className="w-4 h-4 text-[#d4af37]" />
               <span>{lang}</span>
             </button>
-            <div className="absolute right-0 mt-1 w-24 py-1 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div className="absolute right-0 mt-1 w-28 py-1 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               {['RU', 'EN', 'KO'].map((l) => (
                 <button
                   key={l}
@@ -384,13 +389,12 @@ export default function App() {
         </div>
       </header>
 
-      {/* Основной контент по вкладкам */}
+      {/* Основной контент */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         
         {/* Вкладка: ГЛАВНАЯ (Задача 1) */}
         {currentTab === 'home' && (
           <div className="space-y-10">
-            {/* Приветственный баннер */}
             <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#1a1a1a] to-[#242424] border border-[#333] p-8 md:p-12 shadow-2xl">
               <div className="max-w-xl">
                 <span className="text-[#d4af37] text-sm font-semibold tracking-widest uppercase flex items-center gap-2 mb-2">
@@ -470,7 +474,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* Фильтры категорий быстрой доступности */}
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
               <button 
                 onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
@@ -489,7 +492,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Сетка товаров по выбранной категории */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products
                 .filter(p => !selectedCategory || p.category === selectedCategory)
@@ -581,7 +583,6 @@ export default function App() {
       {/* Нижняя панель навигации (Задачи 2 & 6) */}
       <nav className={`fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-md border-t border-[#262626] transition-transform duration-300 ${showNav ? 'translate-y-0' : 'translate-y-full'} pb-[env(safe-area-inset-bottom)]`}>
         <div className="max-w-md mx-auto px-6 py-3 flex items-center justify-between">
-          
           <button 
             onClick={() => setCurrentTab('home')}
             className={`flex flex-col items-center gap-1 transition-colors ${currentTab === 'home' ? 'text-[#d4af37]' : 'text-gray-400 hover:text-white'}`}
@@ -618,7 +619,6 @@ export default function App() {
               </span>
             )}
           </button>
-
         </div>
       </nav>
 
@@ -642,7 +642,6 @@ export default function App() {
               </div>
             ) : (
               <form onSubmit={handleCheckoutSubmit} className="space-y-4">
-                {/* Выбор типа получения */}
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
