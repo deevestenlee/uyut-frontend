@@ -53,27 +53,14 @@ const t = {
 };
 
 export default function App() {
-  // Автоматическая инъекция Tailwind CSS для стабильности на Vercel
-  useEffect(() => {
-    if (!document.getElementById('tailwind-cdn')) {
-      const script = document.createElement('script');
-      script.id = 'tailwind-cdn';
-      script.src = 'https://cdn.tailwindcss.com';
-      document.head.appendChild(script);
-    }
-  }, []);
-
-  // Состояния приложения
   const [lang, setLang] = useState(localStorage.getItem('sb_lang') || 'RU');
   const [currentTab, setCurrentTab] = useState('home');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('sb_cart') || '[]'));
   const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem('sb_favs') || '[]'));
   
-  // Модальные окна и экраны
   const [activeModal, setActiveModal] = useState(null); // 'product' | 'checkout' | 'auth' | 'menuSheet'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [checkoutType, setCheckoutType] = useState('pickup');
@@ -83,7 +70,6 @@ export default function App() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Управление нижней навигацией при скролле (Задача 6)
   const [showNav, setShowNav] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -101,7 +87,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Синхронизация с Supabase и localStorage
   useEffect(() => {
     localStorage.setItem('sb_cart', JSON.stringify(cart));
   }, [cart]);
@@ -139,7 +124,6 @@ export default function App() {
     }
   };
 
-  // Управление количеством и корзиной (Задача 4)
   const updateQuantity = (product, delta) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -168,7 +152,6 @@ export default function App() {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
   }, [cart]);
 
-  // Избранное
   const toggleFavorite = (productId, e) => {
     e?.stopPropagation();
     setFavorites(prev => 
@@ -176,7 +159,6 @@ export default function App() {
     );
   };
 
-  // Оформление заказа (Задача 5)
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     if (!checkoutForm.name || !checkoutForm.phone || (checkoutType === 'delivery' && !checkoutForm.address)) {
@@ -219,7 +201,6 @@ export default function App() {
     }
   };
 
-  // Авторизация сотрудников (Задача 8)
   const handleStaffLogin = async (e) => {
     e.preventDefault();
     try {
@@ -239,7 +220,6 @@ export default function App() {
     await supabase.auth.signOut();
   };
 
-  // Рендер карусели изображений для карточки товара (Задача 3)
   const ProductCard = ({ product }) => {
     const images = Array.isArray(product.images) && product.images.length > 0 
       ? product.images 
@@ -350,7 +330,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Компактный переключатель языка (Задача 7) */}
           <div className="relative group">
             <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm font-medium hover:border-[#d4af37] transition-colors">
               <Globe className="w-4 h-4 text-[#d4af37]" />
@@ -369,7 +348,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Кнопка входа сотрудников (Задача 8) */}
           {user ? (
             <div className="flex items-center gap-2">
               <span className="text-xs text-[#d4af37] hidden md:inline">{user.email}</span>
@@ -392,7 +370,7 @@ export default function App() {
       {/* Основной контент */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         
-        {/* Вкладка: ГЛАВНАЯ (Задача 1) */}
+        {/* Главная страница */}
         {currentTab === 'home' && (
           <div className="space-y-10">
             <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#1a1a1a] to-[#242424] border border-[#333] p-8 md:p-12 shadow-2xl">
@@ -416,12 +394,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* Блок 1: Новинки */}
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-serif text-2xl font-bold text-white flex items-center gap-2">
                   <Star className="w-5 h-5 text-[#d4af37]" /> {t[lang].newArrivals}
                 </h2>
+                <button onClick={() => setCurrentTab('menu')} className="text-sm text-[#d4af37] hover:underline">
+                  Смотреть всё
+                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.filter(p => p.is_new).slice(0, 4).map(product => (
@@ -430,12 +410,14 @@ export default function App() {
               </div>
             </section>
 
-            {/* Блок 2: Хиты продаж */}
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-serif text-2xl font-bold text-white flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-[#d4af37]" /> {t[lang].bestsellers}
                 </h2>
+                <button onClick={() => setCurrentTab('menu')} className="text-sm text-[#d4af37] hover:underline">
+                  Смотреть всё
+                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.filter(p => p.is_bestseller).slice(0, 4).map(product => (
@@ -444,12 +426,14 @@ export default function App() {
               </div>
             </section>
 
-            {/* Блок 3: Скидки / Sale */}
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-serif text-2xl font-bold text-white flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-[#d4af37]" /> {t[lang].sale}
                 </h2>
+                <button onClick={() => setCurrentTab('menu')} className="text-sm text-[#d4af37] hover:underline">
+                  Смотреть всё
+                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.filter(p => p.old_price).slice(0, 4).map(product => (
@@ -460,7 +444,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Вкладка: МЕНЮ И КАТЕГОРИИ (Задача 2) */}
+        {/* Меню и категории */}
         {currentTab === 'menu' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -476,7 +460,7 @@ export default function App() {
 
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
               <button 
-                onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                onClick={() => setSelectedCategory(null)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory ? 'bg-[#d4af37] text-black font-bold' : 'bg-[#1a1a1a] border border-[#333] text-gray-300 hover:border-[#d4af37]'}`}
               >
                 {t[lang].allProducts}
@@ -484,7 +468,7 @@ export default function App() {
               {categories.map(cat => (
                 <button 
                   key={cat}
-                  onClick={() => { setSelectedCategory(cat); setSelectedSubcategory(null); }}
+                  onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'bg-[#d4af37] text-black font-bold' : 'bg-[#1a1a1a] border border-[#333] text-gray-300 hover:border-[#d4af37]'}`}
                 >
                   {cat}
@@ -502,7 +486,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Вкладка: ИЗБРАННОЕ */}
+        {/* Избранное */}
         {currentTab === 'favorites' && (
           <div className="space-y-6">
             <h1 className="font-serif text-3xl font-bold text-white">{t[lang].favorites}</h1>
@@ -520,7 +504,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Вкладка: ЗАКАЗЫ И КОРЗИНА */}
+        {/* Заказы / Корзина */}
         {currentTab === 'orders' && (
           <div className="max-w-2xl mx-auto space-y-6">
             <h1 className="font-serif text-3xl font-bold text-white">{t[lang].cart}</h1>
@@ -580,7 +564,7 @@ export default function App() {
 
       </main>
 
-      {/* Нижняя панель навигации (Задачи 2 & 6) */}
+      {/* Нижняя навигация со скрытием при скролле */}
       <nav className={`fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-md border-t border-[#262626] transition-transform duration-300 ${showNav ? 'translate-y-0' : 'translate-y-full'} pb-[env(safe-area-inset-bottom)]`}>
         <div className="max-w-md mx-auto px-6 py-3 flex items-center justify-between">
           <button 
@@ -622,7 +606,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* МОДАЛЬНОЕ ОКНО: ОФОРМЛЕНИЕ ЗАКАЗА (Задача 5) */}
+      {/* Модальное окно: Оформление заказа */}
       {activeModal === 'checkout' && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
@@ -741,7 +725,7 @@ export default function App() {
         </div>
       )}
 
-      {/* МОДАЛЬНОЕ ОКНО: ВХОД ДЛЯ СОТРУДНИКОВ (Задача 8) */}
+      {/* Модальное окно: Вход для сотрудников */}
       {activeModal === 'auth' && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-3xl p-6 space-y-6">
@@ -786,7 +770,7 @@ export default function App() {
         </div>
       )}
 
-      {/* МОДАЛЬНОЕ ОКНО: ВЫБОР КАТЕГОРИЙ (Задача 2) */}
+      {/* Модальное окно: Выбор категорий */}
       {activeModal === 'menuSheet' && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-[#1a1a1a] border border-[#333] w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4">
